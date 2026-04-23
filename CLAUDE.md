@@ -2,30 +2,15 @@
 
 ## What This App Is
 
-A private, mobile-friendly web app for Jolmer (personal trainer) and his ~34 clients. It replaces Trainerize + SuperSaas + WhatsApp with one tool.
-
-**This is not a SaaS product.** It is built exclusively for one trainer and his fixed group of clients.
-
----
+A private PWA (installable on phone and desktop) for Jolmer (personal trainer) and his ~34 clients. Replaces Trainerize + SuperSaas + WhatsApp with one tool. Not a SaaS product — built exclusively for one trainer and his fixed group of clients.
 
 ## The Two Users
 
-**Jolmer (Trainer)**
-- Plans sessions in a calendar, assigns workouts to groups
-- Creates and edits workouts (exercises, sets, reps, weight)
-- Sees who is coming to each session (attendance dashboard)
-- Tracks progression per client in real-time
-- Manages 4 groups of 4–9 clients each (~34 clients total)
+**Jolmer (Trainer)** — plans sessions, assigns workouts to groups, tracks progression, manages 4 groups of 4–9 clients. Uses the app on phone and laptop — trainer views must work well on desktop.
 
-**Clients (e.g. Poelie)**
-- See upcoming sessions and assigned workouts on their phone
-- Confirm or cancel attendance with one tap
-- Log their sets, reps, and weight per exercise
-- See their own progression over time
+**Clients (e.g. Poelie)** — home screen shows next upcoming session + assigned workout. Agenda view shows all gym sessions (all groups) and they can RSVP to any session. If a client RSVPs outside their group, that session appears on their home screen and they can log it as usual. Clients see only their own progression.
 
-Changes made by clients (attendance, logged weights) must be visible to Jolmer instantly, and vice versa.
-
----
+Changes (attendance, logged weights) must sync to Jolmer in real-time, and vice versa.
 
 ## Tech Stack
 
@@ -33,79 +18,96 @@ Changes made by clients (attendance, logged weights) must be visible to Jolmer i
 |---|---|
 | Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
-| Styling | Tailwind CSS |
-| UI Components | shadcn/ui |
-| Auth | Clerk (Jolmer = trainer role, clients invited via link) |
-| Database | Convex (real-time sync between trainer and clients) |
+| Styling | Tailwind CSS + shadcn/ui |
+| Auth | Clerk (trainer role for Jolmer, clients invited via link) |
+| Database | Convex (real-time sync) |
+| PWA | `next-pwa` (installable, service worker) |
+| Push notifications | OneSignal (free up to 10,000 subscribers) |
 | Animations | Framer Motion |
 | Deployment | Vercel (free hobby plan) |
 
----
-
 ## Cost Target
 
-**€0/month.** All services run on free tiers. Do not suggest paid services or add-ons unless absolutely necessary. At 35 users, free tier limits will never be reached.
-
----
+**€0/month.** Free tiers only. Never suggest paid add-ons — at 35 users, limits will never be reached.
 
 ## Design
 
-- No existing branding — design will be created from scratch
-- Mobile-first: both Jolmer and clients use this primarily on their phones
+- No existing branding — design created from scratch
+- Client views: mobile-first. Trainer views: mobile-first but proper desktop layout (not a stretched phone screen)
 - Clean, simple, fast — clients are not tech-savvy
 - Avoid the generic AI aesthetic (gradients, glassmorphism, floating blobs)
-- Build a design system as we go — ask before introducing new colors or fonts
+- Ask before introducing new colors or fonts; document decisions below when made
 
----
+**Design system:** Font: TBD · Primary colour: TBD · Border radius: TBD
 
 ## Key Principles
 
-- **Ask before changing the database schema** — always confirm with the developer first
-- **Never delete Convex data without explicit confirmation** — destructive operations are irreversible
-- **Never install an npm package without asking first** — explain what it is and why it's needed before adding it
-- **Mobile-first** — every screen must work well on a phone before worrying about desktop
-- **Real-time by default** — use Convex's reactive queries; never use polling
-- **Keep it simple** — no feature creep; check the MVP list before adding anything new
-- **Explain your decisions** — the developer is a complete beginner; briefly explain why you're doing something, not just what
-- **Always test on mobile viewport** before marking a feature done
+- **Ask before changing the database schema** — always confirm first
+- **Soft-delete only** — never hard-delete Convex data; use `cancelled: true` / `archived: true` flags
+- **Ask before installing any npm package** — explain what it is and why
+- **Real-time by default** — Convex reactive queries only; never poll
+- **No feature creep** — check the MVP list before adding anything new
+- **Explain decisions** — the developer is a complete beginner; say why, not just what
+- **Test on mobile viewport** before marking any feature done
 
----
+## Group & Workout Structure
+
+Sessions and workouts are assigned to a **group**, not to individuals. All clients in the group see the same workout for that session. Individual progression is tracked per client within the shared workout. Clients can RSVP to any session across all groups.
+
+## Core Data Entities
+
+Ask before adding, renaming, or restructuring any of these.
+
+- **Group** — name, list of clientIds
+- **Workout** — name, exercises (name, sets, reps, weight)
+- **Session** — date/time, groupId, workoutId
+- **Attendance** — sessionId, clientId, status (`coming` | `cancelled`)
+- **WorkoutLog** — sessionId, clientId, exerciseId, sets, reps, weight logged
+
+## Push Notification Rules
+
+Notifications are an **attendance prompt** ("will you attend?"), not a reminder. Send only to clients in the session's group who have no attendance record yet. Clients who answered yes or no — including voluntary cross-group RSVPs — do not receive a notification. Timing: 24h before, and again 1h before if still unanswered. Triggered via Convex `crons` + OneSignal.
+
+## Client Home Screen
+
+- **Home:** next upcoming session the client is attending (own group or cross-group RSVP) + assigned workout
+- **Agenda:** all gym sessions across all groups — RSVP available from here
+- Fallback: if no RSVP'd session exists, show the next session for their own group
+
+## App Router Structure
+
+- `app/(trainer)/` — calendar, workout builder, attendance dashboard, group management
+- `app/(client)/` — home screen, agenda, workout log, progression
+- `convex/` — all queries and mutations
+- `components/` — shared UI
 
 ## MVP Build Order
 
-1. Workout builder (exercises, sets, reps, weight)
-2. Session calendar (schedule sessions, assign workouts to groups)
-3. Client RSVP (attendance confirmation)
-4. Attendance dashboard (Jolmer sees who's coming)
-5. Progression tracking (clients log weights; Jolmer sees history)
-
----
+1. Workout builder
+2. Session calendar (assign workouts to groups)
+3. Client home screen + agenda
+4. Client RSVP
+5. Attendance dashboard (Jolmer)
+6. Progression tracking
+7. Push notifications (OneSignal + Convex crons)
 
 ## Preferred Libraries
 
-- **Dates:** `date-fns` — not moment.js (outdated and heavy)
-- **Notifications/toasts:** `sonner` (already included in shadcn)
-- **File storage:** Convex built-in storage if ever needed — not S3 or external services
-- **Environment variables:** `.env.local` only — never hardcode API keys in code
-
----
+- **Dates:** `date-fns` (not moment.js)
+- **Toasts:** `sonner` (included in shadcn)
+- **Push:** OneSignal (not raw Web Push API, not Firebase)
+- **Env vars:** `.env.local` only — never hardcode keys
 
 ## What NOT to Build
 
-- Reschedule requests from clients (attendance only)
-- Stripe or payment features
-- Nutrition tracking
-- Multi-trainer support
-- Anything not in the MVP list above without explicit approval
+Reschedule requests · Stripe/payments · Nutrition tracking · Multi-trainer support · Reminder notifications (prompts only) · Anything outside the MVP list without explicit approval
 
----
+## Auth & Permissions
 
-## Auth Model
-
-- Jolmer has a single trainer account with full access
-- Clients are invited via a link (Clerk invite flow)
-- Clients only see their own data and their group's sessions
-- No client can see another client's progression
+- Jolmer: single trainer account, full access
+- Clients: invited via Clerk link, see all sessions in agenda, only their own progression
+- **Trainer-only** (clients must never access): creating/editing/deleting workouts, creating/editing/cancelling sessions, managing groups
+- All Convex mutations for trainer actions must verify the caller has the trainer role. Never render trainer UI in client routes.
 
 ---
 
