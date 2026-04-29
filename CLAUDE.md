@@ -62,7 +62,7 @@ Ask before adding, renaming, or restructuring any of these.
 - **Workout** — name, exercises (name, sets, reps, weight)
 - **Session** — date/time, groupId, workoutId
 - **Attendance** — sessionId, clientId, status (`coming` | `cancelled`)
-- **WorkoutLog** — sessionId, clientId, exerciseId, sets, reps, weight logged
+- **WorkoutLog** — sessionId, clientId, exercises (each with: exerciseId (optional, null for client-added), name, sets, reps, weight logged). Clients can add custom exercises (no exerciseId) and override sets/reps on any exercise. Never modifies the master Workout.
 
 ## Push Notification Rules
 
@@ -106,7 +106,7 @@ Reschedule requests · Stripe/payments · Nutrition tracking · Multi-trainer su
 
 - Jolmer: single trainer account, full access
 - Clients: invited via Clerk link, see all sessions in agenda, only their own progression
-- **Trainer-only** (clients must never access): creating/editing/deleting workouts, creating/editing/cancelling sessions, managing groups
+- **Trainer-only** (clients must never access): creating/editing/deleting workout templates, creating/editing/cancelling sessions, managing groups. Clients can customize their own workout log per session (add/remove exercises, change sets/reps) — changes are personal and never affect the master workout or other clients.
 - All Convex mutations for trainer actions must verify the caller has the trainer role. Never render trainer UI in client routes.
 
 ---
