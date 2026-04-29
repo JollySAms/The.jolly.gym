@@ -61,11 +61,13 @@ Jolmer spends significant time every week bouncing between three tools that don'
 
 ### Nice to Have — Future Versions
 
-11. **Progression Charts** — Visual history of weight/reps progression per exercise per client.
+11. **Trainerize Data Import** — One-time CSV import tool to migrate client profiles, groups, and workout history from Trainerize into Convex. Useful at launch to avoid manual re-entry for 34 clients.
 
-12. **Group Management** — Jolmer can add or remove clients from groups directly in the app.
+12. **Progression Charts** — Visual history of weight/reps progression per exercise per client.
 
-13. **Custom Branding** — Logo, color palette, and name displayed consistently throughout the app.
+13. **Group Management** — Jolmer can add or remove clients from groups directly in the app.
+
+14. **Custom Branding** — Logo, color palette, and name displayed consistently throughout the app.
 
 ---
 
