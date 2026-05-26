@@ -1,5 +1,6 @@
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
+import { Doc } from "./_generated/dataModel";
 import { requireAuth, requireTrainer } from "./lib";
 
 // Returns all active sessions for a given month with group info + attendance count.
@@ -50,8 +51,8 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const TIME_RE = /^\d{2}:\d{2}$/;
 
 function validateDateAndTime(date: string, time: string) {
-  if (!DATE_RE.test(date)) throw new Error("Invalid date format — expected YYYY-MM-DD");
-  if (!TIME_RE.test(time)) throw new Error("Invalid time format — expected HH:MM");
+  if (!DATE_RE.test(date)) throw new Error("Ongeldig datumformaat — verwacht JJJJ-MM-DD");
+  if (!TIME_RE.test(time)) throw new Error("Ongeldig tijdformaat — verwacht UU:MM");
 }
 
 // Trainer only — create a session
@@ -109,7 +110,7 @@ export const createBatch = mutation({
     const trainer = await requireTrainer(ctx);
 
     if (args.weeks < 1 || args.weeks > 52) {
-      throw new Error("weeks must be between 1 and 52");
+      throw new Error("Aantal weken moet tussen 1 en 52 liggen");
     }
 
     // Parse start date as UTC midnight to avoid timezone drift
@@ -163,8 +164,7 @@ export const cancel = mutation({
 });
 
 // Internal helper — joins session with its group and attendance count
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function enrichSession(ctx: QueryCtx, session: any) {
+async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
   const group = await ctx.db.get(session.groupId);
   const coming = await ctx.db
     .query("attendance")

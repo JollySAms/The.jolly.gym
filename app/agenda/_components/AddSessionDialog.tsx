@@ -53,8 +53,8 @@ export function AddSessionDialog({ defaultDate, onClose }: Props) {
         await createSession({ date, time, groupId: groupId as Id<"groups"> });
       }
       onClose();
-    } catch (err: any) {
-      setError(err.message ?? "Er ging iets mis");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Er ging iets mis");
     } finally {
       setSaving(false);
     }

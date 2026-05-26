@@ -26,6 +26,7 @@ export function EditSessionDialog({ session, onClose }: Props) {
   const [groupId, setGroupId] = useState<Id<"groups">>(session.groupId);
   const [saving, setSaving] = useState(false);
   const [cancelling, setCancelling] = useState(false);
+  const [confirmingCancel, setConfirmingCancel] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function handleSave(e: React.FormEvent) {
@@ -35,21 +36,21 @@ export function EditSessionDialog({ session, onClose }: Props) {
     try {
       await updateSession({ id: session._id, date, time, groupId });
       onClose();
-    } catch (err: any) {
-      setError(err.message ?? "Er ging iets mis");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Er ging iets mis");
     } finally {
       setSaving(false);
     }
   }
 
-  async function handleCancel() {
-    if (!confirm("Weet je zeker dat je deze sessie wilt annuleren?")) return;
+  async function handleConfirmCancel() {
     setCancelling(true);
     try {
       await cancelSession({ id: session._id });
       onClose();
-    } catch (err: any) {
-      setError(err.message ?? "Er ging iets mis");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Er ging iets mis");
+      setConfirmingCancel(false);
     } finally {
       setCancelling(false);
     }
@@ -119,14 +120,38 @@ export function EditSessionDialog({ session, onClose }: Props) {
             {saving ? "Opslaan..." : "Wijzigingen opslaan"}
           </button>
 
-          <button
-            type="button"
-            onClick={handleCancel}
-            disabled={cancelling}
-            className="w-full py-3 rounded-xl text-sm font-semibold text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-50"
-          >
-            {cancelling ? "Annuleren..." : "Sessie annuleren"}
-          </button>
+          {confirmingCancel ? (
+            <div className="rounded-xl border border-red-200 bg-red-50 p-4 space-y-3">
+              <p className="text-sm text-red-700 font-medium">
+                Weet je zeker dat je deze sessie wilt annuleren?
+              </p>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={handleConfirmCancel}
+                  disabled={cancelling}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-white bg-red-600 hover:bg-red-700 disabled:opacity-50"
+                >
+                  {cancelling ? "Bezig..." : "Ja, annuleer sessie"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmingCancel(false)}
+                  className="flex-1 py-2.5 rounded-lg text-sm font-semibold text-gray-700 border border-gray-200 hover:bg-gray-50"
+                >
+                  Terug
+                </button>
+              </div>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmingCancel(true)}
+              className="w-full py-3 rounded-xl text-sm font-semibold text-red-600 border border-red-200 hover:bg-red-50"
+            >
+              Sessie annuleren
+            </button>
+          )}
         </form>
       </div>
     </div>

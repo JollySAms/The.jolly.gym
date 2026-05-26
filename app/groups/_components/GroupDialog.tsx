@@ -45,8 +45,8 @@ export function GroupDialog({ group, onClose }: Props) {
         await createGroup({ name: name.trim(), color });
       }
       onClose();
-    } catch (err: any) {
-      setError(err.message ?? "Er ging iets mis");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Er ging iets mis");
     } finally {
       setSaving(false);
     }

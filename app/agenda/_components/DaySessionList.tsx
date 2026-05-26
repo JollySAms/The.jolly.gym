@@ -8,6 +8,7 @@ type EnrichedSession = {
   _id: Id<"sessions">;
   date: string;
   time: string;
+  groupId: Id<"groups">;
   capacity: number;
   group: { _id: Id<"groups">; name: string; color: string } | null;
   attendanceCount: number;
