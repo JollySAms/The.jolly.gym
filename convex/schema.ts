@@ -1,6 +1,13 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
+// Shared validator for a single exercise entry inside a workout template or snapshot
+const workoutExerciseValidator = v.object({
+  exerciseId: v.id("exercises"),
+  name: v.string(),  // cached so the name is readable even if exercise is later archived
+  sets: v.number(),
+});
+
 export default defineSchema({
   // Tracks all users — role "trainer" for Jolmer, "client" for everyone else
   users: defineTable({
@@ -18,6 +25,20 @@ export default defineSchema({
     memberIds: v.optional(v.array(v.id("users"))), // optional: existing groups have no members yet
   }),
 
+  // Exercise library — Jolmer builds this over time from within the workout builder
+  exercises: defineTable({
+    name: v.string(),     // e.g. "Deadlift"
+    archived: v.boolean(),
+  }).index("by_archived", ["archived"]),
+
+  // Reusable workout templates — Jolmer creates these, then assigns them to sessions
+  workouts: defineTable({
+    name: v.string(),                              // e.g. "Leg Day A"
+    exercises: v.array(workoutExerciseValidator),  // ordered list of exercises + sets
+    archived: v.boolean(),
+    createdBy: v.string(),                         // tokenIdentifier of trainer
+  }).index("by_archived", ["archived"]),
+
   // Sessions created by Jolmer — one session per group per time slot
   sessions: defineTable({
     date: v.string(),        // ISO date string "2026-05-20" (sorts lexicographically)
@@ -26,6 +47,9 @@ export default defineSchema({
     capacity: v.number(),    // always 14
     cancelled: v.boolean(),
     createdBy: v.string(),   // tokenIdentifier of trainer
+    // Workout assignment — snapshot is frozen at assignment time so past sessions are unaffected
+    workoutId: v.optional(v.id("workouts")),              // reference to the template (for display)
+    workoutSnapshot: v.optional(v.array(workoutExerciseValidator)), // frozen copy of exercises + sets
   })
     .index("by_cancelled_and_date", ["cancelled", "date"])
     .index("by_group", ["groupId"]),
@@ -41,4 +65,18 @@ export default defineSchema({
     .index("by_session_and_status", ["sessionId", "status"])
     .index("by_user", ["userId"])
     .index("by_session_and_user", ["sessionId", "userId"]),
+
+  // Workout logs — one row per (client + session + exercise)
+  // Clients log their actual sets/reps/weight. isSubstitute=true means they replaced a prescribed exercise.
+  workoutLogs: defineTable({
+    sessionId: v.id("sessions"),
+    userId: v.string(),          // tokenIdentifier of the client
+    exerciseId: v.id("exercises"),
+    exerciseName: v.string(),    // cached for display even if exercise is archived
+    sets: v.array(v.object({ reps: v.number(), weight: v.number() })), // weight in kg
+    isSubstitute: v.boolean(),   // true if client added this to replace a prescribed exercise
+  })
+    .index("by_session_and_user", ["sessionId", "userId"])
+    .index("by_user_and_exercise", ["userId", "exerciseId"])
+    .index("by_session", ["sessionId"]),
 });

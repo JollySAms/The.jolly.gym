@@ -9,10 +9,13 @@
  */
 
 import type * as attendance from "../attendance.js";
+import type * as exercises from "../exercises.js";
 import type * as groups from "../groups.js";
 import type * as lib from "../lib.js";
 import type * as sessions from "../sessions.js";
 import type * as users from "../users.js";
+import type * as workoutLogs from "../workoutLogs.js";
+import type * as workouts from "../workouts.js";
 
 import type {
   ApiFromModules,
@@ -22,10 +25,13 @@ import type {
 
 declare const fullApi: ApiFromModules<{
   attendance: typeof attendance;
+  exercises: typeof exercises;
   groups: typeof groups;
   lib: typeof lib;
   sessions: typeof sessions;
   users: typeof users;
+  workoutLogs: typeof workoutLogs;
+  workouts: typeof workouts;
 }>;
 
 /**

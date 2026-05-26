@@ -12,18 +12,21 @@ type Props = {
     date: string;
     time: string;
     groupId: Id<"groups">;
+    workoutId?: Id<"workouts">;
   };
   onClose: () => void;
 };
 
 export function EditSessionDialog({ session, onClose }: Props) {
   const groups = useQuery(api.groups.list);
+  const workouts = useQuery(api.workouts.list);
   const updateSession = useMutation(api.sessions.update);
   const cancelSession = useMutation(api.sessions.cancel);
 
   const [date, setDate] = useState(session.date);
   const [time, setTime] = useState(session.time);
   const [groupId, setGroupId] = useState<Id<"groups">>(session.groupId);
+  const [workoutId, setWorkoutId] = useState<Id<"workouts"> | "">(session.workoutId ?? "");
   const [saving, setSaving] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
@@ -34,7 +37,13 @@ export function EditSessionDialog({ session, onClose }: Props) {
     setSaving(true);
     setError(null);
     try {
-      await updateSession({ id: session._id, date, time, groupId });
+      await updateSession({
+        id: session._id,
+        date,
+        time,
+        groupId,
+        workoutId: workoutId ? (workoutId as Id<"workouts">) : undefined,
+      });
       onClose();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Er ging iets mis");
@@ -104,6 +113,30 @@ export function EditSessionDialog({ session, onClose }: Props) {
                 {groups.map((g) => (
                   <option key={g._id} value={g._id}>
                     {g.name}
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">
+              Workout <span className="text-gray-400 font-normal">(optioneel)</span>
+            </label>
+            {workouts === undefined ? (
+              <p className="text-sm text-gray-400">Laden...</p>
+            ) : workouts.length === 0 ? (
+              <p className="text-xs text-gray-400">Nog geen workouts aangemaakt.</p>
+            ) : (
+              <select
+                value={workoutId}
+                onChange={(e) => setWorkoutId(e.target.value as Id<"workouts"> | "")}
+                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">Geen workout</option>
+                {workouts.map((w) => (
+                  <option key={w._id} value={w._id}>
+                    {w.name}
                   </option>
                 ))}
               </select>

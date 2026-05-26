@@ -1,7 +1,19 @@
 import { mutation, query, QueryCtx } from "./_generated/server";
 import { v } from "convex/values";
-import { Doc } from "./_generated/dataModel";
+import { Doc, Id } from "./_generated/dataModel";
 import { requireAuth, requireTrainer } from "./lib";
+
+// Helper — fetch the workout and return a frozen snapshot of its exercises
+async function buildSnapshot(ctx: QueryCtx, workoutId: Id<"workouts">) {
+  const workout = await ctx.db.get(workoutId);
+  if (!workout) throw new Error("Workout niet gevonden");
+  // Return a plain copy — this freezes the exercise list at assignment time
+  return workout.exercises.map((e) => ({
+    exerciseId: e.exerciseId,
+    name: e.name,
+    sets: e.sets,
+  }));
+}
 
 // Returns all active sessions for a given month with group info + attendance count.
 // Used to render calendar dots and the day session list.
@@ -61,10 +73,12 @@ export const create = mutation({
     date: v.string(),
     time: v.string(),
     groupId: v.id("groups"),
+    workoutId: v.optional(v.id("workouts")),
   },
   handler: async (ctx, args) => {
     validateDateAndTime(args.date, args.time);
     const trainer = await requireTrainer(ctx);
+    const snapshot = args.workoutId ? await buildSnapshot(ctx as QueryCtx, args.workoutId) : undefined;
     return await ctx.db.insert("sessions", {
       date: args.date,
       time: args.time,
@@ -72,6 +86,8 @@ export const create = mutation({
       capacity: 14,
       cancelled: false,
       createdBy: trainer.tokenIdentifier,
+      workoutId: args.workoutId,
+      workoutSnapshot: snapshot,
     });
   },
 });
@@ -83,14 +99,18 @@ export const update = mutation({
     date: v.string(),
     time: v.string(),
     groupId: v.id("groups"),
+    workoutId: v.optional(v.id("workouts")),
   },
   handler: async (ctx, args) => {
     validateDateAndTime(args.date, args.time);
     await requireTrainer(ctx);
+    const snapshot = args.workoutId ? await buildSnapshot(ctx as QueryCtx, args.workoutId) : undefined;
     await ctx.db.patch(args.id, {
       date: args.date,
       time: args.time,
       groupId: args.groupId,
+      workoutId: args.workoutId,
+      workoutSnapshot: snapshot,
     });
   },
 });
@@ -104,6 +124,7 @@ export const createBatch = mutation({
     time: v.string(),
     groupId: v.id("groups"),
     weeks: v.number(),   // 1–52
+    workoutId: v.optional(v.id("workouts")),
   },
   handler: async (ctx, args) => {
     validateDateAndTime(args.date, args.time);
@@ -112,6 +133,9 @@ export const createBatch = mutation({
     if (args.weeks < 1 || args.weeks > 52) {
       throw new Error("Aantal weken moet tussen 1 en 52 liggen");
     }
+
+    // Fetch snapshot once — same workout assigned to all sessions in the batch
+    const snapshot = args.workoutId ? await buildSnapshot(ctx as QueryCtx, args.workoutId) : undefined;
 
     // Parse start date as UTC midnight to avoid timezone drift
     const [y, m, d] = args.date.split("-").map(Number);
@@ -146,6 +170,8 @@ export const createBatch = mutation({
         capacity: 14,
         cancelled: false,
         createdBy: trainer.tokenIdentifier,
+        workoutId: args.workoutId,
+        workoutSnapshot: snapshot,
       });
       created++;
     }

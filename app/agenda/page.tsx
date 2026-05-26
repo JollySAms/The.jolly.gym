@@ -20,6 +20,7 @@ type EnrichedSession = {
   date: string;
   time: string;
   groupId: Id<"groups">;
+  workoutId?: Id<"workouts">;
   capacity: number;
   group: { _id: Id<"groups">; name: string; color: string } | null;
   attendanceCount: number;
