@@ -10,11 +10,12 @@ export default defineSchema({
     role: v.union(v.literal("trainer"), v.literal("client")),
   }).index("by_token", ["tokenIdentifier"]),
 
-  // Training groups (e.g. "Fitte mannen") — each has a color
+  // Training groups (e.g. "Fitte mannen") — each has a color and member list
   groups: defineTable({
     name: v.string(),
     color: v.string(), // hex color e.g. "#3B82F6"
     cancelled: v.boolean(),
+    memberIds: v.optional(v.array(v.id("users"))), // optional: existing groups have no members yet
   }),
 
   // Sessions created by Jolmer — one session per group per time slot

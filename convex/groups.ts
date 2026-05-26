@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireAuth, requireTrainer } from "./lib";
+import { Id } from "./_generated/dataModel";
 
 // All logged-in users can see groups (needed to show group names + colors in agenda)
 export const list = query({
@@ -8,7 +9,21 @@ export const list = query({
   handler: async (ctx) => {
     await requireAuth(ctx);
     const all = await ctx.db.query("groups").take(50);
-    return all.filter((g) => !g.cancelled);
+    const active = all.filter((g) => !g.cancelled);
+
+    return await Promise.all(
+      active.map(async (g) => {
+        const memberIds = g.memberIds ?? [];
+        const members = await Promise.all(
+          memberIds.map((id) => ctx.db.get(id))
+        );
+        return {
+          ...g,
+          memberIds,
+          members: members.filter(Boolean) as Awaited<ReturnType<typeof ctx.db.get>>[],
+        };
+      })
+    );
   },
 });
 
@@ -24,6 +39,7 @@ export const create = mutation({
       name: args.name,
       color: args.color,
       cancelled: false,
+      memberIds: [],
     });
   },
 });
@@ -47,5 +63,48 @@ export const remove = mutation({
   handler: async (ctx, args) => {
     await requireTrainer(ctx);
     await ctx.db.patch(args.id, { cancelled: true });
+  },
+});
+
+// Trainer only — add a client to a group
+export const addMember = mutation({
+  args: {
+    groupId: v.id("groups"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    await requireTrainer(ctx);
+    const group = await ctx.db.get(args.groupId);
+    if (!group) throw new Error("Groep niet gevonden");
+    const current = group.memberIds ?? [];
+    if (current.includes(args.userId)) return; // already a member
+    await ctx.db.patch(args.groupId, { memberIds: [...current, args.userId] });
+  },
+});
+
+// Trainer only — remove a client from a group
+export const removeMember = mutation({
+  args: {
+    groupId: v.id("groups"),
+    userId: v.id("users"),
+  },
+  handler: async (ctx, args) => {
+    await requireTrainer(ctx);
+    const group = await ctx.db.get(args.groupId);
+    if (!group) throw new Error("Groep niet gevonden");
+    const current = group.memberIds ?? [];
+    await ctx.db.patch(args.groupId, {
+      memberIds: current.filter((id: Id<"users">) => id !== args.userId),
+    });
+  },
+});
+
+// All logged-in users — list all clients (role === "client"), used for member picker
+export const listClients = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireAuth(ctx);
+    const all = await ctx.db.query("users").take(100);
+    return all.filter((u) => u.role === "client");
   },
 });
