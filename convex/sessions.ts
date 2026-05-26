@@ -94,6 +94,65 @@ export const update = mutation({
   },
 });
 
+// Trainer only — create multiple sessions on the same weekday for N consecutive weeks.
+// Skips any week where a session with the same date + time + group already exists.
+// Returns the number of sessions actually created.
+export const createBatch = mutation({
+  args: {
+    date: v.string(),    // start date "YYYY-MM-DD"
+    time: v.string(),
+    groupId: v.id("groups"),
+    weeks: v.number(),   // 1–52
+  },
+  handler: async (ctx, args) => {
+    validateDateAndTime(args.date, args.time);
+    const trainer = await requireTrainer(ctx);
+
+    if (args.weeks < 1 || args.weeks > 52) {
+      throw new Error("weeks must be between 1 and 52");
+    }
+
+    // Parse start date as UTC midnight to avoid timezone drift
+    const [y, m, d] = args.date.split("-").map(Number);
+    const start = Date.UTC(y, m - 1, d);
+    const MS_PER_WEEK = 7 * 24 * 60 * 60 * 1000;
+
+    let created = 0;
+    for (let i = 0; i < args.weeks; i++) {
+      const ts = start + i * MS_PER_WEEK;
+      const dateStr = new Date(ts).toISOString().slice(0, 10);
+
+      // Skip if a session already exists for this date + time + group
+      const existing = await ctx.db
+        .query("sessions")
+        .withIndex("by_cancelled_and_date", (q) =>
+          q.eq("cancelled", false).eq("date", dateStr)
+        )
+        .filter((q) =>
+          q.and(
+            q.eq(q.field("time"), args.time),
+            q.eq(q.field("groupId"), args.groupId)
+          )
+        )
+        .first();
+
+      if (existing) continue;
+
+      await ctx.db.insert("sessions", {
+        date: dateStr,
+        time: args.time,
+        groupId: args.groupId,
+        capacity: 14,
+        cancelled: false,
+        createdBy: trainer.tokenIdentifier,
+      });
+      created++;
+    }
+
+    return created;
+  },
+});
+
 // Trainer only — soft delete a session
 export const cancel = mutation({
   args: { id: v.id("sessions") },
