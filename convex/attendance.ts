@@ -33,6 +33,78 @@ export const getMyStatus = query({
   },
 });
 
+// Returns all attendees for a session structured for the client view:
+// - Group members always appear, each with status: "coming" | "cancelled" | "no_response"
+// - Non-group members who said "coming" appear as cross-group guests
+export const getSessionWithAttendees = query({
+  args: { sessionId: v.id("sessions") },
+  handler: async (ctx, args) => {
+    await requireAuth(ctx);
+
+    const session = await ctx.db.get(args.sessionId);
+    if (!session) return null;
+
+    const group = await ctx.db.get(session.groupId);
+    if (!group) return null;
+
+    const memberIds = group.memberIds ?? [];
+
+    // Fetch each group member and their attendance record
+    const members = await Promise.all(
+      memberIds.map(async (userId) => {
+        const user = await ctx.db.get(userId);
+        if (!user) return null;
+
+        const attendance = await ctx.db
+          .query("attendance")
+          .withIndex("by_session_and_user", (q) =>
+            q.eq("sessionId", args.sessionId).eq("userId", user.tokenIdentifier)
+          )
+          .unique();
+
+        return {
+          userId: user.tokenIdentifier,
+          name: user.name,
+          status: (attendance?.status ?? "no_response") as
+            | "coming"
+            | "cancelled"
+            | "no_response",
+          isGroupMember: true,
+        };
+      })
+    );
+
+    // All "coming" attendees for this session — to find cross-group people
+    const allComing = await ctx.db
+      .query("attendance")
+      .withIndex("by_session_and_status", (q) =>
+        q.eq("sessionId", args.sessionId).eq("status", "coming")
+      )
+      .take(14);
+
+    // Build set of group member token identifiers for fast lookup
+    const groupMemberTokens = new Set(
+      (await Promise.all(memberIds.map((id) => ctx.db.get(id))))
+        .filter(Boolean)
+        .map((u) => u!.tokenIdentifier)
+    );
+
+    const crossGroupComers = allComing
+      .filter((a) => !groupMemberTokens.has(a.userId))
+      .map((a) => ({
+        userId: a.userId,
+        name: a.userName,
+        status: "coming" as const,
+        isGroupMember: false,
+      }));
+
+    return {
+      members: members.filter(Boolean),
+      crossGroupComers,
+    };
+  },
+});
+
 // Sign up for a session — creates or updates the attendance record
 export const rsvp = mutation({
   args: { sessionId: v.id("sessions") },

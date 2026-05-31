@@ -189,6 +189,85 @@ export const cancel = mutation({
   },
 });
 
+// Returns all upcoming sessions (today onwards) for all groups.
+// Used by the client agenda — includes each session's group, attendance count,
+// workout name, and the current user's own RSVP status.
+export const listUpcoming = query({
+  args: {},
+  handler: async (ctx, _args) => {
+    const identity = await requireAuth(ctx);
+    const today = new Date().toISOString().slice(0, 10);
+
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_cancelled_and_date", (q) =>
+        q.eq("cancelled", false).gte("date", today)
+      )
+      .take(100);
+
+    return await Promise.all(
+      sessions.map((s) => enrichSessionForClient(ctx, s, identity.tokenIdentifier))
+    );
+  },
+});
+
+// Returns the client's single most relevant upcoming session:
+// 1. Earliest session they have RSVP'd "coming" to
+// 2. Fallback: next session in their own group
+export const getMyNextSession = query({
+  args: {},
+  handler: async (ctx, _args) => {
+    const identity = await requireAuth(ctx);
+    const today = new Date().toISOString().slice(0, 10);
+
+    // All attendance records for this user
+    const myAttendance = await ctx.db
+      .query("attendance")
+      .withIndex("by_user", (q) => q.eq("userId", identity.tokenIdentifier))
+      .take(200);
+
+    const comingAttendance = myAttendance.filter((a) => a.status === "coming");
+
+    // Fetch those sessions and keep only future, non-cancelled ones
+    const rsvpdSessions = (
+      await Promise.all(comingAttendance.map((a) => ctx.db.get(a.sessionId)))
+    ).filter((s) => s !== null && !s.cancelled && s.date >= today);
+
+    if (rsvpdSessions.length > 0) {
+      // Sort by date then time, take the earliest
+      const next = rsvpdSessions.sort(
+        (a, b) => a!.date.localeCompare(b!.date) || a!.time.localeCompare(b!.time)
+      )[0]!;
+      const enriched = await enrichSessionForClient(ctx, next, identity.tokenIdentifier);
+      return enriched;
+    }
+
+    // Fallback: find this user's group and return its next session
+    const me = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
+
+    if (!me) return null;
+
+    // Scan groups to find the one this user belongs to
+    const allGroups = await ctx.db.query("groups").take(20);
+    const myGroup = allGroups.find((g) => g.memberIds?.includes(me._id));
+    if (!myGroup) return null;
+
+    const nextGroupSession = await ctx.db
+      .query("sessions")
+      .withIndex("by_cancelled_and_date", (q) =>
+        q.eq("cancelled", false).gte("date", today)
+      )
+      .filter((q) => q.eq(q.field("groupId"), myGroup._id))
+      .first();
+
+    if (!nextGroupSession) return null;
+    return enrichSessionForClient(ctx, nextGroupSession, identity.tokenIdentifier);
+  },
+});
+
 // Internal helper — joins session with its group and attendance count
 async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
   const group = await ctx.db.get(session.groupId);
@@ -203,5 +282,43 @@ async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
     ...session,
     group,
     attendanceCount: coming.length,
+  };
+}
+
+// Client-facing enrichment — adds workout name and the user's own RSVP status
+async function enrichSessionForClient(
+  ctx: QueryCtx,
+  session: Doc<"sessions">,
+  tokenIdentifier: string
+) {
+  const group = await ctx.db.get(session.groupId);
+
+  const coming = await ctx.db
+    .query("attendance")
+    .withIndex("by_session_and_status", (q) =>
+      q.eq("sessionId", session._id).eq("status", "coming")
+    )
+    .take(15);
+
+  const myAttendance = await ctx.db
+    .query("attendance")
+    .withIndex("by_session_and_user", (q) =>
+      q.eq("sessionId", session._id).eq("userId", tokenIdentifier)
+    )
+    .unique();
+
+  // Fetch workout name from the template (not the snapshot, which has no name)
+  let workoutName: string | null = null;
+  if (session.workoutId) {
+    const workout = await ctx.db.get(session.workoutId);
+    workoutName = workout?.name ?? null;
+  }
+
+  return {
+    ...session,
+    group,
+    attendanceCount: coming.length,
+    myStatus: myAttendance?.status ?? null,
+    workoutName,
   };
 }
