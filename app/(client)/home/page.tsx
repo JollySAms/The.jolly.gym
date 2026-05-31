@@ -47,12 +47,8 @@ export default function ClientHomePage() {
     <div className="max-w-lg mx-auto px-4 py-8">
       {/* Greeting */}
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Hoi {firstName}</h1>
-      <p className="text-sm text-gray-400 mb-8">
-        {new Date().toLocaleDateString("nl-NL", {
-          weekday: "long",
-          day: "numeric",
-          month: "long",
-        })}
+      <p className="text-sm text-gray-400 mb-8 capitalize">
+        {format(new Date(), "EEEE d MMMM", { locale: nl })}
       </p>
 
       {/* Next session card */}
