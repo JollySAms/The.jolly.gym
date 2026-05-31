@@ -1,11 +1,13 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
+import { useState } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse, addHours } from "date-fns";
 import { nl } from "date-fns/locale";
 import { X, Dumbbell } from "lucide-react";
+import { toast } from "sonner";
 
 type SessionData = {
   _id: Id<"sessions">;
@@ -36,6 +38,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   });
   const rsvp = useMutation(api.attendance.rsvp);
   const cancelRsvp = useMutation(api.attendance.cancelRsvp);
+  const [rsvpLoading, setRsvpLoading] = useState(false);
 
   const color = session.group?.color ?? "#3B82F6";
   const isFull = session.attendanceCount >= session.capacity && session.myStatus !== "coming";
@@ -52,10 +55,20 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   );
 
   async function handleRsvp() {
-    if (session.myStatus === "coming") {
-      await cancelRsvp({ sessionId: session._id });
-    } else if (!isFull) {
-      await rsvp({ sessionId: session._id });
+    if (rsvpLoading) return;
+    setRsvpLoading(true);
+    try {
+      if (session.myStatus === "coming") {
+        await cancelRsvp({ sessionId: session._id });
+        toast.success("Je bent afgemeld");
+      } else if (!isFull) {
+        await rsvp({ sessionId: session._id });
+        toast.success("Je bent ingeschreven!");
+      }
+    } catch {
+      toast.error("Dat lukte niet. Probeer het opnieuw.");
+    } finally {
+      setRsvpLoading(false);
     }
   }
 
@@ -171,16 +184,18 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
         <div className="px-4 py-4 border-t border-gray-100 shrink-0">
           <button
             onClick={handleRsvp}
-            disabled={isFull}
-            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors ${
+            disabled={isFull || rsvpLoading}
+            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
               session.myStatus === "coming"
-                ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                ? "bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
                 : isFull
-                ? "bg-gray-50 text-gray-300 cursor-not-allowed"
-                : "bg-gray-900 text-white hover:bg-gray-700"
+                ? "bg-gray-50 text-gray-300"
+                : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
             }`}
           >
-            {session.myStatus === "coming"
+            {rsvpLoading
+              ? "..."
+              : session.myStatus === "coming"
               ? "Afmelden"
               : isFull
               ? "Sessie is vol"

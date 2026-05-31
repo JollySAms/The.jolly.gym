@@ -8,6 +8,7 @@ import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
 import { Dumbbell, CalendarDays, Users } from "lucide-react";
 import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { ClientSessionDetailSheet } from "@/app/(client)/_components/ClientSessionDetailSheet";
 
 type NextSession = {
@@ -35,6 +36,7 @@ export default function ClientHomePage() {
   const cancelRsvp = useMutation(api.attendance.cancelRsvp);
 
   const [showDetail, setShowDetail] = useState(false);
+  const [rsvpLoading, setRsvpLoading] = useState(false);
 
   useEffect(() => {
     if (isLoaded && isSignedIn && me === null) ensureUser();
@@ -47,11 +49,20 @@ export default function ClientHomePage() {
 
   async function handleRsvp(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!nextSession) return;
-    if (nextSession.myStatus === "coming") {
-      await cancelRsvp({ sessionId: nextSession._id });
-    } else {
-      await rsvp({ sessionId: nextSession._id });
+    if (!nextSession || rsvpLoading) return;
+    setRsvpLoading(true);
+    try {
+      if (nextSession.myStatus === "coming") {
+        await cancelRsvp({ sessionId: nextSession._id });
+        toast.success("Je bent afgemeld");
+      } else {
+        await rsvp({ sessionId: nextSession._id });
+        toast.success("Je bent ingeschreven!");
+      }
+    } catch {
+      toast.error("Dat lukte niet. Probeer het opnieuw.");
+    } finally {
+      setRsvpLoading(false);
     }
   }
 
@@ -117,13 +128,18 @@ export default function ClientHomePage() {
             {/* RSVP button — stopPropagation so card tap still opens detail */}
             <button
               onClick={handleRsvp}
-              className={`mt-5 w-full py-3 rounded-xl text-sm font-semibold transition-colors ${
+              disabled={rsvpLoading}
+              className={`mt-5 w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                 nextSession.myStatus === "coming"
                   ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   : "bg-gray-900 text-white hover:bg-gray-700"
               }`}
             >
-              {nextSession.myStatus === "coming" ? "Afmelden" : "Inschrijven"}
+              {rsvpLoading
+                ? "..."
+                : nextSession.myStatus === "coming"
+                ? "Afmelden"
+                : "Inschrijven"}
             </button>
           </div>
         </div>
