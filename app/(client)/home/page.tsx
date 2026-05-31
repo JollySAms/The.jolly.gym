@@ -31,6 +31,8 @@ export default function ClientHomePage() {
     api.sessions.getMyNextSession,
     isSignedIn && me !== undefined && me?.role === "client" ? {} : "skip"
   );
+  const rsvp = useMutation(api.attendance.rsvp);
+  const cancelRsvp = useMutation(api.attendance.cancelRsvp);
 
   const [showDetail, setShowDetail] = useState(false);
 
@@ -42,6 +44,16 @@ export default function ClientHomePage() {
   if (!isSignedIn) return <RedirectToSignIn />;
 
   const firstName = user?.firstName ?? me?.name?.split(" ")[0] ?? "daar";
+
+  async function handleRsvp(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!nextSession) return;
+    if (nextSession.myStatus === "coming") {
+      await cancelRsvp({ sessionId: nextSession._id });
+    } else {
+      await rsvp({ sessionId: nextSession._id });
+    }
+  }
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
@@ -63,10 +75,10 @@ export default function ClientHomePage() {
           </p>
         </div>
       ) : (
-        // Entire card is tappable — opens detail sheet
-        <button
+        // Card tappable for details — RSVP button inside stops propagation
+        <div
           onClick={() => setShowDetail(true)}
-          className="w-full text-left rounded-2xl border border-gray-100 overflow-hidden hover:border-gray-200 transition-colors"
+          className="rounded-2xl border border-gray-100 overflow-hidden cursor-pointer hover:border-gray-200 transition-colors"
         >
           {/* Group color strip */}
           <div
@@ -102,9 +114,19 @@ export default function ClientHomePage() {
               </span>
             </div>
 
-            <p className="mt-4 text-xs text-gray-400">Tik om details te bekijken →</p>
+            {/* RSVP button — stopPropagation so card tap still opens detail */}
+            <button
+              onClick={handleRsvp}
+              className={`mt-5 w-full py-3 rounded-xl text-sm font-semibold transition-colors ${
+                nextSession.myStatus === "coming"
+                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : "bg-gray-900 text-white hover:bg-gray-700"
+              }`}
+            >
+              {nextSession.myStatus === "coming" ? "Afmelden" : "Inschrijven"}
+            </button>
           </div>
-        </button>
+        </div>
       )}
 
       {/* Detail sheet */}
