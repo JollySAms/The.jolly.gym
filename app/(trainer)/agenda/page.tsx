@@ -9,8 +9,8 @@ import { nl } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useUser, useAuth, RedirectToSignIn } from "@clerk/nextjs";
 
-import { CalendarGrid } from "./_components/CalendarGrid";
-import { DaySessionList } from "./_components/DaySessionList";
+import { CalendarGrid } from "@/components/CalendarGrid";
+import { DaySessionList } from "@/components/DaySessionList";
 import { SessionDetailSheet } from "./_components/SessionDetailSheet";
 import { AddSessionDialog } from "./_components/AddSessionDialog";
 import { EditSessionDialog } from "./_components/EditSessionDialog";
