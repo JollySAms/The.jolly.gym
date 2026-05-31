@@ -82,11 +82,9 @@ export const getSessionWithAttendees = query({
       )
       .take(14);
 
-    // Build set of group member token identifiers for fast lookup
+    // Build set of group member token identifiers for fast lookup — reuse already-fetched members
     const groupMemberTokens = new Set(
-      (await Promise.all(memberIds.map((id) => ctx.db.get(id))))
-        .filter(Boolean)
-        .map((u) => u!.tokenIdentifier)
+      members.filter(Boolean).map((m) => m!.userId)
     );
 
     const crossGroupComers = allComing
