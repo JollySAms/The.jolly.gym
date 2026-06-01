@@ -91,6 +91,18 @@ Notifications are an **attendance prompt** ("will you attend?"), not a reminder.
 6. Progression tracking
 7. Push notifications (OneSignal + Convex crons)
 
+## Future Features (post-MVP)
+
+These are confirmed wants from Jolmer — do NOT build until the MVP list above is complete.
+
+### Achievements
+Clients can see personal bests (1RM, 5RM) per exercise, and a summary of how many PBs they hit in a session. Jolmer can also see this per client.
+
+**Design notes for when this gets built:**
+- PB detection should happen inside the `saveLog` mutation — compare the new weight against the client's history for that exercise and flag it automatically
+- Will likely need either a `isPB: boolean` field on individual sets, or a separate `personalBests` table (ask before deciding)
+- The `getMyProgressionForExercise` query already exists and can power the history comparison
+
 ## Preferred Libraries
 
 - **Dates:** `date-fns` (not moment.js)
