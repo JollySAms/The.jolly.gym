@@ -17,6 +17,7 @@ export default function RootLayout({
     <html
       lang="nl"
       className="h-full antialiased"
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
         <Providers>

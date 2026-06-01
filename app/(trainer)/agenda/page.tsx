@@ -32,8 +32,8 @@ export default function AgendaPage() {
   const ensureUser = useMutation(api.users.ensureUser);
   const me = useQuery(api.users.getMe);
 
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [selectedSession, setSelectedSession] = useState<EnrichedSession | null>(null);
   const [editingSession, setEditingSession] = useState<EnrichedSession | null>(null);
   const [showAddSession, setShowAddSession] = useState(false);

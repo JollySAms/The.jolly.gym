@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { useAuth } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -22,8 +22,13 @@ type EnrichedSession = {
 
 export function SessionsList() {
   const { isSignedIn } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
   const [expandedId, setExpandedId] = useState<Id<"sessions"> | null>(null);
+  const [today, setToday] = useState<string>("");
+
+  useEffect(() => {
+    setToday(format(new Date(), "yyyy-MM-dd"));
+  }, []);
 
   const sessions = useQuery(
     api.sessions.listByMonth,
@@ -31,8 +36,6 @@ export function SessionsList() {
       ? { year: currentMonth.getFullYear(), month: currentMonth.getMonth() + 1 }
       : "skip"
   ) as EnrichedSession[] | undefined;
-
-  const today = format(new Date(), "yyyy-MM-dd");
 
   // Sort sessions by date asc — upcoming first, past sessions further down
   const sorted = sessions

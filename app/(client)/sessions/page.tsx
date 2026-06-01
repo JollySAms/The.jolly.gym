@@ -29,8 +29,8 @@ type UpcomingSession = {
 
 export default function ClientAgendaPage() {
   const { isLoaded, isSignedIn } = useAuth();
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+  const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
+  const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
 
   // Calendar dots — all sessions for the month

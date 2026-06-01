@@ -129,7 +129,7 @@ export default function TrainerProgressionPage() {
           <div className="space-y-3">
             {history.map((entry) => {
               const dateLabel = entry.sessionDate
-                ? format(parse(entry.sessionDate, "yyyy-MM-dd", new Date()), "d MMM yyyy", {
+                ? format(parse(entry.sessionDate, "yyyy-MM-dd", new Date(0)), "d MMM yyyy", {
                     locale: nl,
                   })
                 : "Onbekende datum";

@@ -37,6 +37,11 @@ export default function ClientHomePage() {
 
   const [showDetail, setShowDetail] = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [todayLabel, setTodayLabel] = useState<string | null>(null);
+
+  useEffect(() => {
+    setTodayLabel(format(new Date(), "EEEE d MMMM", { locale: nl }));
+  }, []);
 
   useEffect(() => {
     if (isLoaded && isSignedIn && me === null) ensureUser();
@@ -71,7 +76,7 @@ export default function ClientHomePage() {
       {/* Greeting */}
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Hoi {firstName}</h1>
       <p className="text-sm text-gray-400 mb-8 capitalize">
-        {format(new Date(), "EEEE d MMMM", { locale: nl })}
+        {todayLabel ?? ""}
       </p>
 
       {/* Next session card */}

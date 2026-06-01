@@ -47,11 +47,11 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
 
   const startTime = session.time;
   const endTime = format(
-    addHours(parse(session.time, "HH:mm", new Date()), 1),
+    addHours(parse(session.time, "HH:mm", new Date(0)), 1),
     "HH:mm"
   );
   const dateLabel = format(
-    parse(session.date, "yyyy-MM-dd", new Date()),
+    parse(session.date, "yyyy-MM-dd", new Date(0)),
     "EEEE d MMMM",
     { locale: nl }
   );
