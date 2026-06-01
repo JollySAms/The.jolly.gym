@@ -1,6 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAuth } from "./lib";
+import { Doc, Id } from "./_generated/dataModel";
+import { requireAuth, requireTrainer } from "./lib";
 
 // Returns all "coming" attendees for a session (for the attendee list in detail view)
 export const getForSession = query({
@@ -154,6 +155,72 @@ export const rsvp = mutation({
         signedUpAt: Date.now(),
       });
     }
+  },
+});
+
+// Trainer only — per-client attendance stats grouped by group.
+// Counts past non-cancelled sessions and how many each client RSVPd "coming" to.
+export const getClientAttendanceOverview = query({
+  args: {},
+  handler: async (ctx) => {
+    await requireTrainer(ctx);
+    const today = new Date().toISOString().slice(0, 10);
+
+    // All non-cancelled sessions up to today
+    const allSessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_cancelled_and_date", (q) =>
+        q.eq("cancelled", false).lte("date", today)
+      )
+      .take(500);
+
+    // Group sessions by groupId in JS
+    const sessionsByGroup = new Map<Id<"groups">, Doc<"sessions">[]>();
+    for (const s of allSessions) {
+      const arr = sessionsByGroup.get(s.groupId) ?? [];
+      arr.push(s);
+      sessionsByGroup.set(s.groupId, arr);
+    }
+
+    // All groups — small table, safe to take all and filter in JS
+    const allGroups = await ctx.db.query("groups").take(20);
+    const activeGroups = allGroups.filter((g) => !g.cancelled);
+
+    return await Promise.all(
+      activeGroups.map(async (group) => {
+        const groupSessions = sessionsByGroup.get(group._id) ?? [];
+        const sessionIdSet = new Set(groupSessions.map((s) => s._id));
+
+        const members = await Promise.all(
+          (group.memberIds ?? []).map(async (userId) => {
+            const user = await ctx.db.get(userId);
+            if (!user) return null;
+
+            // Get all attendance records for this user, then count by sessionId in JS
+            const myAttendance = await ctx.db
+              .query("attendance")
+              .withIndex("by_user", (q) => q.eq("userId", user.tokenIdentifier))
+              .take(500);
+
+            const attended = myAttendance.filter(
+              (a) => a.status === "coming" && sessionIdSet.has(a.sessionId)
+            ).length;
+
+            return {
+              name: user.name,
+              totalSessions: groupSessions.length,
+              attended,
+            };
+          })
+        );
+
+        return {
+          group: { _id: group._id, name: group.name, color: group.color },
+          totalSessions: groupSessions.length,
+          members: members.filter((m): m is NonNullable<typeof m> => m !== null),
+        };
+      })
+    );
   },
 });
 
