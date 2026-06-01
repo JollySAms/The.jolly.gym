@@ -6,7 +6,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse, addHours } from "date-fns";
 import { nl } from "date-fns/locale";
-import { X, Dumbbell } from "lucide-react";
+import { X, Dumbbell, ClipboardList } from "lucide-react";
+import { WorkoutLogSheet } from "./WorkoutLogSheet";
 import { toast } from "sonner";
 
 type SessionData = {
@@ -39,6 +40,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   const rsvp = useMutation(api.attendance.rsvp);
   const cancelRsvp = useMutation(api.attendance.cancelRsvp);
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [showLog, setShowLog] = useState(false);
 
   const color = session.group?.color ?? "#3B82F6";
   const isFull = session.attendanceCount >= session.capacity && session.myStatus !== "coming";
@@ -180,8 +182,17 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
           </div>
         </div>
 
-        {/* RSVP button — pinned to bottom */}
-        <div className="px-4 py-4 border-t border-gray-100 shrink-0">
+        {/* Action buttons — pinned to bottom */}
+        <div className="px-4 py-4 border-t border-gray-100 shrink-0 space-y-2">
+          {session.workoutSnapshot && session.workoutSnapshot.length > 0 && (
+            <button
+              onClick={() => setShowLog(true)}
+              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+            >
+              <ClipboardList size={15} />
+              Workout loggen
+            </button>
+          )}
           <button
             onClick={handleRsvp}
             disabled={isFull || rsvpLoading}
@@ -203,6 +214,15 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
           </button>
         </div>
       </div>
+
+      {showLog && session.workoutSnapshot && (
+        <WorkoutLogSheet
+          sessionId={session._id}
+          workoutName={session.workoutName}
+          workoutSnapshot={session.workoutSnapshot}
+          onClose={() => setShowLog(false)}
+        />
+      )}
     </div>
   );
 }

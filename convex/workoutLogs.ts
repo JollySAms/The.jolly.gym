@@ -23,40 +23,45 @@ export const getMyProgressionForExercise = query({
   args: { exerciseId: v.id("exercises") },
   handler: async (ctx, args) => {
     const identity = await requireAuth(ctx);
-    return await ctx.db
+    const logs = await ctx.db
       .query("workoutLogs")
       .withIndex("by_user_and_exercise", (q) =>
         q.eq("userId", identity.tokenIdentifier).eq("exerciseId", args.exerciseId)
       )
       .order("desc")
       .take(50);
+
+    return await Promise.all(
+      logs.map(async (log) => {
+        const session = await ctx.db.get(log.sessionId);
+        return { ...log, sessionDate: session?.date ?? null };
+      })
+    );
   },
 });
 
-// Trainer — get all client logs for a specific session (for progression view)
-export const getForSession = query({
-  args: { sessionId: v.id("sessions") },
-  handler: async (ctx, args) => {
-    await requireTrainer(ctx);
-    return await ctx.db
-      .query("workoutLogs")
-      .withIndex("by_session", (q) => q.eq("sessionId", args.sessionId))
-      .take(500);
-  },
-});
-
-// Trainer — get all logs for a specific exercise across all clients
+// Trainer — get all logs for a specific exercise for a specific client
 export const getForExercise = query({
-  args: { exerciseId: v.id("exercises") },
+  args: {
+    exerciseId: v.id("exercises"),
+    clientTokenIdentifier: v.string(),
+  },
   handler: async (ctx, args) => {
     await requireTrainer(ctx);
-    // No direct index for this — use by_session and filter, or scan.
-    // At 34 clients this is fine. Future: add by_exercise index if needed.
-    const all = await ctx.db
+    const logs = await ctx.db
       .query("workoutLogs")
-      .withIndex("by_user_and_exercise", (q) => q.eq("userId", "").eq("exerciseId", args.exerciseId))
-      .take(500);
-    return all;
+      .withIndex("by_user_and_exercise", (q) =>
+        q.eq("userId", args.clientTokenIdentifier).eq("exerciseId", args.exerciseId)
+      )
+      .order("desc")
+      .take(50);
+
+    return await Promise.all(
+      logs.map(async (log) => {
+        const session = await ctx.db.get(log.sessionId);
+        return { ...log, sessionDate: session?.date ?? null };
+      })
+    );
   },
 });
 
@@ -120,6 +125,7 @@ export const deleteLog = mutation({
       .first();
 
     if (existing) {
+      if (existing.userId !== identity.tokenIdentifier) throw new Error("Forbidden");
       await ctx.db.delete(existing._id);
     }
   },

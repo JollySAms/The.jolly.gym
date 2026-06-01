@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, CalendarDays } from "lucide-react";
+import { Home, CalendarDays, TrendingUp } from "lucide-react";
 
 const navItems = [
   { href: "/home", label: "Home", icon: Home },
   { href: "/sessions", label: "Agenda", icon: CalendarDays },
+  { href: "/progression", label: "Progressie", icon: TrendingUp },
 ];
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {

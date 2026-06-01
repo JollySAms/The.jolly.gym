@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CalendarDays, Users, Dumbbell, ClipboardList } from "lucide-react";
+import { CalendarDays, Users, Dumbbell, ClipboardList, TrendingUp } from "lucide-react";
 
 const navItems = [
   { href: "/agenda", label: "Agenda", icon: CalendarDays },
   { href: "/groups", label: "Groepen", icon: Users },
   { href: "/workouts", label: "Workouts", icon: Dumbbell },
   { href: "/attendance", label: "Aanwezigheid", icon: ClipboardList },
+  { href: "/client-progress", label: "Progressie", icon: TrendingUp },
 ];
 
 export default function TrainerLayout({ children }: { children: React.ReactNode }) {
