@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse } from "date-fns";
@@ -9,8 +10,9 @@ import { nl } from "date-fns/locale";
 import { TrendingUp, ChevronDown } from "lucide-react";
 
 export default function TrainerProgressionPage() {
-  const clients = useQuery(api.users.listClients);
-  const exercises = useQuery(api.exercises.list);
+  const { isSignedIn } = useAuth();
+  const clients = useQuery(api.users.listClients, isSignedIn ? {} : "skip");
+  const exercises = useQuery(api.exercises.list, isSignedIn ? {} : "skip");
 
   const [selectedClientToken, setSelectedClientToken] = useState<string | null>(null);
   const [selectedExerciseId, setSelectedExerciseId] = useState<Id<"exercises"> | null>(null);

@@ -16,8 +16,9 @@ type WorkoutExercise = {
 
 type LogSet = { id: string; reps: string; weight: string };
 
+let _setIdCounter = 0;
 function newSetId() {
-  return crypto.randomUUID();
+  return `set-${Date.now()}-${++_setIdCounter}`;
 }
 
 type LoggedExercise = {

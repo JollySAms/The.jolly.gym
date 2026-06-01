@@ -28,15 +28,20 @@ export const getMyProgressionForExercise = query({
       .withIndex("by_user_and_exercise", (q) =>
         q.eq("userId", identity.tokenIdentifier).eq("exerciseId", args.exerciseId)
       )
-      .order("desc")
       .take(50);
 
-    return await Promise.all(
+    const enriched = await Promise.all(
       logs.map(async (log) => {
         const session = await ctx.db.get(log.sessionId);
         return { ...log, sessionDate: session?.date ?? null };
       })
     );
+
+    return enriched.sort((a, b) => {
+      if (!a.sessionDate) return 1;
+      if (!b.sessionDate) return -1;
+      return b.sessionDate.localeCompare(a.sessionDate);
+    });
   },
 });
 
@@ -53,15 +58,20 @@ export const getForExercise = query({
       .withIndex("by_user_and_exercise", (q) =>
         q.eq("userId", args.clientTokenIdentifier).eq("exerciseId", args.exerciseId)
       )
-      .order("desc")
       .take(50);
 
-    return await Promise.all(
+    const enriched = await Promise.all(
       logs.map(async (log) => {
         const session = await ctx.db.get(log.sessionId);
         return { ...log, sessionDate: session?.date ?? null };
       })
     );
+
+    return enriched.sort((a, b) => {
+      if (!a.sessionDate) return 1;
+      if (!b.sessionDate) return -1;
+      return b.sessionDate.localeCompare(a.sessionDate);
+    });
   },
 });
 
@@ -125,7 +135,6 @@ export const deleteLog = mutation({
       .first();
 
     if (existing) {
-      if (existing.userId !== identity.tokenIdentifier) throw new Error("Forbidden");
       await ctx.db.delete(existing._id);
     }
   },
