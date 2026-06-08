@@ -83,13 +83,15 @@ Notifications are an **attendance prompt** ("will you attend?"), not a reminder.
 
 ## MVP Build Order
 
-1. Workout builder
-2. Session calendar (assign workouts to groups)
-3. Client home screen + agenda
-4. Client RSVP
-5. Attendance dashboard (Jolmer)
-6. Progression tracking
-7. Push notifications (OneSignal + Convex crons)
+1. ✅ Workout builder
+2. ✅ Session calendar (assign workouts to groups)
+3. ✅ Client home screen + agenda
+4. ✅ Client RSVP
+5. ✅ Attendance dashboard (Jolmer)
+6. ✅ Progression tracking (+ search bars on progression pages)
+7. ⬜ Push notifications (OneSignal + Convex crons)
+
+**Deploy to Vercel for real-world testing** — can happen before or after push notifications.
 
 ## Future Features (post-MVP)
 
@@ -102,6 +104,16 @@ Clients can see personal bests (1RM, 5RM) per exercise, and a summary of how man
 - PB detection should happen inside the `saveLog` mutation — compare the new weight against the client's history for that exercise and flag it automatically
 - Will likely need either a `isPB: boolean` field on individual sets, or a separate `personalBests` table (ask before deciding)
 - The `getMyProgressionForExercise` query already exists and can power the history comparison
+
+### Progression Graph
+Chart of progression over time per exercise, available on both `/progression` (client) and `/client-progress` (trainer). Two display modes:
+- **Highest weight** — heaviest weight lifted in a session for that exercise
+- **Calculated 1RM** — estimated one-rep max per session (formula: weight × (1 + reps/30))
+
+**Design notes for when this gets built:**
+- All data already exists in `workoutLogs` — no schema changes needed
+- Will need a charting library (ask before installing)
+- Toggle between the two modes within the same chart view
 
 ## Preferred Libraries
 
