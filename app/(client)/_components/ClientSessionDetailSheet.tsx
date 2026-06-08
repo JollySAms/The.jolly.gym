@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation } from "convex/react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse, addHours } from "date-fns";
@@ -41,6 +41,9 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   const cancelRsvp = useMutation(api.attendance.cancelRsvp);
   const [rsvpLoading, setRsvpLoading] = useState(false);
   const [showLog, setShowLog] = useState(false);
+  // Optimistic local status so the button updates instantly after RSVP
+  const [localStatus, setLocalStatus] = useState(session.myStatus);
+  useEffect(() => { setLocalStatus(session.myStatus); }, [session.myStatus]);
 
   const color = session.group?.color ?? "#3B82F6";
 
@@ -49,7 +52,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   const liveAttendanceCount = attendees != null
     ? attendees.members.filter((m) => m?.status === "coming").length + attendees.crossGroupComers.length
     : session.attendanceCount;
-  const isFull = liveAttendanceCount >= session.capacity && session.myStatus !== "coming";
+  const isFull = liveAttendanceCount >= session.capacity && localStatus !== "coming";
 
   const startTime = session.time;
   const endTime = format(
@@ -65,15 +68,19 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   async function handleRsvp() {
     if (rsvpLoading) return;
     setRsvpLoading(true);
+    const previousStatus = localStatus;
     try {
-      if (session.myStatus === "coming") {
+      if (localStatus === "coming") {
+        setLocalStatus(null);
         await cancelRsvp({ sessionId: session._id });
         toast.success("Je bent afgemeld");
       } else if (!isFull) {
+        setLocalStatus("coming");
         await rsvp({ sessionId: session._id });
         toast.success("Je bent ingeschreven!");
       }
     } catch {
+      setLocalStatus(previousStatus); // revert on error
       toast.error("Dat lukte niet. Probeer het opnieuw.");
     } finally {
       setRsvpLoading(false);
@@ -203,7 +210,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
             onClick={handleRsvp}
             disabled={isFull || rsvpLoading}
             className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
-              session.myStatus === "coming"
+              localStatus === "coming"
                 ? "bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
                 : isFull
                 ? "bg-gray-50 text-gray-300"
@@ -212,7 +219,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
           >
             {rsvpLoading
               ? "..."
-              : session.myStatus === "coming"
+              : localStatus === "coming"
               ? "Afmelden"
               : isFull
               ? "Sessie is vol"
