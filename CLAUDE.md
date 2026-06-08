@@ -38,7 +38,7 @@ Changes (attendance, logged weights) must sync to Jolmer in real-time, and vice 
 - Avoid the generic AI aesthetic (gradients, glassmorphism, floating blobs)
 - Ask before introducing new colors or fonts; document decisions below when made
 
-**Design system:** Font: Helvetica · Primary colour: TBD · Border radius: TBD
+**Design system:** Font: Helvetica · Primary colour: `#2D3F5A` (dark navy from logo) · Border radius: TBD
 
 ## Key Principles
 
@@ -134,6 +134,7 @@ Chart of progression over time per exercise, available on both `/progression` (c
 
 - **Desktop layout polish** — trainer views must work well on desktop (not just stretched mobile). Review all `(trainer)/` pages for proper desktop layout.
 - **EnrichedSession type deduplication** — the type is defined separately in 5 files (`agenda/page.tsx`, `agenda/_components/DaySessionList.tsx`, `agenda/_components/SessionDetailSheet.tsx`, `attendance/_components/SessionsList.tsx`, `components/DaySessionList.tsx`). Extract to a shared types file (e.g. `types/session.ts`) and import from there.
+- **PWA offline support** — install `next-pwa`, configure service worker so the app loads without internet. Low priority (clients will have signal at the gym), but needed for a full PWA experience. Ask before installing the package.
 
 ## What NOT to Build
 

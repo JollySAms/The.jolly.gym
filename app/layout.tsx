@@ -5,7 +5,15 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "The Jolly Gym",
-  description: "Training app for Jolmer and his clients",
+  description: "Jouw trainingsapp van The Jolly Gym",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Jolly Gym",
+  },
+  icons: {
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({
