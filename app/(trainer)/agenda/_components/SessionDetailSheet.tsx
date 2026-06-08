@@ -26,7 +26,7 @@ type Props = {
 const STATUS_CONFIG = {
   coming:      { label: "Gaat",            className: "text-green-600" },
   cancelled:   { label: "Gaat niet",       className: "text-red-500"   },
-  no_response: { label: "Nog geen reactie", className: "text-gray-400"  },
+  no_response: { label: "Nog geen reactie", className: "text-gray-500"  },
 } as const;
 
 export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
@@ -101,7 +101,7 @@ export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
 
           {/* Full attendee breakdown */}
           <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
               Deelnemers
             </p>
 
@@ -112,7 +112,7 @@ export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
                 ))}
               </div>
             ) : !attendees ? (
-              <p className="text-sm text-gray-400 py-2">Sessie niet gevonden.</p>
+              <p className="text-sm text-gray-500 py-2">Sessie niet gevonden.</p>
             ) : (
               <div className="space-y-0.5">
                 {attendees.members.map((m) => {
@@ -133,7 +133,7 @@ export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
 
                 {attendees.crossGroupComers.length > 0 && (
                   <>
-                    <p className="text-xs text-gray-400 pt-3 pb-1">Ook aanwezig</p>
+                    <p className="text-xs text-gray-500 pt-3 pb-1">Ook aanwezig</p>
                     {attendees.crossGroupComers.map((c) => (
                       <div
                         key={c.userId}
@@ -147,7 +147,7 @@ export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
                 )}
 
                 {attendees.members.length === 0 && (
-                  <p className="text-sm text-gray-400 py-2">
+                  <p className="text-sm text-gray-500 py-2">
                     Geen groepsleden gevonden.
                   </p>
                 )}

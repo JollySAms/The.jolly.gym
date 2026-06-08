@@ -136,7 +136,7 @@ export function WorkoutDialog({ workout, onClose }: Props) {
               </label>
 
               {selected.length === 0 ? (
-                <p className="text-sm text-gray-400 py-2">Nog geen oefeningen toegevoegd.</p>
+                <p className="text-sm text-gray-500 py-2">Nog geen oefeningen toegevoegd.</p>
               ) : (
                 <ul className="space-y-2">
                   {selected.map((entry) => (
@@ -201,9 +201,9 @@ export function WorkoutDialog({ workout, onClose }: Props) {
 
                   {/* Exercise list */}
                   {exercises === undefined ? (
-                    <p className="text-sm text-gray-400">Laden...</p>
+                    <p className="text-sm text-gray-500">Laden...</p>
                   ) : filteredExercises.length === 0 && search ? (
-                    <p className="text-sm text-gray-400">Geen resultaten voor "{search}"</p>
+                    <p className="text-sm text-gray-500">Geen resultaten voor "{search}"</p>
                   ) : (
                     <ul className="max-h-40 overflow-y-auto space-y-1">
                       {filteredExercises.map((ex) => {
@@ -217,7 +217,7 @@ export function WorkoutDialog({ workout, onClose }: Props) {
                               className="w-full text-left px-3 py-2 text-sm rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50 hover:text-blue-700 text-gray-700"
                             >
                               {ex.name}
-                              {alreadyAdded && <span className="ml-2 text-xs text-gray-400">toegevoegd</span>}
+                              {alreadyAdded && <span className="ml-2 text-xs text-gray-500">toegevoegd</span>}
                             </button>
                           </li>
                         );

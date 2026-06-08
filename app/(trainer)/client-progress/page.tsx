@@ -77,7 +77,7 @@ export default function TrainerProgressionPage() {
       {/* History */}
       {!selectedClientToken || !selectedExerciseId ? (
         <div className="text-center py-12">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-500">
             {!selectedClientToken
               ? "Kies eerst een klant"
               : "Kies een oefening om de progressie te zien"}
@@ -91,13 +91,13 @@ export default function TrainerProgressionPage() {
         </div>
       ) : history.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-500">
             Geen logs voor {selectedClientName} — {selectedExerciseName}
           </p>
         </div>
       ) : (
         <>
-          <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
             {selectedClientName} · {selectedExerciseName}
           </p>
           <div className="space-y-3">

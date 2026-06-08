@@ -75,7 +75,7 @@ export default function ClientHomePage() {
     <div className="max-w-lg mx-auto px-4 py-8">
       {/* Greeting */}
       <h1 className="text-2xl font-bold text-gray-900 mb-1">Hoi {firstName}</h1>
-      <p className="text-sm text-gray-400 mb-8 capitalize">
+      <p className="text-sm text-gray-500 mb-8 capitalize">
         {todayLabel ?? ""}
       </p>
 
@@ -86,7 +86,7 @@ export default function ClientHomePage() {
         <div className="rounded-2xl border border-gray-100 px-6 py-10 text-center">
           <CalendarDays size={32} className="mx-auto text-gray-200 mb-3" />
           <p className="text-sm font-medium text-gray-500">Geen sessies gepland</p>
-          <p className="text-xs text-gray-400 mt-1">
+          <p className="text-xs text-gray-500 mt-1">
             Ga naar Agenda om je in te schrijven.
           </p>
         </div>
@@ -103,7 +103,7 @@ export default function ClientHomePage() {
           />
 
           <div className="px-5 py-5">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
               Volgende sessie
             </p>
 
@@ -125,7 +125,7 @@ export default function ClientHomePage() {
 
             <div className="flex items-center gap-2 mt-2">
               <Users size={13} className="text-gray-300" />
-              <span className="text-xs text-gray-400">
+              <span className="text-xs text-gray-500">
                 {nextSession.attendanceCount} / {nextSession.capacity} ingeschreven
               </span>
             </div>

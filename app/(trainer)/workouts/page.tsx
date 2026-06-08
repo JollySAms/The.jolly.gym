@@ -63,7 +63,7 @@ export default function WorkoutsPage() {
       ) : workouts.length === 0 ? (
         <div className="text-center py-16">
           <Dumbbell size={40} className="mx-auto text-gray-200 mb-4" />
-          <p className="text-gray-400 text-sm mb-4">Nog geen workouts aangemaakt.</p>
+          <p className="text-gray-500 text-sm mb-4">Nog geen workouts aangemaakt.</p>
           <button
             onClick={() => setShowAdd(true)}
             className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700"
@@ -81,7 +81,7 @@ export default function WorkoutsPage() {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{workout.name}</p>
-                  <p className="text-xs text-gray-400 mt-0.5">
+                  <p className="text-xs text-gray-500 mt-0.5">
                     {workout.exercises.length === 0
                       ? "Geen oefeningen"
                       : workout.exercises.map((e) => e.name).join(" · ")}

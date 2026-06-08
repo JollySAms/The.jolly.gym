@@ -76,7 +76,7 @@ export function MembersSheet({ group, onClose }: Props) {
                         </div>
                         <div className="text-left">
                           <p className="text-sm font-medium text-gray-900">{client.name}</p>
-                          <p className="text-xs text-gray-400">{client.email}</p>
+                          <p className="text-xs text-gray-500">{client.email}</p>
                         </div>
                       </div>
                       <div

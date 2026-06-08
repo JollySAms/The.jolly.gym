@@ -25,7 +25,7 @@ export function AddSessionDialog({ defaultDate, onClose }: Props) {
   const createSession = useMutation(api.sessions.create);
   const createBatch = useMutation(api.sessions.createBatch);
 
-  const [date, setDate] = useState(
+  const [date, setDate] = useState(() =>
     defaultDate ? format(defaultDate, "yyyy-MM-dd") : format(new Date(), "yyyy-MM-dd")
   );
   const [time, setTime] = useState("09:00");
@@ -109,7 +109,7 @@ export function AddSessionDialog({ defaultDate, onClose }: Props) {
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Groep</label>
             {groups === undefined ? (
-              <p className="text-sm text-gray-400">Laden...</p>
+              <p className="text-sm text-gray-500">Laden...</p>
             ) : groups.length === 0 ? (
               <p className="text-sm text-red-500">Maak eerst een groep aan.</p>
             ) : (
@@ -134,9 +134,9 @@ export function AddSessionDialog({ defaultDate, onClose }: Props) {
               Workout <span className="text-gray-400 font-normal">(optioneel)</span>
             </label>
             {workouts === undefined ? (
-              <p className="text-sm text-gray-400">Laden...</p>
+              <p className="text-sm text-gray-500">Laden...</p>
             ) : workouts.length === 0 ? (
-              <p className="text-xs text-gray-400">Nog geen workouts — maak ze aan via /workouts</p>
+              <p className="text-xs text-gray-500">Nog geen workouts — maak ze aan via /workouts</p>
             ) : (
               <select
                 value={workoutId}

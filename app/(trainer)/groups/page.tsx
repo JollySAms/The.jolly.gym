@@ -69,7 +69,7 @@ export default function GroupsPage() {
         </div>
       ) : groups.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-gray-400 text-sm mb-4">Nog geen groepen aangemaakt.</p>
+          <p className="text-gray-500 text-sm mb-4">Nog geen groepen aangemaakt.</p>
           <button
             onClick={() => setShowAdd(true)}
             className="px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700"
@@ -92,7 +92,7 @@ export default function GroupsPage() {
                 />
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-gray-900 truncate">{group.name}</p>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-500">
                     {group.memberIds.length} {group.memberIds.length === 1 ? "lid" : "leden"}
                   </p>
                 </div>

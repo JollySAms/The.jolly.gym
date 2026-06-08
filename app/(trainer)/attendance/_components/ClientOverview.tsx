@@ -13,18 +13,18 @@ export function ClientOverview() {
   );
 
   if (overview === undefined) {
-    return <p className="text-sm text-gray-400">Laden...</p>;
+    return <p className="text-sm text-gray-500">Laden...</p>;
   }
 
   if (!overview || overview.length === 0) {
-    return <p className="text-sm text-gray-400 italic">Nog geen groepen of sessies gevonden</p>;
+    return <p className="text-sm text-gray-500 italic">Nog geen groepen of sessies gevonden</p>;
   }
 
   // Filter out groups with no members
   const groupsWithMembers = overview.filter((g) => g.members.length > 0);
 
   if (groupsWithMembers.length === 0) {
-    return <p className="text-sm text-gray-400 italic">Nog geen leden toegevoegd aan groepen</p>;
+    return <p className="text-sm text-gray-500 italic">Nog geen leden toegevoegd aan groepen</p>;
   }
 
   return (
@@ -38,7 +38,7 @@ export function ClientOverview() {
               style={{ backgroundColor: group.color }}
             />
             <h3 className="text-sm font-semibold text-gray-800">{group.name}</h3>
-            <span className="text-xs text-gray-400 ml-auto">{totalSessions} sessies</span>
+            <span className="text-xs text-gray-500 ml-auto">{totalSessions} sessies</span>
           </div>
 
           {/* Members table */}

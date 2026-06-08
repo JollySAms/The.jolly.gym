@@ -82,11 +82,11 @@ export function SessionsList() {
 
       {/* Sessions list */}
       {upcoming === undefined && (
-        <p className="text-sm text-gray-400">Laden...</p>
+        <p className="text-sm text-gray-500">Laden...</p>
       )}
 
       {upcoming && past && upcoming.length === 0 && past.length === 0 && (
-        <p className="text-sm text-gray-400 italic">Geen sessies deze maand</p>
+        <p className="text-sm text-gray-500 italic">Geen sessies deze maand</p>
       )}
 
       {upcoming && past && (upcoming.length > 0 || past.length > 0) && (
@@ -106,7 +106,7 @@ export function SessionsList() {
           {past.length > 0 && (
             <div className="flex items-center gap-3 py-2">
               <div className="flex-1 border-t border-gray-200" />
-              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider shrink-0">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider shrink-0">
                 Verleden
               </span>
               <div className="flex-1 border-t border-gray-200" />

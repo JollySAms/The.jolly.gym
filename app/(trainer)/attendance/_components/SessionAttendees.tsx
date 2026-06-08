@@ -18,10 +18,10 @@ export function SessionAttendees({ sessionId }: Props) {
   const data = useQuery(api.attendance.getSessionWithAttendees, { sessionId });
 
   if (data === undefined) {
-    return <p className="text-sm text-gray-400 py-2">Laden...</p>;
+    return <p className="text-sm text-gray-500 py-2">Laden...</p>;
   }
   if (!data) {
-    return <p className="text-sm text-gray-400 py-2">Niet gevonden</p>;
+    return <p className="text-sm text-gray-500 py-2">Niet gevonden</p>;
   }
 
   const all: Attendee[] = [
@@ -30,7 +30,7 @@ export function SessionAttendees({ sessionId }: Props) {
   ];
 
   if (all.length === 0) {
-    return <p className="text-sm text-gray-400 py-2 italic">Nog niemand aangemeld</p>;
+    return <p className="text-sm text-gray-500 py-2 italic">Nog niemand aangemeld</p>;
   }
 
   return (
@@ -40,7 +40,7 @@ export function SessionAttendees({ sessionId }: Props) {
           <span className="text-gray-700">
             {m.name ?? "Onbekend"}
             {!m.isGroupMember && (
-              <span className="ml-1.5 text-xs text-gray-400">(gast)</span>
+              <span className="ml-1.5 text-xs text-gray-500">(gast)</span>
             )}
           </span>
           {m.status === "coming" && (
@@ -50,7 +50,7 @@ export function SessionAttendees({ sessionId }: Props) {
             <span className="text-red-500 font-medium">Afgemeld</span>
           )}
           {m.status === "no_response" && (
-            <span className="text-gray-400">–</span>
+            <span className="text-gray-500">–</span>
           )}
         </li>
       ))}

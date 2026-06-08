@@ -47,7 +47,7 @@ export default function ProgressionPage() {
       {/* History */}
       {!selectedId ? (
         <div className="text-center py-12">
-          <p className="text-sm text-gray-400">Kies een oefening om je progressie te zien</p>
+          <p className="text-sm text-gray-500">Kies een oefening om je progressie te zien</p>
         </div>
       ) : history === undefined ? (
         <div className="space-y-3">
@@ -57,7 +57,7 @@ export default function ProgressionPage() {
         </div>
       ) : history.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-sm text-gray-400">
+          <p className="text-sm text-gray-500">
             Nog geen logs voor {selectedName}
           </p>
         </div>

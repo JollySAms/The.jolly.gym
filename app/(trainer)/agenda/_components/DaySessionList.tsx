@@ -28,9 +28,9 @@ export function DaySessionList({ date, sessions, onSelectSession }: Props) {
       <p className="text-sm font-bold text-gray-800 mb-2 capitalize">{dateLabel}</p>
 
       {sessions === undefined ? (
-        <p className="text-sm text-gray-400">Laden...</p>
+        <p className="text-sm text-gray-500">Laden...</p>
       ) : sessions.length === 0 ? (
-        <p className="text-sm text-gray-400">Geen klassen</p>
+        <p className="text-sm text-gray-500">Geen klassen</p>
       ) : (
         <div className="divide-y divide-gray-100">
           {sessions

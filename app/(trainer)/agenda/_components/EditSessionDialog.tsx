@@ -102,7 +102,7 @@ export function EditSessionDialog({ session, onClose }: Props) {
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Groep</label>
             {groups === undefined ? (
-              <p className="text-sm text-gray-400">Laden...</p>
+              <p className="text-sm text-gray-500">Laden...</p>
             ) : (
               <select
                 value={groupId}
@@ -124,9 +124,9 @@ export function EditSessionDialog({ session, onClose }: Props) {
               Workout <span className="text-gray-400 font-normal">(optioneel)</span>
             </label>
             {workouts === undefined ? (
-              <p className="text-sm text-gray-400">Laden...</p>
+              <p className="text-sm text-gray-500">Laden...</p>
             ) : workouts.length === 0 ? (
-              <p className="text-xs text-gray-400">Nog geen workouts aangemaakt.</p>
+              <p className="text-xs text-gray-500">Nog geen workouts aangemaakt.</p>
             ) : (
               <select
                 value={workoutId}

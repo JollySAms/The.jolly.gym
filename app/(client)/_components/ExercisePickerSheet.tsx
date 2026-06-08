@@ -55,7 +55,7 @@ export function ExercisePickerSheet({ onSelect, onClose, excludeIds = [] }: Prop
               ))}
             </div>
           ) : filtered.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-8">
+            <p className="text-sm text-gray-500 text-center py-8">
               {search ? "Geen resultaten" : "Geen oefeningen beschikbaar"}
             </p>
           ) : (

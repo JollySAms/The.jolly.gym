@@ -46,7 +46,7 @@ export function CalendarGrid({ currentMonth, sessions, selectedDate, onSelectDat
       {/* Day headers */}
       <div className="grid grid-cols-7 mb-1">
         {DAY_LABELS.map((label) => (
-          <div key={label} className="text-center text-xs font-medium text-gray-400 py-1">
+          <div key={label} className="text-center text-xs font-medium text-gray-500 py-1">
             {label}
           </div>
         ))}
