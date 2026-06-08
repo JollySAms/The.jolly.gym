@@ -39,13 +39,13 @@ export function SessionsList() {
 
   const upcoming = sessions
     ? [...sessions]
-        .filter((s) => s.date > today)
+        .filter((s) => s.date >= today)
         .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
     : undefined;
 
   const past = sessions
     ? [...sessions]
-        .filter((s) => s.date <= today)
+        .filter((s) => s.date < today)
         .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))
     : undefined;
 
