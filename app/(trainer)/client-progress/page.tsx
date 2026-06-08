@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse } from "date-fns";
@@ -11,9 +11,10 @@ import { TrendingUp } from "lucide-react";
 import { SearchCombobox } from "@/components/SearchCombobox";
 
 export default function TrainerProgressionPage() {
-  const { isSignedIn } = useAuth();
-  const clients = useQuery(api.users.listClients, isSignedIn ? {} : "skip");
-  const exercises = useQuery(api.exercises.list, isSignedIn ? {} : "skip");
+  const { isLoaded, isSignedIn } = useAuth();
+  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
+  const clients = useQuery(api.users.listClients, me?.role === "trainer" ? {} : "skip");
+  const exercises = useQuery(api.exercises.list, me?.role === "trainer" ? {} : "skip");
 
   const [selectedClientToken, setSelectedClientToken] = useState<string | null>(null);
   const [selectedExerciseId, setSelectedExerciseId] = useState<Id<"exercises"> | null>(null);
@@ -31,6 +32,10 @@ export default function TrainerProgressionPage() {
     exercises?.find((e) => e._id === selectedExerciseId)?.name ?? null;
 
   const loading = clients === undefined || exercises === undefined;
+
+  if (!isLoaded) return null;
+  if (!isSignedIn) return <RedirectToSignIn />;
+  if (me !== undefined && me?.role !== "trainer") return null;
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6">

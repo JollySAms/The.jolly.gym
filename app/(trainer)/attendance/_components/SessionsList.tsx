@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { useAuth } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
@@ -24,11 +24,7 @@ export function SessionsList() {
   const { isSignedIn } = useAuth();
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
   const [expandedId, setExpandedId] = useState<Id<"sessions"> | null>(null);
-  const [today, setToday] = useState<string>("");
-
-  useEffect(() => {
-    setToday(format(new Date(), "yyyy-MM-dd"));
-  }, []);
+  const [today] = useState(() => format(new Date(), "yyyy-MM-dd"));
 
   const sessions = useQuery(
     api.sessions.listByMonth,

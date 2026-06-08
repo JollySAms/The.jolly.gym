@@ -4,26 +4,15 @@ import { requireAuth, requireTrainer } from "./lib";
 import { Id } from "./_generated/dataModel";
 
 // All logged-in users can see groups (needed to show group names + colors in agenda)
+// Returns only safe fields — member user documents are NOT included to avoid
+// exposing client email addresses to other clients.
 export const list = query({
   args: {},
   handler: async (ctx) => {
     await requireAuth(ctx);
     const all = await ctx.db.query("groups").take(50);
     const active = all.filter((g) => !g.cancelled);
-
-    return await Promise.all(
-      active.map(async (g) => {
-        const memberIds = g.memberIds ?? [];
-        const members = await Promise.all(
-          memberIds.map((id) => ctx.db.get(id))
-        );
-        return {
-          ...g,
-          memberIds,
-          members: members.filter(Boolean) as Awaited<ReturnType<typeof ctx.db.get>>[],
-        };
-      })
-    );
+    return active.map((g) => ({ ...g, memberIds: g.memberIds ?? [] }));
   },
 });
 
@@ -99,11 +88,11 @@ export const removeMember = mutation({
   },
 });
 
-// All logged-in users — list all clients (role === "client"), used for member picker
+// Trainer only — list all clients (role === "client"), used for member picker
 export const listClients = query({
   args: {},
   handler: async (ctx) => {
-    await requireAuth(ctx);
+    await requireTrainer(ctx);
     const all = await ctx.db.query("users").take(100);
     return all.filter((u) => u.role === "client");
   },
