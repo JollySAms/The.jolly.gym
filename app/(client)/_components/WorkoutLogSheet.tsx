@@ -243,10 +243,10 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
 
                     {/* Column labels */}
                     <div className="grid grid-cols-[20px_2fr_1fr_1fr_24px] gap-2 px-1 mb-1">
-                      <span className="text-[10px] font-medium text-gray-400 text-center">#</span>
+                      <span className="text-[10px] font-medium text-gray-500 text-center">#</span>
                       <span className="text-[10px] font-medium text-gray-600">Vorige</span>
-                      <span className="text-[10px] font-medium text-gray-400 text-center">Herh</span>
-                      <span className="text-[10px] font-medium text-gray-400 text-center">Kg</span>
+                      <span className="text-[10px] font-medium text-gray-500 text-center">Herh</span>
+                      <span className="text-[10px] font-medium text-gray-500 text-center">Kg</span>
                       <span />
                     </div>
 
@@ -259,7 +259,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                           key={set.id}
                           className="grid grid-cols-[20px_2fr_1fr_1fr_24px] gap-2 items-center"
                         >
-                          <span className="text-xs text-gray-400 text-center font-medium">
+                          <span className="text-xs text-gray-500 text-center font-medium">
                             {setIndex + 1}
                           </span>
                           <span className="text-xs text-gray-600 truncate">
@@ -297,7 +297,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                     {/* Add set */}
                     <button
                       onClick={() => addSet(exIndex)}
-                      className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-900 transition-colors mt-2 py-1"
+                      className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-900 transition-colors mt-2 py-1"
                     >
                       <Plus size={12} />
                       Set toevoegen
@@ -308,7 +308,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                 {/* Add substitute exercise */}
                 <button
                   onClick={() => setShowPicker(true)}
-                  className="flex items-center gap-2 w-full py-2 text-sm text-gray-400 hover:text-gray-900 transition-colors"
+                  className="flex items-center gap-2 w-full py-2 text-sm text-gray-500 hover:text-gray-900 transition-colors"
                 >
                   <div className="w-6 h-6 rounded-full border-2 border-dashed border-gray-200 flex items-center justify-center shrink-0">
                     <Plus size={12} />
