@@ -37,9 +37,16 @@ export function SessionsList() {
       : "skip"
   ) as EnrichedSession[] | undefined;
 
-  // Sort sessions by date asc — upcoming first, past sessions further down
-  const sorted = sessions
-    ? [...sessions].sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
+  const upcoming = sessions
+    ? [...sessions]
+        .filter((s) => s.date > today)
+        .sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time))
+    : undefined;
+
+  const past = sessions
+    ? [...sessions]
+        .filter((s) => s.date <= today)
+        .sort((a, b) => b.date.localeCompare(a.date) || b.time.localeCompare(a.time))
     : undefined;
 
   return (
@@ -74,69 +81,106 @@ export function SessionsList() {
       </div>
 
       {/* Sessions list */}
-      {sorted === undefined && (
+      {upcoming === undefined && (
         <p className="text-sm text-gray-400">Laden...</p>
       )}
 
-      {sorted && sorted.length === 0 && (
+      {upcoming && past && upcoming.length === 0 && past.length === 0 && (
         <p className="text-sm text-gray-400 italic">Geen sessies deze maand</p>
       )}
 
-      {sorted && sorted.length > 0 && (
-        <ul className="space-y-2">
-          {sorted.map((session) => {
-            const isPast = session.date <= today;
-            const isExpanded = expandedId === session._id;
-            const dateObj = new Date(session.date + "T00:00:00");
-            const dayLabel = format(dateObj, "EEE d MMM", { locale: nl });
+      {upcoming && past && (upcoming.length > 0 || past.length > 0) && (
+        <div className="space-y-2">
+          {/* Upcoming sessions — full color */}
+          {upcoming.map((session) => (
+            <SessionRow
+              key={session._id}
+              session={session}
+              isPast={false}
+              isExpanded={expandedId === session._id}
+              onToggle={() => setExpandedId(expandedId === session._id ? null : session._id)}
+            />
+          ))}
 
-            return (
-              <li key={session._id} className="border border-gray-100 rounded-xl overflow-hidden">
-                <button
-                  onClick={() => setExpandedId(isExpanded ? null : session._id)}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
-                >
-                  {/* Date */}
-                  <span className={`text-sm font-medium w-28 shrink-0 capitalize ${isPast ? "text-gray-700" : "text-gray-400"}`}>
-                    {dayLabel}
-                  </span>
+          {/* Divider */}
+          {past.length > 0 && (
+            <div className="flex items-center gap-3 py-2">
+              <div className="flex-1 border-t border-gray-200" />
+              <span className="text-xs font-medium text-gray-400 uppercase tracking-wider shrink-0">
+                Verleden
+              </span>
+              <div className="flex-1 border-t border-gray-200" />
+            </div>
+          )}
 
-                  {/* Time */}
-                  <span className={`text-sm w-12 shrink-0 ${isPast ? "text-gray-600" : "text-gray-400"}`}>
-                    {session.time}
-                  </span>
+          {/* Past sessions — faded, most recent first */}
+          {past.map((session) => (
+            <SessionRow
+              key={session._id}
+              session={session}
+              isPast={true}
+              isExpanded={expandedId === session._id}
+              onToggle={() => setExpandedId(expandedId === session._id ? null : session._id)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
-                  {/* Group badge */}
-                  {session.group && (
-                    <span
-                      className="text-xs font-medium px-2 py-0.5 rounded-full text-white shrink-0"
-                      style={{ backgroundColor: session.group.color }}
-                    >
-                      {session.group.name}
-                    </span>
-                  )}
+type SessionRowProps = {
+  session: EnrichedSession;
+  isPast: boolean;
+  isExpanded: boolean;
+  onToggle: () => void;
+};
 
-                  {/* Attendance count */}
-                  <span className={`ml-auto text-sm font-semibold ${isPast ? "text-gray-800" : "text-gray-400"}`}>
-                    {session.attendanceCount}/{session.capacity}
-                  </span>
+function SessionRow({ session, isPast, isExpanded, onToggle }: SessionRowProps) {
+  const dateObj = new Date(session.date + "T00:00:00");
+  const dayLabel = format(dateObj, "EEE d MMM", { locale: nl });
 
-                  {/* Expand icon */}
-                  <span className="ml-2 text-gray-400 shrink-0">
-                    {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                  </span>
-                </button>
+  return (
+    <div className={`border rounded-xl overflow-hidden ${isPast ? "border-gray-100" : "border-gray-200"}`}>
+      <button
+        onClick={onToggle}
+        className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors"
+      >
+        {/* Date */}
+        <span className={`text-sm font-medium w-28 shrink-0 capitalize ${isPast ? "text-gray-400" : "text-gray-900"}`}>
+          {dayLabel}
+        </span>
 
-                {/* Expanded attendee list */}
-                {isExpanded && (
-                  <div className="px-4 pb-4 border-t border-gray-50">
-                    <SessionAttendees sessionId={session._id} />
-                  </div>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+        {/* Time */}
+        <span className={`text-sm w-12 shrink-0 ${isPast ? "text-gray-400" : "text-gray-700"}`}>
+          {session.time}
+        </span>
+
+        {/* Group badge */}
+        {session.group && (
+          <span
+            className={`text-xs font-medium px-2 py-0.5 rounded-full shrink-0 ${isPast ? "text-white opacity-40" : "text-white"}`}
+            style={{ backgroundColor: session.group.color }}
+          >
+            {session.group.name}
+          </span>
+        )}
+
+        {/* Attendance count */}
+        <span className={`ml-auto text-sm font-semibold ${isPast ? "text-gray-400" : "text-gray-900"}`}>
+          {session.attendanceCount}/{session.capacity}
+        </span>
+
+        {/* Expand icon */}
+        <span className="ml-2 text-gray-400 shrink-0">
+          {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </span>
+      </button>
+
+      {isExpanded && (
+        <div className="px-4 pb-4 border-t border-gray-50">
+          <SessionAttendees sessionId={session._id} />
+        </div>
       )}
     </div>
   );
