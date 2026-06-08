@@ -113,13 +113,13 @@ The app is "done" for v1 when:
 - App is installable on mobile (PWA) and works on Android and iOS
 
 **Build order:**
-1. Workout builder
-2. Session calendar
-3. Client home screen and agenda
-4. Client RSVP
-5. Attendance dashboard
-6. Progression tracking
-7. Push notifications
+1. ✅ Workout builder
+2. ✅ Session calendar
+3. ✅ Client home screen and agenda
+4. ✅ Client RSVP
+5. ✅ Attendance dashboard
+6. ✅ Progression tracking
+7. ⬜ Push notifications
 
 ---
 
@@ -133,7 +133,7 @@ The app is "done" for v1 when:
 | Multi-trainer support | This is a private tool for one trainer |
 | In-app messaging / chat | WhatsApp continues to handle direct communication |
 | Waitlists or session capacity limits | Not a current pain point |
-| Progression charts (visual) | Nice to have post-launch |
+| Progression charts (visual) | Confirmed post-MVP — highest weight + calculated 1RM per day |
 | Group management UI | Jolmer manages groups via admin for now |
 | Custom branding | Design created from scratch, branding is post-MVP polish |
 
