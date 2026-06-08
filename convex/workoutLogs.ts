@@ -75,6 +75,28 @@ export const getForExercise = query({
   },
 });
 
+// Client — get the most recently saved sets for each given exercise.
+// Used to show last-used reps/weight as placeholders in the workout log sheet.
+export const getMyLastLogs = query({
+  args: { exerciseIds: v.array(v.id("exercises")) },
+  handler: async (ctx, args) => {
+    const identity = await requireAuth(ctx);
+    const entries = await Promise.all(
+      args.exerciseIds.map(async (exerciseId) => {
+        const last = await ctx.db
+          .query("workoutLogs")
+          .withIndex("by_user_and_exercise", (q) =>
+            q.eq("userId", identity.tokenIdentifier).eq("exerciseId", exerciseId)
+          )
+          .order("desc")
+          .first();
+        return [exerciseId, last?.sets ?? null] as const;
+      })
+    );
+    return Object.fromEntries(entries);
+  },
+});
+
 // Client — save (upsert) their log for one exercise in a session.
 // If a log already exists for this (session + user + exercise), it is replaced.
 export const saveLog = mutation({

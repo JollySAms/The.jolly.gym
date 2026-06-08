@@ -48,6 +48,12 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  const exerciseIds = exercises.map((e) => e.exerciseId);
+  const lastLogs = useQuery(
+    api.workoutLogs.getMyLastLogs,
+    initialized && exerciseIds.length > 0 ? { exerciseIds } : "skip"
+  );
+
   // Merge snapshot + existing log entries on first load
   useEffect(() => {
     if (existingLogs === undefined || initialized) return;
@@ -180,12 +186,10 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
     }
   }
 
-  const existingIds = exercises.map((e) => e.exerciseId);
-
   return (
     <>
       <div className="fixed inset-0 z-[55] flex items-end sm:items-center justify-center">
-        <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+        <div className="absolute inset-0 bg-black/40" onClick={saving ? undefined : onClose} />
 
         <div className="relative w-full max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden max-h-[90vh] flex flex-col">
           {/* Header */}
@@ -238,8 +242,9 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                     </div>
 
                     {/* Column labels */}
-                    <div className="grid grid-cols-[28px_1fr_1fr_28px] gap-2 px-1 mb-1">
+                    <div className="grid grid-cols-[20px_2fr_1fr_1fr_24px] gap-2 px-1 mb-1">
                       <span className="text-[10px] font-medium text-gray-400 text-center">#</span>
+                      <span className="text-[10px] font-medium text-gray-400">Vorige</span>
                       <span className="text-[10px] font-medium text-gray-400 text-center">Herh</span>
                       <span className="text-[10px] font-medium text-gray-400 text-center">Kg</span>
                       <span />
@@ -247,17 +252,23 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
 
                     {/* Set rows */}
                     <div className="space-y-1.5">
-                      {ex.sets.map((set, setIndex) => (
+                      {ex.sets.map((set, setIndex) => {
+                        const lastSet = lastLogs?.[ex.exerciseId]?.[setIndex];
+                        return (
                         <div
                           key={set.id}
-                          className="grid grid-cols-[28px_1fr_1fr_28px] gap-2 items-center"
+                          className="grid grid-cols-[20px_2fr_1fr_1fr_24px] gap-2 items-center"
                         >
                           <span className="text-xs text-gray-400 text-center font-medium">
                             {setIndex + 1}
                           </span>
+                          <span className="text-xs text-gray-400 truncate">
+                            {lastSet ? `${lastSet.reps}× ${lastSet.weight} kg` : "–"}
+                          </span>
                           <input
                             type="number"
                             min="0"
+                            step="1"
                             placeholder="–"
                             value={set.reps}
                             onChange={(e) => updateSet(exIndex, setIndex, "reps", e.target.value)}
@@ -279,7 +290,8 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                             <X size={13} />
                           </button>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
 
                     {/* Add set */}
@@ -324,7 +336,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
         <ExercisePickerSheet
           onSelect={addSubstitute}
           onClose={() => setShowPicker(false)}
-          excludeIds={existingIds}
+          excludeIds={exerciseIds}
         />
       )}
     </>
