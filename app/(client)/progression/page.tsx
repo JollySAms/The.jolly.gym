@@ -7,7 +7,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse } from "date-fns";
 import { nl } from "date-fns/locale";
-import { TrendingUp, ChevronDown } from "lucide-react";
+import { TrendingUp } from "lucide-react";
+import { SearchCombobox } from "@/components/SearchCombobox";
 
 export default function ProgressionPage() {
   const { isSignedIn } = useAuth();
@@ -30,30 +31,16 @@ export default function ProgressionPage() {
       </div>
 
       {/* Exercise picker */}
-      <div className="relative mb-6">
+      <div className="mb-6">
         {exercises === undefined ? (
           <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />
         ) : (
-          <div className="relative">
-            <select
-              value={selectedId ?? ""}
-              onChange={(e) =>
-                setSelectedId(e.target.value ? (e.target.value as Id<"exercises">) : null)
-              }
-              className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent pr-9"
-            >
-              <option value="">Kies een oefening...</option>
-              {exercises.map((ex) => (
-                <option key={ex._id} value={ex._id}>
-                  {ex.name}
-                </option>
-              ))}
-            </select>
-            <ChevronDown
-              size={15}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-            />
-          </div>
+          <SearchCombobox
+            items={exercises.map((ex) => ({ label: ex.name, value: ex._id }))}
+            value={selectedId}
+            onChange={(v) => setSelectedId(v as Id<"exercises"> | null)}
+            placeholder="Zoek oefening..."
+          />
         )}
       </div>
 

@@ -7,7 +7,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse } from "date-fns";
 import { nl } from "date-fns/locale";
-import { TrendingUp, ChevronDown } from "lucide-react";
+import { TrendingUp } from "lucide-react";
+import { SearchCombobox } from "@/components/SearchCombobox";
 
 export default function TrainerProgressionPage() {
   const { isSignedIn } = useAuth();
@@ -40,66 +41,37 @@ export default function TrainerProgressionPage() {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-2 gap-3 mb-6">
+      <div className="flex flex-col gap-3 mb-6">
         {/* Client picker */}
-        <div className="relative">
-          {loading ? (
-            <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />
-          ) : (
-            <>
-              <select
-                value={selectedClientToken ?? ""}
-                onChange={(e) => {
-                  setSelectedClientToken(e.target.value || null);
-                  setSelectedExerciseId(null);
-                }}
-                className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent pr-9"
-              >
-                <option value="">Kies klant...</option>
-                {(clients ?? []).map((c) => (
-                  <option key={c._id} value={c.tokenIdentifier}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={15}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-              />
-            </>
-          )}
-        </div>
+        {loading ? (
+          <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />
+        ) : (
+          <SearchCombobox
+            items={(clients ?? []).map((c) => ({
+              label: c.name,
+              value: c.tokenIdentifier,
+            }))}
+            value={selectedClientToken}
+            onChange={(v) => {
+              setSelectedClientToken(v);
+              setSelectedExerciseId(null);
+            }}
+            placeholder="Zoek klant..."
+          />
+        )}
 
         {/* Exercise picker */}
-        <div className="relative">
-          {loading ? (
-            <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />
-          ) : (
-            <>
-              <select
-                value={selectedExerciseId ?? ""}
-                onChange={(e) =>
-                  setSelectedExerciseId(
-                    e.target.value ? (e.target.value as Id<"exercises">) : null
-                  )
-                }
-                disabled={!selectedClientToken}
-                className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent pr-9 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <option value="">Kies oefening...</option>
-                {(exercises ?? []).map((ex) => (
-                  <option key={ex._id} value={ex._id}>
-                    {ex.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown
-                size={15}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
-              />
-            </>
-          )}
-        </div>
+        {loading ? (
+          <div className="h-11 bg-gray-100 rounded-xl animate-pulse" />
+        ) : (
+          <SearchCombobox
+            items={(exercises ?? []).map((ex) => ({ label: ex.name, value: ex._id }))}
+            value={selectedExerciseId}
+            onChange={(v) => setSelectedExerciseId(v as Id<"exercises"> | null)}
+            placeholder="Zoek oefening..."
+            disabled={!selectedClientToken}
+          />
+        )}
       </div>
 
       {/* History */}
