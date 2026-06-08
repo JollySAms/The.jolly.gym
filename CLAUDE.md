@@ -130,6 +130,11 @@ Chart of progression over time per exercise, available on both `/progression` (c
 - **Push:** OneSignal (not raw Web Push API, not Firebase)
 - **Env vars:** `.env.local` only — never hardcode keys
 
+## Known Cleanup (do during design polish phase)
+
+- **Desktop layout polish** — trainer views must work well on desktop (not just stretched mobile). Review all `(trainer)/` pages for proper desktop layout.
+- **EnrichedSession type deduplication** — the type is defined separately in 5 files (`agenda/page.tsx`, `agenda/_components/DaySessionList.tsx`, `agenda/_components/SessionDetailSheet.tsx`, `attendance/_components/SessionsList.tsx`, `components/DaySessionList.tsx`). Extract to a shared types file (e.g. `types/session.ts`) and import from there.
+
 ## What NOT to Build
 
 Reschedule requests · Stripe/payments · Nutrition tracking · Multi-trainer support · Reminder notifications (prompts only) · Anything outside the MVP list without explicit approval
