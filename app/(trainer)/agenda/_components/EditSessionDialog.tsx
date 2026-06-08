@@ -67,7 +67,7 @@ export function EditSessionDialog({ session, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
-      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+      <div className="absolute inset-0 bg-black/40" onClick={saving || cancelling ? undefined : onClose} />
       <div className="relative w-full max-w-md bg-white rounded-t-2xl sm:rounded-2xl shadow-xl overflow-hidden">
         <div className="flex items-center justify-between px-4 pt-4 pb-2 border-b border-gray-100">
           <h2 className="text-sm font-semibold text-gray-800">Sessie bewerken</h2>

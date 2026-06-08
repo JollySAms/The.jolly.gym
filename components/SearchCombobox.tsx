@@ -23,6 +23,9 @@ export function SearchCombobox({
   const [inputText, setInputText] = useState("");
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  // Tracks whether we've cleared the selection in the current typing session.
+  // Ensures we clear exactly once on the first keystroke, not on every character.
+  const hasCleared = useRef(false);
 
   const selectedLabel = items.find((i) => i.value === value)?.label ?? null;
 
@@ -71,12 +74,16 @@ export function SearchCombobox({
           onChange={(e) => {
             setInputText(e.target.value);
             setOpen(true);
+            // Clear selection on the first keystroke only, not on every character
+            if (value && !hasCleared.current) {
+              onChange(null);
+              hasCleared.current = true;
+            }
           }}
           onFocus={() => {
             setInputText("");
             setOpen(true);
-            // Clear selection once when opening so results reflect fresh search
-            if (value) onChange(null);
+            hasCleared.current = false; // reset for new typing session
           }}
           placeholder={placeholder}
           disabled={disabled}

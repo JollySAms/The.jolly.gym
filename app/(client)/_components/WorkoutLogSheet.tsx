@@ -199,7 +199,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                 {workoutName ?? "Workout loggen"}
               </p>
             </div>
-            <button onClick={onClose} className="p-1.5 rounded-full hover:bg-gray-100">
+            <button onClick={saving ? undefined : onClose} className="p-1.5 rounded-full hover:bg-gray-100">
               <X size={18} className="text-gray-500" />
             </button>
           </div>
