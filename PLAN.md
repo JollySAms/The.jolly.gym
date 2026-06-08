@@ -63,7 +63,18 @@ Jolmer spends significant time every week bouncing between three tools that don'
 
 11. **Trainerize Data Import** — One-time CSV import tool to migrate client profiles, groups, and workout history from Trainerize into Convex. Useful at launch to avoid manual re-entry for 34 clients.
 
-12. **Progression Charts** — Visual history of weight/reps progression per exercise per client.
+12. **Progression Charts** — Visual history per exercise per client. Two separate views the user toggles between: (1) heaviest weight lifted per session, and (2) calculated 1RM per session using Epley formula (`weight × (1 + reps ÷ 30)`). Available on both client progression page and trainer client-progress page.
+
+13. **Achievements** — Clients earn achievements based on workout performance and attendance. Four achievement types:
+
+    | Type | Trigger |
+    |---|---|
+    | Rep range PR | New best weight for a specific rep count (e.g. 5RM, 8RM) |
+    | Calculated 1RM PR | Every time estimated 1RM increases for an exercise |
+    | Group streak | Attending every scheduled session for own group |
+    | General streak | Attending at least one session every week |
+
+    Jolmer can view achievements per client. PR detection runs inside the `saveLog` mutation; streak detection runs after attendance confirmation.
 
 13. **Group Management** — Jolmer can add or remove clients from groups directly in the app.
 
@@ -133,7 +144,7 @@ The app is "done" for v1 when:
 | Multi-trainer support | This is a private tool for one trainer |
 | In-app messaging / chat | WhatsApp continues to handle direct communication |
 | Waitlists or session capacity limits | Not a current pain point |
-| Progression charts (visual) | Confirmed post-MVP — highest weight + calculated 1RM per day |
+| Progression charts (visual) | Post-MVP — toggle between highest weight and calculated 1RM views per session |
 | Group management UI | Jolmer manages groups via admin for now |
 | Custom branding | Design created from scratch, branding is post-MVP polish |
 

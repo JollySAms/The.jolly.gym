@@ -38,7 +38,7 @@ Changes (attendance, logged weights) must sync to Jolmer in real-time, and vice 
 - Avoid the generic AI aesthetic (gradients, glassmorphism, floating blobs)
 - Ask before introducing new colors or fonts; document decisions below when made
 
-**Design system:** Font: TBD · Primary colour: TBD · Border radius: TBD
+**Design system:** Font: Helvetica · Primary colour: TBD · Border radius: TBD
 
 ## Key Principles
 
@@ -66,12 +66,12 @@ Ask before adding, renaming, or restructuring any of these.
 
 ## Push Notification Rules
 
-Notifications are an **attendance prompt** ("will you attend?"), not a reminder. Send only to clients in the session's group who have no attendance record yet. Clients who answered yes or no — including voluntary cross-group RSVPs — do not receive a notification. Timing: 24h before, and again 1h before if still unanswered. Triggered via Convex `crons` + OneSignal.
+Notifications are an **attendance prompt**, not a reminder. Message: *"Klopt het dat je komt?"* Send only to clients in the session's group who have no attendance record yet. Clients who answered yes or no — including voluntary cross-group RSVPs — do not receive a notification. Timing: 24h before, and again 1h before if still unanswered. Triggered via Convex `crons` + OneSignal.
 
 ## Client Home Screen
 
 - **Home:** next upcoming session the client is attending (own group or cross-group RSVP) + assigned workout
-- **Agenda:** all gym sessions across all groups — RSVP available from here
+- **Agenda:** all gym sessions across all groups — RSVP available from here. Attendance states: Confirmed / Confirmed not / No response. Clients who RSVP'd outside their group appear in the confirmed/declined lists but **not** in the "no response" list (they are guests, not expected attendees).
 - Fallback: if no RSVP'd session exists, show the next session for their own group
 
 ## App Router Structure
@@ -98,22 +98,30 @@ Notifications are an **attendance prompt** ("will you attend?"), not a reminder.
 These are confirmed wants from Jolmer — do NOT build until the MVP list above is complete.
 
 ### Achievements
-Clients can see personal bests (1RM, 5RM) per exercise, and a summary of how many PBs they hit in a session. Jolmer can also see this per client.
+Clients earn achievements based on workout and attendance performance. Jolmer can also see achievements per client.
+
+| Type | Trigger |
+|---|---|
+| Rep range PR | New best weight for a specific rep count (e.g. 5RM, 8RM) |
+| Calculated 1RM PR | Every time estimated 1RM increases for an exercise |
+| Group streak | Attending every scheduled session for own group |
+| General streak | Attending at least one session every week |
 
 **Design notes for when this gets built:**
-- PB detection should happen inside the `saveLog` mutation — compare the new weight against the client's history for that exercise and flag it automatically
-- Will likely need either a `isPB: boolean` field on individual sets, or a separate `personalBests` table (ask before deciding)
+- PR detection should happen inside the `saveLog` mutation — compare the new weight against the client's history for that exercise and rep count, and flag automatically
+- Streak detection should run after attendance is confirmed — compare attendance history against the session schedule
+- Will likely need either a `isPR: boolean` field on individual sets, or a separate `personalBests` table (ask before deciding)
 - The `getMyProgressionForExercise` query already exists and can power the history comparison
 
 ### Progression Graph
-Chart of progression over time per exercise, available on both `/progression` (client) and `/client-progress` (trainer). Two display modes:
+Chart of progression over time per exercise, available on both `/progression` (client) and `/client-progress` (trainer). Two separate views the user can switch between:
 - **Highest weight** — heaviest weight lifted in a session for that exercise
-- **Calculated 1RM** — estimated one-rep max per session (formula: weight × (1 + reps/30))
+- **Calculated 1RM** — estimated one-rep max per session using Epley formula: `weight × (1 + reps ÷ 30)`, plotted as the session maximum
 
 **Design notes for when this gets built:**
 - All data already exists in `workoutLogs` — no schema changes needed
 - Will need a charting library (ask before installing)
-- Toggle between the two modes within the same chart view
+- Toggle between the two views within the same chart component
 
 ## Preferred Libraries
 
