@@ -1,6 +1,18 @@
-import { clerkMiddleware } from '@clerk/nextjs/server'
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
-export default clerkMiddleware()
+const isTrainerRoute = createRouteMatcher([
+  '/agenda(.*)',
+  '/groups(.*)',
+  '/workouts(.*)',
+  '/attendance(.*)',
+  '/client-progress(.*)',
+])
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isTrainerRoute(req)) {
+    await auth.protect()
+  }
+})
 
 export const config = {
   matcher: [

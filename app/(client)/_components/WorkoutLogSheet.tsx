@@ -137,12 +137,11 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
   }
 
   function addSubstitute(exerciseId: Id<"exercises">, exerciseName: string) {
-    // If this exercise was previously removed, cancel that deletion
     setRemovedSubstituteIds((prev) => prev.filter((id) => id !== exerciseId));
-    setExercises((prev) => [
-      ...prev,
-      { exerciseId, exerciseName, isSubstitute: true, sets: [{ id: newSetId(), reps: "", weight: "" }] },
-    ]);
+    setExercises((prev) => {
+      if (prev.some((e) => e.exerciseId === exerciseId)) return prev;
+      return [...prev, { exerciseId, exerciseName, isSubstitute: true, sets: [{ id: newSetId(), reps: "", weight: "" }] }];
+    });
   }
 
   async function handleSave() {

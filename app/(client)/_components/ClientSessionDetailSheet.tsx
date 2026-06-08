@@ -43,7 +43,13 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   const [showLog, setShowLog] = useState(false);
 
   const color = session.group?.color ?? "#3B82F6";
-  const isFull = session.attendanceCount >= session.capacity && session.myStatus !== "coming";
+
+  // Derive attendance count and isFull from the live attendees query so the
+  // button state updates if the session fills up while this sheet is open.
+  const liveAttendanceCount = attendees != null
+    ? attendees.members.filter((m) => m?.status === "coming").length + attendees.crossGroupComers.length
+    : session.attendanceCount;
+  const isFull = liveAttendanceCount >= session.capacity && session.myStatus !== "coming";
 
   const startTime = session.time;
   const endTime = format(
@@ -92,7 +98,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
             </p>
             <p className="text-base font-bold text-gray-900 capitalize">{dateLabel}</p>
             <p className="text-sm text-gray-500">
-              {startTime} – {endTime} &nbsp;·&nbsp; {session.attendanceCount}/{session.capacity}
+              {startTime} – {endTime} &nbsp;·&nbsp; {liveAttendanceCount}/{session.capacity}
             </p>
           </div>
           <button onClick={onClose} className="p-1.5 rounded-full hover:bg-gray-100 shrink-0">

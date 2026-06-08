@@ -1,7 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { useQuery } from "convex/react";
+import { api } from "@/convex/_generated/api";
 import { CalendarDays, Users, Dumbbell, ClipboardList, TrendingUp } from "lucide-react";
 
 const navItems = [
@@ -14,6 +18,17 @@ const navItems = [
 
 export default function TrainerLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { isLoaded, isSignedIn } = useAuth();
+  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
+
+  useEffect(() => {
+    if (isLoaded && !isSignedIn) router.replace("/sign-in");
+    if (me !== undefined && me !== null && me.role !== "trainer") router.replace("/");
+  }, [isLoaded, isSignedIn, me, router]);
+
+  // Don't render trainer UI until role is confirmed
+  if (!isLoaded || !isSignedIn || me === undefined || me === null || me.role !== "trainer") return null;
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-white">
