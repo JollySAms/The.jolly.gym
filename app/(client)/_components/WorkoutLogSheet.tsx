@@ -151,7 +151,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
         .map((ex) => ({
           ex,
           validSets: ex.sets
-            .filter((s) => s.reps !== "" || s.weight !== "")
+            .filter((s) => Number(s.reps) > 0 || Number(s.weight) > 0)
             .map((s) => ({ reps: Number(s.reps) || 0, weight: Number(s.weight) || 0 })),
         }))
         .filter(({ validSets }) => validSets.length > 0);

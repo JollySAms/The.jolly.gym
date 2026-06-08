@@ -71,12 +71,12 @@ export function SearchCombobox({
           onChange={(e) => {
             setInputText(e.target.value);
             setOpen(true);
-            // Clear current selection so results reflect fresh search
-            if (value) onChange(null);
           }}
           onFocus={() => {
             setInputText("");
             setOpen(true);
+            // Clear selection once when opening so results reflect fresh search
+            if (value) onChange(null);
           }}
           placeholder={placeholder}
           disabled={disabled}

@@ -203,7 +203,7 @@ export const listUpcoming = query({
       .withIndex("by_cancelled_and_date", (q) =>
         q.eq("cancelled", false).gte("date", today)
       )
-      .take(100);
+      .take(500);
 
     return await Promise.all(
       sessions.map((s) => enrichSessionForClient(ctx, s, identity.tokenIdentifier))
@@ -251,7 +251,7 @@ export const getMyNextSession = query({
     if (!me) return null;
 
     // Scan groups to find the one this user belongs to
-    const allGroups = await ctx.db.query("groups").take(20);
+    const allGroups = await ctx.db.query("groups").take(100);
     const myGroup = allGroups.find((g) => g.memberIds?.includes(me._id));
     if (!myGroup) return null;
 
@@ -276,7 +276,7 @@ async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
     .withIndex("by_session_and_status", (q) =>
       q.eq("sessionId", session._id).eq("status", "coming")
     )
-    .take(15);
+    .take(20);
 
   return {
     ...session,
@@ -298,7 +298,7 @@ async function enrichSessionForClient(
     .withIndex("by_session_and_status", (q) =>
       q.eq("sessionId", session._id).eq("status", "coming")
     )
-    .take(15);
+    .take(20);
 
   const myAttendance = await ctx.db
     .query("attendance")

@@ -128,18 +128,25 @@ export function EditSessionDialog({ session, onClose }: Props) {
             ) : workouts.length === 0 ? (
               <p className="text-xs text-gray-500">Nog geen workouts aangemaakt.</p>
             ) : (
-              <select
-                value={workoutId}
-                onChange={(e) => setWorkoutId(e.target.value as Id<"workouts"> | "")}
-                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Geen workout</option>
-                {workouts.map((w) => (
-                  <option key={w._id} value={w._id}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
+              <>
+                {workoutId && !workouts.some((w) => w._id === workoutId) && (
+                  <p className="text-xs text-amber-600 mb-1">
+                    De huidige workout is gearchiveerd. Kies een nieuwe workout of laat leeg.
+                  </p>
+                )}
+                <select
+                  value={workouts.some((w) => w._id === workoutId) ? workoutId : ""}
+                  onChange={(e) => setWorkoutId(e.target.value as Id<"workouts"> | "")}
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="">Geen workout</option>
+                  {workouts.map((w) => (
+                    <option key={w._id} value={w._id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              </>
             )}
           </div>
 
