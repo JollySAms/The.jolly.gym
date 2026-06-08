@@ -19,7 +19,7 @@ type Group = {
 
 export default function GroupsPage() {
   const { isLoaded, isSignedIn } = useAuth();
-  const { user } = useUser();
+  useUser();
   const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
   const groups = useQuery(api.groups.list, isSignedIn ? {} : "skip");
   const removeGroup = useMutation(api.groups.remove);

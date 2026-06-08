@@ -203,7 +203,7 @@ export function WorkoutDialog({ workout, onClose }: Props) {
                   {exercises === undefined ? (
                     <p className="text-sm text-gray-500">Laden...</p>
                   ) : filteredExercises.length === 0 && search ? (
-                    <p className="text-sm text-gray-500">Geen resultaten voor "{search}"</p>
+                    <p className="text-sm text-gray-500">Geen resultaten voor &ldquo;{search}&rdquo;</p>
                   ) : (
                     <ul className="max-h-40 overflow-y-auto space-y-1">
                       {filteredExercises.map((ex) => {

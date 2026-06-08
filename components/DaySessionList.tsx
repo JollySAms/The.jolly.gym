@@ -38,8 +38,6 @@ export function DaySessionList({ date, sessions, onSelectSession }: Props) {
             .sort((a, b) => a.time.localeCompare(b.time))
             .map((session) => {
               const color = session.group?.color ?? "#3B82F6";
-              const spotsLeft = session.capacity - session.attendanceCount;
-
               return (
                 <button
                   key={session._id}

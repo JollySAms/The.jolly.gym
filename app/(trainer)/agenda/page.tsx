@@ -28,7 +28,7 @@ type EnrichedSession = {
 
 export default function AgendaPage() {
   const { isLoaded, isSignedIn } = useAuth();
-  const { user } = useUser();
+  useUser();
   const ensureUser = useMutation(api.users.ensureUser);
   const me = useQuery(api.users.getMe);
 
@@ -72,8 +72,6 @@ export default function AgendaPage() {
   // Show nothing while Clerk loads, redirect to sign-in if not authenticated
   if (!isLoaded) return null;
   if (!isSignedIn) return <RedirectToSignIn />;
-
-  const monthLabel = format(currentMonth, "MMMM yyyy", { locale: nl });
 
   return (
     <main className="min-h-screen bg-white max-w-lg mx-auto px-4 py-6">
