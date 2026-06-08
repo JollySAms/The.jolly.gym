@@ -244,7 +244,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                     {/* Column labels */}
                     <div className="grid grid-cols-[20px_2fr_1fr_1fr_24px] gap-2 px-1 mb-1">
                       <span className="text-[10px] font-medium text-gray-400 text-center">#</span>
-                      <span className="text-[10px] font-medium text-gray-400">Vorige</span>
+                      <span className="text-[10px] font-medium text-gray-600">Vorige</span>
                       <span className="text-[10px] font-medium text-gray-400 text-center">Herh</span>
                       <span className="text-[10px] font-medium text-gray-400 text-center">Kg</span>
                       <span />
@@ -262,7 +262,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                           <span className="text-xs text-gray-400 text-center font-medium">
                             {setIndex + 1}
                           </span>
-                          <span className="text-xs text-gray-400 truncate">
+                          <span className="text-xs text-gray-600 truncate">
                             {lastSet ? `${lastSet.reps}× ${lastSet.weight} kg` : "–"}
                           </span>
                           <input
