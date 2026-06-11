@@ -75,6 +75,7 @@ export default defineSchema({
     exerciseName: v.string(),    // cached for display even if exercise is archived
     sets: v.array(v.object({ reps: v.number(), weight: v.number() })), // weight in kg
     isSubstitute: v.boolean(),   // true if client added this to replace a prescribed exercise
+    deleted: v.optional(v.boolean()), // soft-delete flag
   })
     .index("by_session_and_user", ["sessionId", "userId"])
     .index("by_user_and_exercise", ["userId", "exerciseId"])

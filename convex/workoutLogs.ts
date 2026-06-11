@@ -14,6 +14,7 @@ export const getMyLog = query({
       .withIndex("by_session_and_user", (q) =>
         q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
       )
+      .filter((q) => q.neq(q.field("deleted"), true))
       .take(50);
   },
 });
@@ -28,6 +29,7 @@ export const getMyProgressionForExercise = query({
       .withIndex("by_user_and_exercise", (q) =>
         q.eq("userId", identity.tokenIdentifier).eq("exerciseId", args.exerciseId)
       )
+      .filter((q) => q.neq(q.field("deleted"), true))
       .take(50);
 
     const enriched = await Promise.all(
@@ -58,6 +60,7 @@ export const getForExercise = query({
       .withIndex("by_user_and_exercise", (q) =>
         q.eq("userId", args.clientTokenIdentifier).eq("exerciseId", args.exerciseId)
       )
+      .filter((q) => q.neq(q.field("deleted"), true))
       .take(50);
 
     const enriched = await Promise.all(
@@ -88,6 +91,7 @@ export const getMyLastLogs = query({
           .withIndex("by_user_and_exercise", (q) =>
             q.eq("userId", identity.tokenIdentifier).eq("exerciseId", exerciseId)
           )
+          .filter((q) => q.neq(q.field("deleted"), true))
           .order("desc")
           .first();
         return [exerciseId, last?.sets ?? null] as const;
@@ -117,7 +121,12 @@ export const saveLog = mutation({
       .withIndex("by_session_and_user", (q) =>
         q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
-      .filter((q) => q.eq(q.field("exerciseId"), args.exerciseId))
+      .filter((q) =>
+        q.and(
+          q.eq(q.field("exerciseId"), args.exerciseId),
+          q.neq(q.field("deleted"), true)
+        )
+      )
       .first();
 
     if (existing) {
@@ -157,7 +166,7 @@ export const deleteLog = mutation({
       .first();
 
     if (existing) {
-      await ctx.db.delete(existing._id);
+      await ctx.db.patch(existing._id, { deleted: true });
     }
   },
 });
