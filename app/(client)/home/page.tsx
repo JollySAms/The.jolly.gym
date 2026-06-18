@@ -114,13 +114,15 @@ export default function ClientHomePage() {
               {nextSession.time} · {nextSession.group?.name ?? "Onbekende groep"}
             </p>
 
-            {nextSession.workoutName && (
+            {nextSession.workoutName ? (
               <div className="flex items-center gap-2 mt-4 bg-gray-50 rounded-xl px-3 py-2.5">
                 <Dumbbell size={15} className="text-gray-400 shrink-0" />
                 <span className="text-sm font-medium text-gray-700">
                   {nextSession.workoutName}
                 </span>
               </div>
+            ) : (
+              <p className="text-xs text-gray-400 mt-4">Nog geen workout toegevoegd</p>
             )}
 
             <div className="flex items-center gap-2 mt-2">

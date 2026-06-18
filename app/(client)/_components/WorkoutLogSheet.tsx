@@ -47,6 +47,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
   const [savedPrescribedIds, setSavedPrescribedIds] = useState<Set<Id<"exercises">>>(new Set());
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   const exerciseIds = exercises.map((e) => e.exerciseId);
   const lastLogs = useQuery(
@@ -176,8 +177,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
         ...stalePrescribedIds.map((exerciseId) => deleteLog({ sessionId, exerciseId })),
       ]);
 
-      toast.success("Workout opgeslagen!");
-      onClose();
+      setSaved(true);
     } catch {
       toast.error("Opslaan mislukt. Probeer opnieuw.");
     } finally {
@@ -206,7 +206,27 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
 
           {/* Body */}
           <div className="overflow-y-auto flex-1 px-4 py-4 space-y-6">
-            {!initialized ? (
+            {saved ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <p className="text-4xl">👍</p>
+                <p className="text-lg font-bold text-gray-900">Goed gedaan!</p>
+                <p className="text-sm text-gray-500">Workout opgeslagen</p>
+                <div className="flex flex-col gap-2 w-full mt-4">
+                  <button
+                    onClick={onClose}
+                    className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition-colors"
+                  >
+                    Klaar
+                  </button>
+                  <button
+                    onClick={() => setSaved(false)}
+                    className="w-full py-3 rounded-xl text-sm font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
+                  >
+                    Verder loggen
+                  </button>
+                </div>
+              </div>
+            ) : !initialized ? (
               <div className="space-y-5">
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="space-y-2">
@@ -319,15 +339,17 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
           </div>
 
           {/* Footer */}
-          <div className="px-4 py-4 border-t border-gray-100 shrink-0">
-            <button
-              onClick={handleSave}
-              disabled={saving || !initialized}
-              className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? "Opslaan..." : "Opslaan"}
-            </button>
-          </div>
+          {!saved && (
+            <div className="px-4 py-4 border-t border-gray-100 shrink-0">
+              <button
+                onClick={handleSave}
+                disabled={saving || !initialized}
+                className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? "Opslaan..." : "Opslaan"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

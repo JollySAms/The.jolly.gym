@@ -28,7 +28,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   if (!isLoaded || !isSignedIn || me === undefined) return null;
 
   return (
-    <div className="min-h-screen bg-white pb-20">
+    <div className="min-h-screen bg-white pb-24">
       {/* Page content */}
       {children}
 
@@ -40,11 +40,11 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+              className={`flex-1 flex flex-col items-center gap-1.5 py-4 text-xs font-medium transition-colors ${
                 active ? "text-gray-900" : "text-gray-400"
               }`}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
+              <Icon size={22} strokeWidth={active ? 2.5 : 1.5} />
               {label}
             </Link>
           );
