@@ -159,7 +159,7 @@ export default function ClientHomePage() {
               {nextSession.time} · {nextSession.group?.name ?? "Onbekende groep"}
             </p>
             {/* DEBUG — remove after testing */}
-            <p className="text-[10px] text-red-400">isGroupMember: {String((nextSession as any).isGroupMember)}</p>
+            <p className="text-[10px] text-red-400">isGroupMember: {String(nextSession.isGroupMember)}</p>
 
             {nextSession.workoutName ? (
               <div className="flex items-center gap-2 mt-4 bg-gray-50 rounded-xl px-3 py-2.5">
