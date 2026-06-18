@@ -66,7 +66,7 @@ Ask before adding, renaming, or restructuring any of these.
 
 ## Push Notification Rules
 
-Notifications are an **attendance prompt**, not a reminder. Message: *"Klopt het dat je komt?"* Send only to clients in the session's group who have no attendance record yet. Clients who answered yes or no — including voluntary cross-group RSVPs — do not receive a notification. Timing: 24h before, and again 1h before if still unanswered. Triggered via Convex `crons` + OneSignal.
+Notifications are an **attendance prompt**, not a reminder. Message: *"Klopt het dat je komt?"* Send only to clients in the session's group who have no attendance record yet. Clients who answered yes or no — including voluntary cross-group RSVPs — do not receive a notification. Timing: 24h before only. Do NOT send a second notification 1h before. Triggered via Convex `crons` + OneSignal.
 
 ## Client Home Screen
 

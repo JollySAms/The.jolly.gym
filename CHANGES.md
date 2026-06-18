@@ -21,7 +21,7 @@
 - [x] **#7 — Geen workout note** — Als er nog geen workout aan een sessie is toegevoegd, toon een note: "Nog geen workout toegevoegd".
 - [x] **#14 — Bottom bar groter** — Onderste navigatiebar (Progressie + Agenda knoppen) iets groter en iets hoger. CSS tweak in client layout.
 - [x] **#15 — Opslaan bevestiging** — Toon "Goed gedaan! 👍" bevestiging na het opslaan van een workout log.
-- [ ] **#9 — Push notificatie timing** — Alleen 1 dag van tevoren sturen, NIET ook 1 uur van tevoren. Aanpassen in Convex cron.
+- [x] **#9 — Push notificatie timing** — Alleen 1 dag van tevoren sturen, NIET ook 1 uur van tevoren. Beslissing vastgelegd in CLAUDE.md — geen cron gebouwd dus geen code change nodig.
 
 ---
 
