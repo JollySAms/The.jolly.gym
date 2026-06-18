@@ -15,7 +15,9 @@ export default defineSchema({
     name: v.string(),
     email: v.string(),
     role: v.union(v.literal("trainer"), v.literal("client")),
-  }).index("by_token", ["tokenIdentifier"]),
+  })
+    .index("by_token", ["tokenIdentifier"])
+    .index("by_role", ["role"]),
 
   // Training groups (e.g. "Fitte mannen") — each has a color and member list
   groups: defineTable({

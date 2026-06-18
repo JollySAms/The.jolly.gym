@@ -276,7 +276,7 @@ async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
     .withIndex("by_session_and_status", (q) =>
       q.eq("sessionId", session._id).eq("status", "coming")
     )
-    .take(20);
+    .take(session.capacity + 10); // capacity (14) + headroom for cross-group guests
 
   return {
     ...session,
@@ -298,7 +298,7 @@ async function enrichSessionForClient(
     .withIndex("by_session_and_status", (q) =>
       q.eq("sessionId", session._id).eq("status", "coming")
     )
-    .take(20);
+    .take(session.capacity + 10); // capacity (14) + headroom for cross-group guests
 
   const myAttendance = await ctx.db
     .query("attendance")

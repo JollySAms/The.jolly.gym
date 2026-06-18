@@ -14,13 +14,13 @@ type EnrichedSession = {
   attendanceCount: number;
 };
 
-type Props = {
+type Props<T extends EnrichedSession> = {
   date: Date;
-  sessions: EnrichedSession[] | undefined;
-  onSelectSession: (session: EnrichedSession) => void;
+  sessions: T[] | undefined;
+  onSelectSession: (session: T) => void;
 };
 
-export function DaySessionList({ date, sessions, onSelectSession }: Props) {
+export function DaySessionList<T extends EnrichedSession>({ date, sessions, onSelectSession }: Props<T>) {
   const dateLabel = format(date, "EEE d/M", { locale: nl });
 
   return (

@@ -7,7 +7,7 @@ import { Id } from "@/convex/_generated/dataModel";
 import { format, addMonths, subMonths } from "date-fns";
 import { nl } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { useUser, useAuth, RedirectToSignIn } from "@clerk/nextjs";
+import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
 
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { DaySessionList } from "@/components/DaySessionList";
@@ -28,9 +28,8 @@ type EnrichedSession = {
 
 export default function AgendaPage() {
   const { isLoaded, isSignedIn } = useAuth();
-  useUser();
   const ensureUser = useMutation(api.users.ensureUser);
-  const me = useQuery(api.users.getMe);
+  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
 
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
@@ -51,7 +50,7 @@ export default function AgendaPage() {
     if (isLoaded && isSignedIn && me === null) {
       ensureUser();
     }
-  }, [isLoaded, isSignedIn, me]);
+  }, [isLoaded, isSignedIn, me, ensureUser]);
 
   // Wait for me to resolve before determining role — prevents trainer seeing client UI during load
   const isTrainer = me !== undefined && me?.role === "trainer";

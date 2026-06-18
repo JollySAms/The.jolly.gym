@@ -9,6 +9,7 @@ type Props = {
 };
 
 type Attendee = {
+  userId: string;
   name: string | null | undefined;
   status: "coming" | "cancelled" | "no_response";
   isGroupMember: boolean;
@@ -35,8 +36,8 @@ export function SessionAttendees({ sessionId }: Props) {
 
   return (
     <ul className="mt-2 space-y-1">
-      {all.map((m, i) => (
-        <li key={i} className="flex items-center justify-between text-sm">
+      {all.map((m) => (
+        <li key={m.userId} className="flex items-center justify-between text-sm">
           <span className="text-gray-700">
             {m.name ?? "Onbekend"}
             {!m.isGroupMember && (

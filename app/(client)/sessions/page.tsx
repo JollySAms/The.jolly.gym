@@ -101,7 +101,7 @@ export default function ClientAgendaPage() {
       <DaySessionList
         date={selectedDate}
         sessions={sessionsForDay}
-        onSelectSession={(s) => setSelectedSession(s as unknown as UpcomingSession)}
+        onSelectSession={(s) => setSelectedSession(s)}
       />
 
       {/* Detail sheet */}

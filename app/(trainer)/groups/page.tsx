@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useAuth, useUser, RedirectToSignIn } from "@clerk/nextjs";
+import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
 import { Plus, Pencil, Users, Trash2 } from "lucide-react";
 
 import { GroupDialog } from "./_components/GroupDialog";
@@ -19,7 +19,6 @@ type Group = {
 
 export default function GroupsPage() {
   const { isLoaded, isSignedIn } = useAuth();
-  useUser();
   const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
   const groups = useQuery(api.groups.list, isSignedIn ? {} : "skip");
   const removeGroup = useMutation(api.groups.remove);

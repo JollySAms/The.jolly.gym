@@ -87,13 +87,3 @@ export const removeMember = mutation({
     });
   },
 });
-
-// Trainer only — list all clients (role === "client"), used for member picker
-export const listClients = query({
-  args: {},
-  handler: async (ctx) => {
-    await requireTrainer(ctx);
-    const all = await ctx.db.query("users").take(100);
-    return all.filter((u) => u.role === "client");
-  },
-});

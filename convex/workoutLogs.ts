@@ -103,6 +103,7 @@ export const getMyLastLogs = query({
 
 // Client — save (upsert) their log for one exercise in a session.
 // If a log already exists for this (session + user + exercise), it is replaced.
+// Also auto-RSVPs the client to the session if they don't have a "coming" record yet.
 export const saveLog = mutation({
   args: {
     sessionId: v.id("sessions"),
@@ -114,6 +115,37 @@ export const saveLog = mutation({
   handler: async (ctx, args) => {
     const identity = await requireAuth(ctx);
     const userId = identity.tokenIdentifier;
+
+    // Validate the session exists and is not cancelled
+    const session = await ctx.db.get(args.sessionId);
+    if (!session || session.cancelled) throw new Error("Sessie niet gevonden");
+
+    // Auto-RSVP: ensure a "coming" attendance record exists before saving the log
+    const existingAttendance = await ctx.db
+      .query("attendance")
+      .withIndex("by_session_and_user", (q) =>
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
+      )
+      .unique();
+
+    if (!existingAttendance || existingAttendance.status !== "coming") {
+      if (existingAttendance) {
+        // Previously cancelled — reactivate
+        await ctx.db.patch(existingAttendance._id, {
+          status: "coming",
+          signedUpAt: Date.now(),
+        });
+      } else {
+        // No record yet — create one
+        await ctx.db.insert("attendance", {
+          sessionId: args.sessionId,
+          userId,
+          userName: identity.name ?? identity.email ?? "Unknown",
+          status: "coming",
+          signedUpAt: Date.now(),
+        });
+      }
+    }
 
     // Check for existing log entry (upsert)
     const existing = await ctx.db

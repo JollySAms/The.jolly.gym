@@ -18,7 +18,7 @@ type Props = {
 };
 
 export function MembersSheet({ group, onClose }: Props) {
-  const clients = useQuery(api.groups.listClients);
+  const clients = useQuery(api.users.listClients);
   const addMember = useMutation(api.groups.addMember);
   const removeMember = useMutation(api.groups.removeMember);
 

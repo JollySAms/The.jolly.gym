@@ -32,8 +32,10 @@ export const listClients = query({
   args: {},
   handler: async (ctx) => {
     await requireTrainer(ctx);
-    const all = await ctx.db.query("users").take(200);
-    return all.filter((u) => u.role === "client");
+    return await ctx.db
+      .query("users")
+      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .take(200);
   },
 });
 

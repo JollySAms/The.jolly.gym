@@ -45,7 +45,7 @@ export default function ClientHomePage() {
 
   useEffect(() => {
     if (isLoaded && isSignedIn && me === null) ensureUser();
-  }, [isLoaded, isSignedIn, me]);
+  }, [isLoaded, isSignedIn, me, ensureUser]);
 
   if (!isLoaded) return null;
   if (!isSignedIn) return <RedirectToSignIn />;
