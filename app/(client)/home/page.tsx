@@ -21,6 +21,7 @@ type NextSession = {
   attendanceCount: number;
   myStatus: "coming" | "cancelled" | null;
   group: { _id: Id<"groups">; name: string; color: string } | null;
+  isGroupMember: boolean;
 };
 
 export default function ClientHomePage() {
@@ -34,14 +35,22 @@ export default function ClientHomePage() {
   );
   const rsvp = useMutation(api.attendance.rsvp);
   const cancelRsvp = useMutation(api.attendance.cancelRsvp);
+  const markAbsent = useMutation(api.attendance.markAbsent);
+  const undoAbsent = useMutation(api.attendance.undoAbsent);
 
   const [showDetail, setShowDetail] = useState(false);
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [absentLoading, setAbsentLoading] = useState(false);
+  const [localStatus, setLocalStatus] = useState<"coming" | "cancelled" | null>(null);
   const [todayLabel, setTodayLabel] = useState<string | null>(null);
 
   useEffect(() => {
     setTodayLabel(format(new Date(), "EEEE d MMMM", { locale: nl }));
   }, []);
+
+  useEffect(() => {
+    if (nextSession) setLocalStatus(nextSession.myStatus);
+  }, [nextSession?.myStatus]);
 
   useEffect(() => {
     if (isLoaded && isSignedIn && me === null) ensureUser();
@@ -56,18 +65,54 @@ export default function ClientHomePage() {
     e.stopPropagation();
     if (!nextSession || rsvpLoading) return;
     setRsvpLoading(true);
+    const previousStatus = localStatus;
     try {
-      if (nextSession.myStatus === "coming") {
+      if (localStatus === "coming") {
+        setLocalStatus(null);
         await cancelRsvp({ sessionId: nextSession._id });
         toast.success("Je bent afgemeld");
       } else {
+        setLocalStatus("coming");
         await rsvp({ sessionId: nextSession._id });
         toast.success("Je bent ingeschreven!");
       }
     } catch {
+      setLocalStatus(previousStatus);
       toast.error("Dat lukte niet. Probeer het opnieuw.");
     } finally {
       setRsvpLoading(false);
+    }
+  }
+
+  async function handleMarkAbsent(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!nextSession || absentLoading) return;
+    setAbsentLoading(true);
+    const previousStatus = localStatus;
+    try {
+      setLocalStatus("cancelled");
+      await markAbsent({ sessionId: nextSession._id });
+    } catch {
+      setLocalStatus(previousStatus);
+      toast.error("Dat lukte niet. Probeer het opnieuw.");
+    } finally {
+      setAbsentLoading(false);
+    }
+  }
+
+  async function handleUndoAbsent(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (!nextSession || absentLoading) return;
+    setAbsentLoading(true);
+    const previousStatus = localStatus;
+    try {
+      setLocalStatus(null);
+      await undoAbsent({ sessionId: nextSession._id });
+    } catch {
+      setLocalStatus(previousStatus);
+      toast.error("Dat lukte niet. Probeer het opnieuw.");
+    } finally {
+      setAbsentLoading(false);
     }
   }
 
@@ -132,22 +177,41 @@ export default function ClientHomePage() {
               </span>
             </div>
 
-            {/* RSVP button — stopPropagation so card tap still opens detail */}
-            <button
-              onClick={handleRsvp}
-              disabled={rsvpLoading}
-              className={`mt-5 w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                nextSession.myStatus === "coming"
-                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  : "bg-gray-900 text-white hover:bg-gray-700"
-              }`}
-            >
-              {rsvpLoading
-                ? "..."
-                : nextSession.myStatus === "coming"
-                ? "Afmelden"
-                : "Inschrijven"}
-            </button>
+            {/* RSVP buttons — stopPropagation so card tap still opens detail */}
+            <div className="mt-5 space-y-2">
+              {localStatus === "coming" ? (
+                <button
+                  onClick={handleRsvp}
+                  disabled={rsvpLoading}
+                  className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {rsvpLoading ? "..." : "Afmelden"}
+                </button>
+              ) : (
+                <>
+                  <button
+                    onClick={handleRsvp}
+                    disabled={rsvpLoading}
+                    className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {rsvpLoading ? "..." : "Inschrijven"}
+                  </button>
+                  {nextSession.isGroupMember && (
+                    <button
+                      onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
+                      disabled={absentLoading}
+                      className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                        localStatus === "cancelled"
+                          ? "bg-red-50 text-red-500 hover:bg-red-100"
+                          : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                      }`}
+                    >
+                      {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
+                    </button>
+                  )}
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}

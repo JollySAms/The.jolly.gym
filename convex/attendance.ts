@@ -25,22 +25,27 @@ export const getMyStatus = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) return null;
 
-    return await ctx.db
+    const record = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_user", (q) =>
         q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
       )
       .unique();
+
+    // Soft-deleted record = no response
+    if (!record || record.deleted) return null;
+    return record;
   },
 });
 
 // Returns all attendees for a session structured for the client view:
 // - Group members always appear, each with status: "coming" | "cancelled" | "no_response"
 // - Non-group members who said "coming" appear as cross-group guests
+// - isCurrentUserGroupMember: true if the viewing client belongs to this session's group
 export const getSessionWithAttendees = query({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    await requireAuth(ctx);
+    const identity = await requireAuth(ctx);
 
     const session = await ctx.db.get(args.sessionId);
     if (!session) return null;
@@ -49,6 +54,13 @@ export const getSessionWithAttendees = query({
     if (!group) return null;
 
     const memberIds = group.memberIds ?? [];
+
+    // Look up current user to determine group membership
+    const currentUser = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
+    const isCurrentUserGroupMember = !!(currentUser && memberIds.includes(currentUser._id));
 
     // Fetch each group member and their attendance record
     const members = await Promise.all(
@@ -63,13 +75,17 @@ export const getSessionWithAttendees = query({
           )
           .unique();
 
+        // Soft-deleted record = no response
+        const status = (!attendance || attendance.deleted)
+          ? "no_response"
+          : attendance.status === "coming"
+          ? "coming"
+          : "cancelled";
+
         return {
           userId: user.tokenIdentifier,
           name: user.name,
-          status: (attendance?.status ?? "no_response") as
-            | "coming"
-            | "cancelled"
-            | "no_response",
+          status: status as "coming" | "cancelled" | "no_response",
           isGroupMember: true,
         };
       })
@@ -89,7 +105,7 @@ export const getSessionWithAttendees = query({
     );
 
     const crossGroupComers = allComing
-      .filter((a) => !groupMemberTokens.has(a.userId))
+      .filter((a) => !groupMemberTokens.has(a.userId) && !a.deleted)
       .map((a) => ({
         userId: a.userId,
         name: a.userName,
@@ -100,6 +116,7 @@ export const getSessionWithAttendees = query({
     return {
       members: members.filter(Boolean),
       crossGroupComers,
+      isCurrentUserGroupMember,
     };
   },
 });
@@ -141,10 +158,11 @@ export const rsvp = mutation({
     if (coming.length >= session.capacity) throw new Error("Session is full");
 
     if (existing) {
-      // Previously cancelled — reactivate
+      // Previously cancelled or soft-deleted (niet aanwezig) — reactivate
       await ctx.db.patch(existing._id, {
         status: "coming",
         signedUpAt: Date.now(),
+        deleted: false,
       });
     } else {
       await ctx.db.insert("attendance", {
@@ -221,6 +239,67 @@ export const getClientAttendanceOverview = query({
         };
       })
     );
+  },
+});
+
+// Mark yourself as not attending — only for clients in the session's own group.
+// Creates a cancelled record if none exists, so push notifications are suppressed.
+export const markAbsent = mutation({
+  args: { sessionId: v.id("sessions") },
+  handler: async (ctx, args) => {
+    const identity = await requireAuth(ctx);
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
+      .unique();
+    if (user?.role === "trainer") throw new Error("Trainers cannot mark absence");
+
+    // Only group members may use this — cross-group visitors use RSVP only
+    const session = await ctx.db.get(args.sessionId);
+    if (!session || session.cancelled) throw new Error("Session not found");
+    const group = await ctx.db.get(session.groupId);
+    if (!group) throw new Error("Group not found");
+    if (!(group.memberIds ?? []).includes(user!._id)) {
+      throw new Error("Not a member of this group");
+    }
+
+    const existing = await ctx.db
+      .query("attendance")
+      .withIndex("by_session_and_user", (q) =>
+        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (existing) {
+      await ctx.db.patch(existing._id, { status: "cancelled", deleted: false });
+    } else {
+      await ctx.db.insert("attendance", {
+        sessionId: args.sessionId,
+        userId: identity.tokenIdentifier,
+        userName: identity.name ?? identity.email ?? "Unknown",
+        status: "cancelled",
+        signedUpAt: Date.now(),
+      });
+    }
+  },
+});
+
+// Undo a "niet aanwezig" — soft-deletes the cancelled record, returning client to no_response
+export const undoAbsent = mutation({
+  args: { sessionId: v.id("sessions") },
+  handler: async (ctx, args) => {
+    const identity = await requireAuth(ctx);
+
+    const existing = await ctx.db
+      .query("attendance")
+      .withIndex("by_session_and_user", (q) =>
+        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+      )
+      .unique();
+
+    if (!existing || existing.status !== "cancelled" || existing.deleted) return;
+    await ctx.db.patch(existing._id, { deleted: true });
   },
 });
 

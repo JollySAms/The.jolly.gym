@@ -285,7 +285,7 @@ async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
   };
 }
 
-// Client-facing enrichment — adds workout name and the user's own RSVP status
+// Client-facing enrichment — adds workout name, the user's own RSVP status, and group membership flag
 async function enrichSessionForClient(
   ctx: QueryCtx,
   session: Doc<"sessions">,
@@ -307,6 +307,16 @@ async function enrichSessionForClient(
     )
     .unique();
 
+  // Soft-deleted record means the client undid their "niet aanwezig" → treat as no response
+  const myStatus = myAttendance?.deleted ? null : (myAttendance?.status ?? null);
+
+  // Look up user document to check group membership
+  const me = await ctx.db
+    .query("users")
+    .withIndex("by_token", (q) => q.eq("tokenIdentifier", tokenIdentifier))
+    .unique();
+  const isGroupMember = !!(me && (group?.memberIds ?? []).includes(me._id));
+
   // Fetch workout name from the template (not the snapshot, which has no name)
   let workoutName: string | null = null;
   if (session.workoutId) {
@@ -318,7 +328,8 @@ async function enrichSessionForClient(
     ...session,
     group,
     attendanceCount: coming.length,
-    myStatus: myAttendance?.status ?? null,
+    myStatus,
     workoutName,
+    isGroupMember,
   };
 }

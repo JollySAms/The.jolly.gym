@@ -39,7 +39,10 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   });
   const rsvp = useMutation(api.attendance.rsvp);
   const cancelRsvp = useMutation(api.attendance.cancelRsvp);
+  const markAbsent = useMutation(api.attendance.markAbsent);
+  const undoAbsent = useMutation(api.attendance.undoAbsent);
   const [rsvpLoading, setRsvpLoading] = useState(false);
+  const [absentLoading, setAbsentLoading] = useState(false);
   const [showLog, setShowLog] = useState(false);
   // Optimistic local status so the button updates instantly after RSVP
   const [localStatus, setLocalStatus] = useState(session.myStatus);
@@ -80,10 +83,40 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
         toast.success("Je bent ingeschreven!");
       }
     } catch {
-      setLocalStatus(previousStatus); // revert on error
+      setLocalStatus(previousStatus);
       toast.error("Dat lukte niet. Probeer het opnieuw.");
     } finally {
       setRsvpLoading(false);
+    }
+  }
+
+  async function handleMarkAbsent() {
+    if (absentLoading) return;
+    setAbsentLoading(true);
+    const previousStatus = localStatus;
+    try {
+      setLocalStatus("cancelled");
+      await markAbsent({ sessionId: session._id });
+    } catch {
+      setLocalStatus(previousStatus);
+      toast.error("Dat lukte niet. Probeer het opnieuw.");
+    } finally {
+      setAbsentLoading(false);
+    }
+  }
+
+  async function handleUndoAbsent() {
+    if (absentLoading) return;
+    setAbsentLoading(true);
+    const previousStatus = localStatus;
+    try {
+      setLocalStatus(null);
+      await undoAbsent({ sessionId: session._id });
+    } catch {
+      setLocalStatus(previousStatus);
+      toast.error("Dat lukte niet. Probeer het opnieuw.");
+    } finally {
+      setAbsentLoading(false);
     }
   }
 
@@ -206,25 +239,46 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
               Workout loggen
             </button>
           )}
-          <button
-            onClick={handleRsvp}
-            disabled={isFull || rsvpLoading}
-            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
-              localStatus === "coming"
-                ? "bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50"
-                : isFull
-                ? "bg-gray-50 text-gray-300"
-                : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
-            }`}
-          >
-            {rsvpLoading
-              ? "..."
-              : localStatus === "coming"
-              ? "Afmelden"
-              : isFull
-              ? "Sessie is vol"
-              : "Inschrijven"}
-          </button>
+
+          {localStatus === "coming" ? (
+            // Already signed up — single Afmelden button
+            <button
+              onClick={handleRsvp}
+              disabled={rsvpLoading}
+              className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {rsvpLoading ? "..." : "Afmelden"}
+            </button>
+          ) : (
+            // Not signed up — show Inschrijven + optionally Niet aanwezig
+            <>
+              <button
+                onClick={handleRsvp}
+                disabled={isFull || rsvpLoading}
+                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
+                  isFull
+                    ? "bg-gray-50 text-gray-300"
+                    : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
+                }`}
+              >
+                {rsvpLoading ? "..." : isFull ? "Sessie is vol" : "Inschrijven"}
+              </button>
+
+              {attendees?.isCurrentUserGroupMember && (
+                <button
+                  onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
+                  disabled={absentLoading}
+                  className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    localStatus === "cancelled"
+                      ? "bg-red-50 text-red-500 hover:bg-red-100"
+                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
+                </button>
+              )}
+            </>
+          )}
         </div>
       </div>
 

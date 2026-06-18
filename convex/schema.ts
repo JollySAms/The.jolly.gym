@@ -63,6 +63,7 @@ export default defineSchema({
     userName: v.string(),     // cached display name for attendee list
     status: v.union(v.literal("coming"), v.literal("cancelled")),
     signedUpAt: v.number(),   // timestamp for "Gemaakt op" column
+    deleted: v.optional(v.boolean()), // soft-delete: true = record undone, treat as no_response
   })
     .index("by_session_and_status", ["sessionId", "status"])
     .index("by_user", ["userId"])
