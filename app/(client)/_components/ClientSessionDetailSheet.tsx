@@ -20,6 +20,7 @@ type SessionData = {
   attendanceCount: number;
   myStatus: "coming" | "cancelled" | null;
   group: { _id: Id<"groups">; name: string; color: string } | null;
+  isGroupMember: boolean;
 };
 
 type Props = {
@@ -248,18 +249,20 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
             {rsvpLoading ? "..." : isFull ? "Sessie is vol" : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
           </button>
 
-          {/* Niet aanwezig: always shown, toggles absent state */}
-          <button
-            onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
-            disabled={absentLoading}
-            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-              localStatus === "cancelled"
-                ? "bg-red-50 text-red-500 hover:bg-red-100"
-                : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`}
-          >
-            {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
-          </button>
+          {/* Niet aanwezig: only shown to own-group members */}
+          {session.isGroupMember && (
+            <button
+              onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
+              disabled={absentLoading}
+              className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                localStatus === "cancelled"
+                  ? "bg-red-50 text-red-500 hover:bg-red-100"
+                  : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
+            </button>
+          )}
         </div>
       </div>
 

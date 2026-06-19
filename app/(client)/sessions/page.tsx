@@ -25,6 +25,7 @@ type UpcomingSession = {
   attendanceCount: number;
   myStatus: "coming" | "cancelled" | null;
   group: { _id: Id<"groups">; name: string; color: string } | null;
+  isGroupMember: boolean;
 };
 
 export default function ClientAgendaPage() {

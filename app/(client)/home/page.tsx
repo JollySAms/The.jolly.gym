@@ -183,18 +183,20 @@ export default function ClientHomePage() {
               >
                 {rsvpLoading ? "..." : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
               </button>
-              {/* Niet aanwezig: only active when not already marked absent */}
-              <button
-                onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
-                disabled={absentLoading}
-                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                  localStatus === "cancelled"
-                    ? "bg-red-50 text-red-500 hover:bg-red-100"
-                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
-              </button>
+              {/* Niet aanwezig: only shown to own-group members */}
+              {nextSession.isGroupMember && (
+                <button
+                  onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
+                  disabled={absentLoading}
+                  className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                    localStatus === "cancelled"
+                      ? "bg-red-50 text-red-500 hover:bg-red-100"
+                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                  }`}
+                >
+                  {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
+                </button>
+              )}
             </div>
           </div>
         </div>
