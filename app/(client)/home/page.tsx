@@ -34,6 +34,7 @@ export default function ClientHomePage() {
     isSignedIn && me !== undefined && me?.role === "client" ? {} : "skip"
   );
   const rsvp = useMutation(api.attendance.rsvp);
+  const cancelRsvp = useMutation(api.attendance.cancelRsvp);
   const markAbsent = useMutation(api.attendance.markAbsent);
   const undoAbsent = useMutation(api.attendance.undoAbsent);
 
@@ -62,13 +63,18 @@ export default function ClientHomePage() {
 
   async function handleRsvp(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!nextSession || rsvpLoading || localStatus === "coming") return;
+    if (!nextSession || rsvpLoading) return;
     setRsvpLoading(true);
     const previousStatus = localStatus;
     try {
-      setLocalStatus("coming");
-      await rsvp({ sessionId: nextSession._id });
-      toast.success("Je bent ingeschreven!");
+      if (localStatus === "coming") {
+        setLocalStatus(null);
+        await cancelRsvp({ sessionId: nextSession._id });
+      } else {
+        setLocalStatus("coming");
+        await rsvp({ sessionId: nextSession._id });
+        toast.success("Je bent ingeschreven!");
+      }
     } catch {
       setLocalStatus(previousStatus);
       toast.error("Dat lukte niet. Probeer het opnieuw.");
@@ -174,11 +180,11 @@ export default function ClientHomePage() {
               {/* Inschrijven: turns green when signed up, disabled when already coming */}
               <button
                 onClick={handleRsvp}
-                disabled={rsvpLoading || localStatus === "coming"}
-                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-default ${
+                disabled={rsvpLoading}
+                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   localStatus === "coming"
-                    ? "bg-green-500 text-white"
-                    : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
+                    ? "bg-green-500 text-white hover:bg-green-600"
+                    : "bg-gray-900 text-white hover:bg-gray-700"
                 }`}
               >
                 {rsvpLoading ? "..." : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}

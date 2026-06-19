@@ -39,6 +39,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
     sessionId: session._id,
   });
   const rsvp = useMutation(api.attendance.rsvp);
+  const cancelRsvp = useMutation(api.attendance.cancelRsvp);
   const markAbsent = useMutation(api.attendance.markAbsent);
   const undoAbsent = useMutation(api.attendance.undoAbsent);
   const [rsvpLoading, setRsvpLoading] = useState(false);
@@ -69,13 +70,18 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   );
 
   async function handleRsvp() {
-    if (rsvpLoading || localStatus === "coming") return;
+    if (rsvpLoading) return;
     setRsvpLoading(true);
     const previousStatus = localStatus;
     try {
-      setLocalStatus("coming");
-      await rsvp({ sessionId: session._id });
-      toast.success("Je bent ingeschreven!");
+      if (localStatus === "coming") {
+        setLocalStatus(null);
+        await cancelRsvp({ sessionId: session._id });
+      } else {
+        setLocalStatus("coming");
+        await rsvp({ sessionId: session._id });
+        toast.success("Je bent ingeschreven!");
+      }
     } catch {
       setLocalStatus(previousStatus);
       toast.error("Dat lukte niet. Probeer het opnieuw.");
@@ -234,16 +240,16 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
             </button>
           )}
 
-          {/* Inschrijven: turns green when signed up, disabled when already coming */}
+          {/* Inschrijven: turns green when signed up, click again to cancel */}
           <button
             onClick={handleRsvp}
-            disabled={isFull || rsvpLoading || localStatus === "coming"}
-            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-default ${
+            disabled={isFull || rsvpLoading}
+            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
               isFull
                 ? "bg-gray-50 text-gray-300"
                 : localStatus === "coming"
-                ? "bg-green-500 text-white"
-                : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-gray-900 text-white hover:bg-gray-700"
             }`}
           >
             {rsvpLoading ? "..." : isFull ? "Sessie is vol" : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
