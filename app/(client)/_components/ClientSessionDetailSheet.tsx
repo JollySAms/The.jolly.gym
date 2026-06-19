@@ -150,7 +150,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
         <div className="overflow-y-auto flex-1 px-4 py-4 space-y-5">
 
           {/* Workout */}
-          {session.workoutName && (
+          {session.workoutName ? (
             <div>
               <div className="flex items-center gap-2 mb-2">
                 <Dumbbell size={14} className="text-gray-400" />
@@ -168,6 +168,11 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
                   ))}
                 </div>
               )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Dumbbell size={14} className="text-gray-300" />
+              <p className="text-xs text-gray-400">Nog geen workout toegevoegd</p>
             </div>
           )}
 
