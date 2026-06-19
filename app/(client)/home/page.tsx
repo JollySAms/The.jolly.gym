@@ -63,19 +63,13 @@ export default function ClientHomePage() {
 
   async function handleRsvp(e: React.MouseEvent) {
     e.stopPropagation();
-    if (!nextSession || rsvpLoading) return;
+    if (!nextSession || rsvpLoading || localStatus === "coming") return;
     setRsvpLoading(true);
     const previousStatus = localStatus;
     try {
-      if (localStatus === "coming") {
-        setLocalStatus(null);
-        await cancelRsvp({ sessionId: nextSession._id });
-        toast.success("Je bent afgemeld");
-      } else {
-        setLocalStatus("coming");
-        await rsvp({ sessionId: nextSession._id });
-        toast.success("Je bent ingeschreven!");
-      }
+      setLocalStatus("coming");
+      await rsvp({ sessionId: nextSession._id });
+      toast.success("Je bent ingeschreven!");
     } catch {
       setLocalStatus(previousStatus);
       toast.error("Dat lukte niet. Probeer het opnieuw.");
@@ -178,14 +172,14 @@ export default function ClientHomePage() {
 
             {/* RSVP buttons — stopPropagation so card tap still opens detail */}
             <div className="mt-5 space-y-2">
-              {/* Inschrijven: toggles RSVP, turns green when signed up */}
+              {/* Inschrijven: turns green when signed up, disabled when already coming */}
               <button
                 onClick={handleRsvp}
-                disabled={rsvpLoading}
-                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                disabled={rsvpLoading || localStatus === "coming"}
+                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-default ${
                   localStatus === "coming"
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-gray-900 text-white hover:bg-gray-700"
+                    ? "bg-green-500 text-white"
+                    : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
                 }`}
               >
                 {rsvpLoading ? "..." : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
