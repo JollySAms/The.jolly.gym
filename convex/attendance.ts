@@ -316,8 +316,8 @@ export const cancelRsvp = mutation({
       )
       .unique();
 
-    if (!existing || existing.status === "cancelled") return; // nothing to cancel
+    if (!existing || existing.deleted) return; // nothing to cancel
 
-    await ctx.db.patch(existing._id, { status: "cancelled" });
+    await ctx.db.patch(existing._id, { deleted: true });
   },
 });
