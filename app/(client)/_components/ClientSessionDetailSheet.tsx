@@ -38,7 +38,6 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
     sessionId: session._id,
   });
   const rsvp = useMutation(api.attendance.rsvp);
-  const cancelRsvp = useMutation(api.attendance.cancelRsvp);
   const markAbsent = useMutation(api.attendance.markAbsent);
   const undoAbsent = useMutation(api.attendance.undoAbsent);
   const [rsvpLoading, setRsvpLoading] = useState(false);

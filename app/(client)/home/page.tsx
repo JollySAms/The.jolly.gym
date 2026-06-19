@@ -34,7 +34,6 @@ export default function ClientHomePage() {
     isSignedIn && me !== undefined && me?.role === "client" ? {} : "skip"
   );
   const rsvp = useMutation(api.attendance.rsvp);
-  const cancelRsvp = useMutation(api.attendance.cancelRsvp);
   const markAbsent = useMutation(api.attendance.markAbsent);
   const undoAbsent = useMutation(api.attendance.undoAbsent);
 
