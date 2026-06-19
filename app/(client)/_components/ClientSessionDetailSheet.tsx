@@ -240,45 +240,29 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
             </button>
           )}
 
-          {localStatus === "coming" ? (
-            // Already signed up — single Afmelden button
-            <button
-              onClick={handleRsvp}
-              disabled={rsvpLoading}
-              className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {rsvpLoading ? "..." : "Afmelden"}
-            </button>
-          ) : (
-            // Not signed up — show Inschrijven + optionally Niet aanwezig
-            <>
-              <button
-                onClick={handleRsvp}
-                disabled={isFull || rsvpLoading}
-                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
-                  isFull
-                    ? "bg-gray-50 text-gray-300"
-                    : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
-                }`}
-              >
-                {rsvpLoading ? "..." : isFull ? "Sessie is vol" : "Inschrijven"}
-              </button>
+          <button
+            onClick={handleRsvp}
+            disabled={isFull || rsvpLoading}
+            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
+              isFull
+                ? "bg-gray-50 text-gray-300"
+                : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
+            }`}
+          >
+            {rsvpLoading ? "..." : isFull ? "Sessie is vol" : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
+          </button>
 
-              {attendees?.isCurrentUserGroupMember && (
-                <button
-                  onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
-                  disabled={absentLoading}
-                  className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                    localStatus === "cancelled"
-                      ? "bg-red-50 text-red-500 hover:bg-red-100"
-                      : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                  }`}
-                >
-                  {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
-                </button>
-              )}
-            </>
-          )}
+          <button
+            onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
+            disabled={absentLoading}
+            className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+              localStatus === "cancelled"
+                ? "bg-red-50 text-red-500 hover:bg-red-100"
+                : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+            }`}
+          >
+            {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
+          </button>
         </div>
       </div>
 

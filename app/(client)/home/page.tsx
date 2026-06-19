@@ -178,36 +178,28 @@ export default function ClientHomePage() {
 
             {/* RSVP buttons — stopPropagation so card tap still opens detail */}
             <div className="mt-5 space-y-2">
-              {localStatus === "coming" ? (
-                <button
-                  onClick={handleRsvp}
-                  disabled={rsvpLoading}
-                  className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {rsvpLoading ? "..." : "Afmelden"}
-                </button>
-              ) : (
-                <>
-                  <button
-                    onClick={handleRsvp}
-                    disabled={rsvpLoading}
-                    className="w-full py-3 rounded-xl text-sm font-semibold bg-gray-900 text-white hover:bg-gray-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {rsvpLoading ? "..." : "Inschrijven"}
-                  </button>
-                  <button
-                    onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
-                    disabled={absentLoading}
-                    className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                      localStatus === "cancelled"
-                        ? "bg-red-50 text-red-500 hover:bg-red-100"
-                        : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                    }`}
-                  >
-                    {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
-                  </button>
-                </>
-              )}
+              <button
+                onClick={handleRsvp}
+                disabled={rsvpLoading}
+                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  localStatus === "coming"
+                    ? "bg-gray-900 text-white"
+                    : "bg-gray-900 text-white hover:bg-gray-700"
+                }`}
+              >
+                {rsvpLoading ? "..." : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
+              </button>
+              <button
+                onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
+                disabled={absentLoading}
+                className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                  localStatus === "cancelled"
+                    ? "bg-red-50 text-red-500 hover:bg-red-100"
+                    : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                }`}
+              >
+                {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
+              </button>
             </div>
           </div>
         </div>
