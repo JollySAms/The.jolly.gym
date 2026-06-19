@@ -158,9 +158,6 @@ export default function ClientHomePage() {
             <p className="text-base text-gray-500 mt-0.5">
               {nextSession.time} · {nextSession.group?.name ?? "Onbekende groep"}
             </p>
-            {/* DEBUG — remove after testing */}
-            <p className="text-[10px] text-red-400">isGroupMember: {String(nextSession.isGroupMember)}</p>
-
             {nextSession.workoutName ? (
               <div className="flex items-center gap-2 mt-4 bg-gray-50 rounded-xl px-3 py-2.5">
                 <Dumbbell size={15} className="text-gray-400 shrink-0" />
@@ -198,19 +195,17 @@ export default function ClientHomePage() {
                   >
                     {rsvpLoading ? "..." : "Inschrijven"}
                   </button>
-                  {nextSession.isGroupMember && (
-                    <button
-                      onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
-                      disabled={absentLoading}
-                      className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
-                        localStatus === "cancelled"
-                          ? "bg-red-50 text-red-500 hover:bg-red-100"
-                          : "border border-gray-200 text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
-                    </button>
-                  )}
+                  <button
+                    onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
+                    disabled={absentLoading}
+                    className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
+                      localStatus === "cancelled"
+                        ? "bg-red-50 text-red-500 hover:bg-red-100"
+                        : "border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {absentLoading ? "..." : localStatus === "cancelled" ? "Niet aanwezig ✓" : "Niet aanwezig"}
+                  </button>
                 </>
               )}
             </div>
