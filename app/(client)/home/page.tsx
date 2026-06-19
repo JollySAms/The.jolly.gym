@@ -178,17 +178,19 @@ export default function ClientHomePage() {
 
             {/* RSVP buttons — stopPropagation so card tap still opens detail */}
             <div className="mt-5 space-y-2">
+              {/* Inschrijven: toggles RSVP, turns green when signed up */}
               <button
                 onClick={handleRsvp}
                 disabled={rsvpLoading}
                 className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                   localStatus === "coming"
-                    ? "bg-gray-900 text-white"
+                    ? "bg-green-500 text-white hover:bg-green-600"
                     : "bg-gray-900 text-white hover:bg-gray-700"
                 }`}
               >
                 {rsvpLoading ? "..." : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
               </button>
+              {/* Niet aanwezig: only active when not already marked absent */}
               <button
                 onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
                 disabled={absentLoading}

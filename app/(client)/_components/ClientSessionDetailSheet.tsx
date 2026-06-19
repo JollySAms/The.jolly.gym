@@ -240,18 +240,22 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
             </button>
           )}
 
+          {/* Inschrijven: toggles RSVP, turns green when signed up */}
           <button
             onClick={handleRsvp}
             disabled={isFull || rsvpLoading}
             className={`w-full py-3 rounded-xl text-sm font-semibold transition-colors disabled:cursor-not-allowed ${
               isFull
                 ? "bg-gray-50 text-gray-300"
+                : localStatus === "coming"
+                ? "bg-green-500 text-white hover:bg-green-600 disabled:opacity-50"
                 : "bg-gray-900 text-white hover:bg-gray-700 disabled:opacity-50"
             }`}
           >
             {rsvpLoading ? "..." : isFull ? "Sessie is vol" : localStatus === "coming" ? "Ingeschreven ✓" : "Inschrijven"}
           </button>
 
+          {/* Niet aanwezig: always shown, toggles absent state */}
           <button
             onClick={localStatus === "cancelled" ? handleUndoAbsent : handleMarkAbsent}
             disabled={absentLoading}
