@@ -59,7 +59,7 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
       </aside>
 
       {/* Page content */}
-      <main className="flex-1 pb-20 md:pb-0">{children}</main>
+      <main className="flex-1 pb-24 md:pb-0">{children}</main>
 
       {/* Mobile bottom nav */}
       <nav className="md:hidden fixed bottom-0 inset-x-0 bg-white border-t border-gray-100 flex">
@@ -69,7 +69,7 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 text-xs font-medium transition-colors ${
+              className={`flex-1 flex flex-col items-center gap-1.5 py-4 text-xs font-medium transition-colors ${
                 active ? "text-gray-900" : "text-gray-400"
               }`}
             >
