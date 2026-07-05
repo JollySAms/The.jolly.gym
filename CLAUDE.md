@@ -40,6 +40,13 @@ Changes (attendance, logged weights) must sync to Jolmer in real-time, and vice 
 
 **Design system:** Font: Helvetica · Primary colour: `#2D3F5A` (dark navy from logo) · Border radius: TBD
 
+## Every Session
+
+**At the start of every session:** Read `CHANGES.md` to see what's done, in progress, and pending.
+**At the end of every session:** Update `CHANGES.md` — mark completed items `[x]`, add a session log entry.
+
+---
+
 ## Key Principles
 
 - **Ask before changing the database schema** — always confirm first

@@ -12,7 +12,7 @@
 
 ## 🔴 Bugs / Urgent (fix first — affects real users now)
 
-- [ ] **#6 — Sessie timeout** — Na een tijdje wordt je uitgelogd, moet altijd ingelogd blijven. Fix via Clerk session settings (extend session lifetime). No code change needed.
+- [ ] **#6 — Sessie timeout** — Na een tijdje wordt je uitgelogd, moet altijd ingelogd blijven. Fix: migrate Clerk from Development mode to Production mode (free). Dev mode has short session lifetimes by design and extending them requires a paid Clerk plan. See Clerk migration checklist — this involves a tokenIdentifier migration before switching keys.
 
 ---
 
@@ -67,5 +67,5 @@
 - Always check with Jolmer before making UI-facing design changes
 - App is live at the-jolly-gym.vercel.app — real clients are using it
 - Dutch language used throughout client-facing UI
-- #6 (session timeout) is purely a Clerk dashboard setting — no code needed
+- #6 (session timeout) requires Clerk Production migration — not a simple dashboard setting (extending session lifetime in Dev mode is a paid Clerk feature)
 - #3 (exercise vervangen) needs code review first to assess current substitute flow
