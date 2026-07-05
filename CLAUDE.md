@@ -123,6 +123,27 @@ Chart of progression over time per exercise, available on both `/progression` (c
 - Will need a charting library (ask before installing)
 - Toggle between the two views within the same chart component
 
+## Deployment Setup
+
+**Two Convex instances — never confuse them:**
+- `academic-cat-468` = DEV (local dev only, `.env.local`)
+- `robust-hornet-740` = PROD (live app, Vercel)
+
+**To deploy Convex to prod:** Vercel does this automatically on every `git push` via the build command `npx convex deploy --yes && next build`. The `CONVEX_DEPLOY_KEY` in Vercel must be a prod key from the `robust-hornet-740` project.
+
+**Never run `npx convex deploy --yes` locally** — it deploys to DEV. Changes only reach prod via `git push`.
+
+**Required Vercel environment variables (Production):**
+- `NEXT_PUBLIC_CONVEX_URL` = `https://robust-hornet-740.eu-west-1.convex.cloud`
+- `NEXT_PUBLIC_CONVEX_SITE_URL` = `https://robust-hornet-740.eu-west-1.convex.site`
+- `CONVEX_DEPLOY_KEY` = prod deploy key from Convex dashboard (robust-hornet-740 → Settings → Deploy Keys)
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` = Clerk publishable key
+- `CLERK_SECRET_KEY` = Clerk secret key
+
+**If something works locally but not in prod:** 99% chance Convex code was not deployed to prod. Check Vercel build log — it should say "Deployed Convex functions to robust-hornet-740" near the top.
+
+**If `isGroupMember` or any new field returns `undefined` in prod:** The Convex functions in prod are out of date. Check the Vercel build log for the Convex deploy confirmation.
+
 ## Preferred Libraries
 
 - **Dates:** `date-fns` (not moment.js)

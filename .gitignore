@@ -42,3 +42,6 @@ next-env.d.ts
 
 # MCP config (may contain API tokens)
 .mcp.json
+
+# Convex data backups (contain production data — never commit)
+*.zip
