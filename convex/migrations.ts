@@ -2,41 +2,18 @@ import { internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 /**
- * One-time migration: replace Clerk Dev tokenIdentifier prefix with Clerk Production prefix.
+ * ⚠️  DO NOT RUN THIS SCRIPT ⚠️
  *
- * WHY THIS EXISTS:
- * All Convex records store Clerk's tokenIdentifier as the user identity key.
- * When switching from Clerk Dev → Clerk Production, the prefix changes:
- *   Dev:  https://rested-lobster-9.clerk.accounts.dev|user_XXXXX
- *   Prod: https://<your-prod-domain>|user_XXXXX  (or https://clerk.jollygym.nl|user_XXXXX)
+ * This prefix-only migration was the original plan but is INCORRECT.
+ * Reason: when switching Clerk instances (Dev → Production), Clerk assigns
+ * BRAND NEW user IDs. So swapping only the prefix still leaves the wrong
+ * user_XXXXX suffix, and no one can log in.
  *
- * Tables affected (all fields that store tokenIdentifiers as strings):
- *   - users.tokenIdentifier       (31 records — primary identity key)
- *   - attendance.userId            (58 records — RSVP records)
- *   - workoutLogs.userId           (all workout log records)
- *   - sessions.createdBy           (all trainer sessions)
- *   - workouts.createdBy           (all trainer workouts)
+ * THE CORRECT APPROACH is in convex/users.ts — ensureUser now automatically
+ * migrates each user by email on their first login to the new Clerk Production
+ * instance. No manual script needed.
  *
- * HOW TO RUN (from the-jolly-gym/ directory):
- *
- *   DRY RUN (safe, read-only — do this first!):
- *   npx convex run --prod migrations:migrateTokenIdentifierPrefix \
- *     '{"oldPrefix":"https://rested-lobster-9.clerk.accounts.dev","newPrefix":"YOUR_PROD_PREFIX","dryRun":true}'
- *
- *   LIVE RUN (actually updates Convex — do ONLY after verifying dry run output):
- *   npx convex run --prod migrations:migrateTokenIdentifierPrefix \
- *     '{"oldPrefix":"https://rested-lobster-9.clerk.accounts.dev","newPrefix":"YOUR_PROD_PREFIX","dryRun":false}'
- *
- * FINDING YOUR_PROD_PREFIX:
- *   After creating your Clerk Production instance, go to:
- *   Clerk Dashboard → Configure → Domains
- *   The "Frontend API" URL shown there IS the prefix (without the |user_XXXXX part).
- *   Example: https://clerk.jollygym.nl
- *
- * SAFETY:
- *   - dryRun:true logs what WOULD change without touching anything
- *   - This is an internalMutation — only callable via CLI, never from the browser
- *   - Run dry run first, verify counts match (31 users, 58 attendance, etc), then run live
+ * This file is kept only for reference/history. It is safe to delete.
  */
 export const migrateTokenIdentifierPrefix = internalMutation({
   args: {
