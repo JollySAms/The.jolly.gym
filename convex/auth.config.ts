@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: "https://clerk.jollygym.nl",
+      domain: "https://rested-lobster-9.clerk.accounts.dev",
       applicationID: "convex",
     },
   ],
