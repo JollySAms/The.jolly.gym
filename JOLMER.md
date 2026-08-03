@@ -59,7 +59,7 @@ Then go to `vercel.com` → your project → watch the build complete (takes ~2 
 
 ## Checking the live app vs local
 
-- **Live app (what clients see):** `the-jolly-gym.vercel.app` (or `jollygym.nl` once the domain is connected)
+- **Live app (what clients see):** `jollygym.nl`
 - **Local dev (your test environment):** `localhost:3000` — run with `npm run dev` in the terminal
 
 Changes you make locally are NOT live until you `git push`.
