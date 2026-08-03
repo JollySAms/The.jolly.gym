@@ -78,7 +78,7 @@ export const migrateOrCreateUser = internalMutation({
 // Action: fetches email from Clerk API, then calls migrateOrCreateUser
 export const ensureUser = action({
   args: {},
-  handler: async (ctx) => {
+  handler: async (ctx): Promise<string> => {
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Not authenticated");
 
