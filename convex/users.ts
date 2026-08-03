@@ -1,30 +1,25 @@
-import { mutation, query } from "./_generated/server";
+import { action, internalMutation, mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { requireTrainer } from "./lib";
+import { internal } from "./_generated/api";
 
-// Called once on login to create the user record if it doesn't exist yet.
-// Also handles the one-time migration from Clerk Dev → Clerk Production:
-// When switching Clerk instances, user IDs change but emails stay the same.
-// On first login to the new instance, we find the old record by email and
-// update all tokenIdentifier references across every table.
-export const ensureUser = mutation({
-  args: {},
-  handler: async (ctx) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) throw new Error("Not authenticated");
-
-    // 1. Normal path: already migrated or new Production user
+// Internal mutation that does the actual DB writes after email is fetched from Clerk
+export const migrateOrCreateUser = internalMutation({
+  args: {
+    tokenIdentifier: v.string(),
+    email: v.string(),
+    name: v.string(),
+  },
+  handler: async (ctx, { tokenIdentifier, email, name }) => {
+    // 1. Already migrated or existing Production user
     const existing = await ctx.db
       .query("users")
-      .withIndex("by_token", (q) =>
-        q.eq("tokenIdentifier", identity.tokenIdentifier)
-      )
+      .withIndex("by_token", (q) => q.eq("tokenIdentifier", tokenIdentifier))
       .unique();
 
     if (existing) return existing._id;
 
-    // 2. Migration path: find old record by email (Clerk Dev → Production switch)
-    const email = identity.email ?? "";
+    // 2. Migration path: find old record by email
     const oldUser = email
       ? await ctx.db
           .query("users")
@@ -34,12 +29,10 @@ export const ensureUser = mutation({
 
     if (oldUser) {
       const oldToken = oldUser.tokenIdentifier;
-      const newToken = identity.tokenIdentifier;
+      const newToken = tokenIdentifier;
 
-      // Update users.tokenIdentifier
       await ctx.db.patch(oldUser._id, { tokenIdentifier: newToken });
 
-      // Update attendance.userId (has by_user index)
       const attendanceRecords = await ctx.db
         .query("attendance")
         .withIndex("by_user", (q) => q.eq("userId", oldToken))
@@ -48,7 +41,6 @@ export const ensureUser = mutation({
         await ctx.db.patch(record._id, { userId: newToken });
       }
 
-      // Update workoutLogs.userId (full scan — small table, one-time per user)
       const allLogs = await ctx.db.query("workoutLogs").collect();
       for (const log of allLogs) {
         if (log.userId === oldToken) {
@@ -56,7 +48,6 @@ export const ensureUser = mutation({
         }
       }
 
-      // Update sessions.createdBy (trainer only — small number of records)
       const allSessions = await ctx.db.query("sessions").collect();
       for (const session of allSessions) {
         if (session.createdBy === oldToken) {
@@ -64,7 +55,6 @@ export const ensureUser = mutation({
         }
       }
 
-      // Update workouts.createdBy (trainer only)
       const allWorkouts = await ctx.db.query("workouts").collect();
       for (const workout of allWorkouts) {
         if (workout.createdBy === oldToken) {
@@ -75,17 +65,52 @@ export const ensureUser = mutation({
       return oldUser._id;
     }
 
-    // 3. Brand new user: create fresh record
+    // 3. Brand new user
     return await ctx.db.insert("users", {
-      tokenIdentifier: identity.tokenIdentifier,
-      name: identity.name ?? email ?? "Unknown",
+      tokenIdentifier,
+      name,
       email,
-      role: "client", // default; Jolmer's role is set to "trainer" via Convex dashboard
+      role: "client",
     });
   },
 });
 
-// Trainer only — list all client accounts (for progression view, attendance, etc.)
+// Action: fetches email from Clerk API, then calls migrateOrCreateUser
+export const ensureUser = action({
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Not authenticated");
+
+    const tokenIdentifier = identity.tokenIdentifier;
+    let email = identity.email ?? "";
+    let name = identity.name ?? "";
+
+    // If email not in token, fetch from Clerk API using the user ID
+    if (!email) {
+      const userId = identity.subject; // the `sub` claim = Clerk user ID
+      const clerkSecret = process.env.CLERK_SECRET_KEY;
+      if (clerkSecret) {
+        const res = await fetch(`https://api.clerk.com/v1/users/${userId}`, {
+          headers: { Authorization: `Bearer ${clerkSecret}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          email = data.email_addresses?.[0]?.email_address ?? "";
+          name = `${data.first_name ?? ""} ${data.last_name ?? ""}`.trim() || email;
+        }
+      }
+    }
+
+    return await ctx.runMutation(internal.users.migrateOrCreateUser, {
+      tokenIdentifier,
+      email,
+      name,
+    });
+  },
+});
+
+// Trainer only — list all client accounts
 export const listClients = query({
   args: {},
   handler: async (ctx) => {
@@ -97,7 +122,7 @@ export const listClients = query({
   },
 });
 
-// Returns the current user's record (role, name, etc.)
+// Returns the current user's record
 export const getMe = query({
   args: {},
   handler: async (ctx) => {

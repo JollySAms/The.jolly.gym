@@ -59,10 +59,10 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
   useEffect(() => {
     if (existingLogs === undefined || initialized) return;
 
-    const logMap = new Map(existingLogs.map((l) => [l.exerciseId, l]));
+    const logMap = new Map(existingLogs.map((l: { exerciseId: string | null | undefined; sets: { reps: number; weight: number }[]; isSubstitute?: boolean; exerciseName?: string }) => [l.exerciseId, l]));
 
     const prescribed: LoggedExercise[] = workoutSnapshot.map((ex) => {
-      const saved = logMap.get(ex.exerciseId);
+      const saved = logMap.get(ex.exerciseId) as { sets: { reps: number; weight: number }[] } | undefined;
       return {
         exerciseId: ex.exerciseId,
         exerciseName: ex.name,

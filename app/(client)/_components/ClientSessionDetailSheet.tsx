@@ -54,7 +54,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
   // Derive attendance count and isFull from the live attendees query so the
   // button state updates if the session fills up while this sheet is open.
   const liveAttendanceCount = attendees != null
-    ? attendees.members.filter((m) => m?.status === "coming").length + attendees.crossGroupComers.length
+    ? attendees.members.filter((m: { status?: string }) => m?.status === "coming").length + attendees.crossGroupComers.length
     : session.attendanceCount;
   const isFull = liveAttendanceCount >= session.capacity && localStatus !== "coming";
 
@@ -193,7 +193,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
             ) : (
               <div className="space-y-1">
                 {/* Group members */}
-                {attendees.members.map((m) => {
+                {attendees.members.map((m: { userId: string; name: string; status: "coming" | "cancelled" | "no_response" } | null) => {
                   if (!m) return null;
                   const cfg = STATUS_CONFIG[m.status];
                   return (
@@ -213,7 +213,7 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
                 {attendees.crossGroupComers.length > 0 && (
                   <>
                     <p className="text-xs text-gray-500 pt-3 pb-1">Ook aanwezig</p>
-                    {attendees.crossGroupComers.map((c) => (
+                    {attendees.crossGroupComers.map((c: { userId: string; name: string }) => (
                       <div
                         key={c.userId}
                         className="flex items-center justify-between py-2 border-b border-gray-50"

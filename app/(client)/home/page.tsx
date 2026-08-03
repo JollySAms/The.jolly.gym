@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth, useUser, RedirectToSignIn } from "@clerk/nextjs";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parseISO } from "date-fns";
@@ -27,7 +27,7 @@ type NextSession = {
 export default function ClientHomePage() {
   const { isLoaded, isSignedIn } = useAuth();
   const { user } = useUser();
-  const ensureUser = useMutation(api.users.ensureUser);
+  const ensureUser = useAction(api.users.ensureUser);
   const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
   const nextSession = useQuery(
     api.sessions.getMyNextSession,

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useAction } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, addMonths, subMonths } from "date-fns";
@@ -28,7 +28,7 @@ type EnrichedSession = {
 
 export default function AgendaPage() {
   const { isLoaded, isSignedIn } = useAuth();
-  const ensureUser = useMutation(api.users.ensureUser);
+  const ensureUser = useAction(api.users.ensureUser);
   const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
 
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());

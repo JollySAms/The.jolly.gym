@@ -17,7 +17,7 @@ export function ExercisePickerSheet({ onSelect, onClose, excludeIds = [] }: Prop
   const [search, setSearch] = useState("");
 
   const filtered = (exercises ?? []).filter(
-    (ex) =>
+    (ex: { _id: Id<"exercises">; name: string }) =>
       !excludeIds.includes(ex._id) &&
       ex.name.toLowerCase().includes(search.toLowerCase())
   );
@@ -60,7 +60,7 @@ export function ExercisePickerSheet({ onSelect, onClose, excludeIds = [] }: Prop
             </p>
           ) : (
             <div className="divide-y divide-gray-50">
-              {filtered.map((ex) => (
+              {filtered.map((ex: { _id: Id<"exercises">; name: string }) => (
                 <button
                   key={ex._id}
                   onClick={() => {
