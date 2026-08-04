@@ -1,7 +1,6 @@
 "use client";
 
-import { useAuth, useUser, RedirectToSignIn } from "@clerk/nextjs";
-import { useQuery, useMutation, useAction } from "convex/react";
+import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parseISO } from "date-fns";
@@ -25,13 +24,12 @@ type NextSession = {
 };
 
 export default function ClientHomePage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const { user } = useUser();
-  const ensureUser = useAction(api.users.ensureUser);
-  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const ensureUser = useMutation(api.users.ensureUser);
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
   const nextSession = useQuery(
     api.sessions.getMyNextSession,
-    isSignedIn && me !== undefined && me?.role === "client" ? {} : "skip"
+    isAuthenticated && me !== undefined && me?.role === "client" ? {} : "skip"
   );
   const rsvp = useMutation(api.attendance.rsvp);
   const cancelRsvp = useMutation(api.attendance.cancelRsvp);
@@ -53,13 +51,13 @@ export default function ClientHomePage() {
   }, [nextSession?.myStatus]);
 
   useEffect(() => {
-    if (isLoaded && isSignedIn && me === null) ensureUser();
-  }, [isLoaded, isSignedIn, me, ensureUser]);
+    if (!isLoading && isAuthenticated && me === null) ensureUser();
+  }, [isLoading, isAuthenticated, me, ensureUser]);
 
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <RedirectToSignIn />;
+  if (isLoading) return null;
+  if (!isAuthenticated) return null;
 
-  const firstName = user?.firstName ?? me?.name?.split(" ")[0] ?? "daar";
+  const firstName = me?.name?.split(" ")[0] ?? "daar";
 
   async function handleRsvp(e: React.MouseEvent) {
     e.stopPropagation();

@@ -8,9 +8,12 @@
  * @module
  */
 
+import type * as ResendOTP from "../ResendOTP.js";
 import type * as attendance from "../attendance.js";
+import type * as auth from "../auth.js";
 import type * as exercises from "../exercises.js";
 import type * as groups from "../groups.js";
+import type * as http from "../http.js";
 import type * as lib from "../lib.js";
 import type * as sessions from "../sessions.js";
 import type * as users from "../users.js";
@@ -24,9 +27,12 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  ResendOTP: typeof ResendOTP;
   attendance: typeof attendance;
+  auth: typeof auth;
   exercises: typeof exercises;
   groups: typeof groups;
+  http: typeof http;
   lib: typeof lib;
   sessions: typeof sessions;
   users: typeof users;

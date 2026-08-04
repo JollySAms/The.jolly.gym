@@ -45,7 +45,7 @@ export const create = mutation({
       name: trimmed,
       exercises: args.exercises,
       archived: false,
-      createdBy: trainer.tokenIdentifier,
+      createdBy: trainer.tokenIdentifier!,
     });
   },
 });

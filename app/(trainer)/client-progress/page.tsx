@@ -1,8 +1,7 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useConvexAuth } from "convex/react";
 import { useState } from "react";
-import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse } from "date-fns";
@@ -11,8 +10,8 @@ import { TrendingUp } from "lucide-react";
 import { SearchCombobox } from "@/components/SearchCombobox";
 
 export default function TrainerProgressionPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
   const clients = useQuery(api.users.listClients, me?.role === "trainer" ? {} : "skip");
   const exercises = useQuery(api.exercises.list, me?.role === "trainer" ? {} : "skip");
 
@@ -33,8 +32,8 @@ export default function TrainerProgressionPage() {
 
   const loading = clients === undefined || exercises === undefined;
 
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <RedirectToSignIn />;
+  if (isLoading) return null;
+  if (!isAuthenticated) return null;
   if (me !== undefined && me?.role !== "trainer") return null;
 
   return (

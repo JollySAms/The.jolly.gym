@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ConvexAuthNextjsServerProvider } from "@convex-dev/auth/nextjs/server";
 import { Providers } from "./providers";
 import { Toaster } from "sonner";
 import "./globals.css";
@@ -28,10 +29,12 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <Providers>
-          {children}
-          <Toaster position="top-center" richColors />
-        </Providers>
+        <ConvexAuthNextjsServerProvider>
+          <Providers>
+            {children}
+            <Toaster position="top-center" richColors />
+          </Providers>
+        </ConvexAuthNextjsServerProvider>
       </body>
     </html>
   );

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useAuth } from "@clerk/nextjs";
+import { useConvexAuth } from "convex/react";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Home, CalendarDays, TrendingUp } from "lucide-react";
@@ -17,15 +17,15 @@ const navItems = [
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isLoaded, isSignedIn } = useAuth();
-  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
 
   useEffect(() => {
-    if (isLoaded && !isSignedIn) router.replace("/sign-in");
-  }, [isLoaded, isSignedIn, router]);
+    if (!isLoading && !isAuthenticated) router.replace("/sign-in");
+  }, [isLoading, isAuthenticated, router]);
 
   // Don't render client UI until auth is confirmed
-  if (!isLoaded || !isSignedIn || me === undefined) return null;
+  if (isLoading || !isAuthenticated || me === undefined) return null;
 
   return (
     <div className="min-h-screen bg-white pb-24">

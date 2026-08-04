@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "convex/react";
-import { useAuth } from "@clerk/nextjs";
+import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, addMonths, subMonths } from "date-fns";
@@ -21,14 +20,14 @@ type EnrichedSession = {
 };
 
 export function SessionsList() {
-  const { isSignedIn } = useAuth();
+  const { isAuthenticated } = useConvexAuth();
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
   const [expandedId, setExpandedId] = useState<Id<"sessions"> | null>(null);
   const [today] = useState(() => format(new Date(), "yyyy-MM-dd"));
 
   const sessions = useQuery(
     api.sessions.listByMonth,
-    isSignedIn
+    isAuthenticated
       ? { year: currentMonth.getFullYear(), month: currentMonth.getMonth() + 1 }
       : "skip"
   ) as EnrichedSession[] | undefined;

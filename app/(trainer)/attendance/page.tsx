@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "convex/react";
-import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
+import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { SessionsList } from "./_components/SessionsList";
 import { ClientOverview } from "./_components/ClientOverview";
@@ -10,12 +9,12 @@ import { ClientOverview } from "./_components/ClientOverview";
 type Tab = "sessies" | "overzicht";
 
 export default function AttendancePage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const me = useQuery(api.users.getMe, isSignedIn ? undefined : "skip");
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.getMe, isAuthenticated ? undefined : "skip");
   const [activeTab, setActiveTab] = useState<Tab>("sessies");
 
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <RedirectToSignIn />;
+  if (isLoading) return null;
+  if (!isAuthenticated) return null;
   if (me === undefined) return null; // wait for role to resolve
   if (me?.role !== "trainer") return null; // clients never see this page
 

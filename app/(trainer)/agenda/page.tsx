@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useQuery, useAction } from "convex/react";
+import { useConvexAuth, useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, addMonths, subMonths } from "date-fns";
 import { nl } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
-import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
 
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { DaySessionList } from "@/components/DaySessionList";
@@ -27,9 +26,9 @@ type EnrichedSession = {
 };
 
 export default function AgendaPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const ensureUser = useAction(api.users.ensureUser);
-  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const ensureUser = useMutation(api.users.ensureUser);
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
 
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
@@ -47,10 +46,10 @@ export default function AgendaPage() {
   // has no JWT, causing ctx.auth.getUserIdentity() to return null and the
   // mutation to throw "Not authenticated".
   useEffect(() => {
-    if (isLoaded && isSignedIn && me === null) {
+    if (!isLoading && isAuthenticated && me === null) {
       ensureUser();
     }
-  }, [isLoaded, isSignedIn, me, ensureUser]);
+  }, [isLoading, isAuthenticated, me, ensureUser]);
 
   // Wait for me to resolve before determining role — prevents trainer seeing client UI during load
   const isTrainer = me !== undefined && me?.role === "trainer";
@@ -58,19 +57,18 @@ export default function AgendaPage() {
   // "skip" prevents the query from running before Clerk has provided a token
   const monthSessions = useQuery(
     api.sessions.listByMonth,
-    isSignedIn
+    isAuthenticated
       ? { year: currentMonth.getFullYear(), month: currentMonth.getMonth() + 1 }
       : "skip"
   );
 
   const daySessions = useQuery(
     api.sessions.listByDate,
-    isSignedIn ? { date: format(selectedDate, "yyyy-MM-dd") } : "skip"
+    isAuthenticated ? { date: format(selectedDate, "yyyy-MM-dd") } : "skip"
   );
 
-  // Show nothing while Clerk loads, redirect to sign-in if not authenticated
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <RedirectToSignIn />;
+  // Show nothing while loading, middleware handles redirect if not authenticated
+  if (isLoading || !isAuthenticated) return null;
 
   return (
     <main className="min-h-screen bg-white max-w-lg mx-auto px-4 py-6">

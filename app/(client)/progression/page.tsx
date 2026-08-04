@@ -1,8 +1,7 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useConvexAuth } from "convex/react";
 import { useState } from "react";
-import { useAuth } from "@clerk/nextjs";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse } from "date-fns";
@@ -11,8 +10,8 @@ import { TrendingUp } from "lucide-react";
 import { SearchCombobox } from "@/components/SearchCombobox";
 
 export default function ProgressionPage() {
-  const { isSignedIn } = useAuth();
-  const exercises = useQuery(api.exercises.list, isSignedIn ? {} : "skip");
+  const { isAuthenticated } = useConvexAuth();
+  const exercises = useQuery(api.exercises.list, isAuthenticated ? {} : "skip");
   const [selectedId, setSelectedId] = useState<Id<"exercises"> | null>(null);
 
   const history = useQuery(

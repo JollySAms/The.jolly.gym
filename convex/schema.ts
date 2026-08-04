@@ -1,5 +1,6 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { authTables } from "@convex-dev/auth/server";
 
 // Shared validator for a single exercise entry inside a workout template or snapshot
 const workoutExerciseValidator = v.object({
@@ -9,13 +10,22 @@ const workoutExerciseValidator = v.object({
 });
 
 export default defineSchema({
-  // Tracks all users — role "trainer" for Jolmer, "client" for everyone else
+  ...authTables,
+  // Override the default authTables users table with our custom fields
   users: defineTable({
-    tokenIdentifier: v.string(), // stable Clerk identity key
-    name: v.string(),
-    email: v.string(),
-    role: v.union(v.literal("trainer"), v.literal("client")),
+    // Convex Auth fields (optional — managed by the auth library)
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    email: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+    // Custom fields
+    tokenIdentifier: v.optional(v.string()), // legacy identity key, updated on login
+    role: v.optional(v.union(v.literal("trainer"), v.literal("client"))),
   })
+    .index("email", ["email"])
     .index("by_token", ["tokenIdentifier"])
     .index("by_role", ["role"]),
 

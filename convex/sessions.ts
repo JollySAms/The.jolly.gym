@@ -85,7 +85,7 @@ export const create = mutation({
       groupId: args.groupId,
       capacity: 14,
       cancelled: false,
-      createdBy: trainer.tokenIdentifier,
+      createdBy: trainer.tokenIdentifier!,
       workoutId: args.workoutId,
       workoutSnapshot: snapshot,
     });
@@ -169,7 +169,7 @@ export const createBatch = mutation({
         groupId: args.groupId,
         capacity: 14,
         cancelled: false,
-        createdBy: trainer.tokenIdentifier,
+        createdBy: trainer.tokenIdentifier!,
         workoutId: args.workoutId,
         workoutSnapshot: snapshot,
       });

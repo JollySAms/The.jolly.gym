@@ -1,15 +1,14 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { useAuth } from "@clerk/nextjs";
+import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 
 export function ClientOverview() {
-  const { isSignedIn } = useAuth();
+  const { isAuthenticated } = useConvexAuth();
 
   const overview = useQuery(
     api.attendance.getClientAttendanceOverview,
-    isSignedIn ? {} : "skip"
+    isAuthenticated ? {} : "skip"
   );
 
   if (overview === undefined) {

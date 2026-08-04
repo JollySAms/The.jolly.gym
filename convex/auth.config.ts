@@ -1,7 +1,7 @@
 export default {
   providers: [
     {
-      domain: "https://clerk.jollygym.nl",
+      domain: process.env.CONVEX_SITE_URL,
       applicationID: "convex",
     },
   ],

@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
 import { Plus, Pencil, Users, Trash2 } from "lucide-react";
 
 import { GroupDialog } from "./_components/GroupDialog";
@@ -18,9 +17,9 @@ type Group = {
 };
 
 export default function GroupsPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
-  const groups = useQuery(api.groups.list, isSignedIn ? {} : "skip");
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
+  const groups = useQuery(api.groups.list, isAuthenticated ? {} : "skip");
   const removeGroup = useMutation(api.groups.remove);
 
   const [showAdd, setShowAdd] = useState(false);
@@ -33,8 +32,8 @@ export default function GroupsPage() {
     ? (groups?.find((g) => g._id === managingGroupId) as Group ?? null)
     : null;
 
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <RedirectToSignIn />;
+  if (isLoading) return null;
+  if (!isAuthenticated) return null;
 
   const isTrainer = me !== undefined && me?.role === "trainer";
 

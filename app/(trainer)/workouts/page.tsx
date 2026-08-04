@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery, useMutation, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { useAuth } from "@clerk/nextjs";
-import { RedirectToSignIn } from "@clerk/nextjs";
 import { Plus, Pencil, Trash2, Dumbbell } from "lucide-react";
 import { WorkoutDialog } from "./_components/WorkoutDialog";
 
@@ -22,17 +20,17 @@ type Workout = {
 };
 
 export default function WorkoutsPage() {
-  const { isLoaded, isSignedIn } = useAuth();
-  const me = useQuery(api.users.getMe, isSignedIn ? {} : "skip");
-  const workouts = useQuery(api.workouts.list, isSignedIn && me?.role === "trainer" ? {} : "skip");
+  const { isLoading, isAuthenticated } = useConvexAuth();
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
+  const workouts = useQuery(api.workouts.list, isAuthenticated && me?.role === "trainer" ? {} : "skip");
   const archiveWorkout = useMutation(api.workouts.archive);
 
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Workout | null>(null);
   const [confirmArchive, setConfirmArchive] = useState<Workout | null>(null);
 
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <RedirectToSignIn />;
+  if (isLoading) return null;
+  if (!isAuthenticated) return null;
 
   const isTrainer = me !== undefined && me?.role === "trainer";
 

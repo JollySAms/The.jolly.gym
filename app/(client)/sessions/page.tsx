@@ -1,13 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "convex/react";
+import { useQuery, useConvexAuth } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, addMonths, subMonths } from "date-fns";
 import { nl } from "date-fns/locale";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useAuth, RedirectToSignIn } from "@clerk/nextjs";
 
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { DaySessionList } from "@/components/DaySessionList";
@@ -29,7 +28,7 @@ type UpcomingSession = {
 };
 
 export default function ClientAgendaPage() {
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoading, isAuthenticated } = useConvexAuth();
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
   const [selectedDate, setSelectedDate] = useState<Date>(() => new Date());
   const [selectedSession, setSelectedSession] = useState<UpcomingSession | null>(null);
@@ -37,7 +36,7 @@ export default function ClientAgendaPage() {
   // Calendar dots — all sessions for the month
   const monthSessions = useQuery(
     api.sessions.listByMonth,
-    isSignedIn
+    isAuthenticated
       ? { year: currentMonth.getFullYear(), month: currentMonth.getMonth() + 1 }
       : "skip"
   );
@@ -45,11 +44,11 @@ export default function ClientAgendaPage() {
   // All upcoming sessions — filtered to selected date for the day list
   const allUpcoming = useQuery(
     api.sessions.listUpcoming,
-    isSignedIn ? {} : "skip"
+    isAuthenticated ? {} : "skip"
   );
 
-  if (!isLoaded) return null;
-  if (!isSignedIn) return <RedirectToSignIn />;
+  if (isLoading) return null;
+  if (!isAuthenticated) return null;
 
   const selectedDateStr = format(selectedDate, "yyyy-MM-dd");
   const sessionsForDay = (allUpcoming ?? []).filter(

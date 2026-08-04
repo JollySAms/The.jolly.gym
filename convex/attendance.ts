@@ -71,7 +71,7 @@ export const getSessionWithAttendees = query({
         const attendance = await ctx.db
           .query("attendance")
           .withIndex("by_session_and_user", (q) =>
-            q.eq("sessionId", args.sessionId).eq("userId", user.tokenIdentifier)
+            q.eq("sessionId", args.sessionId).eq("userId", user.tokenIdentifier!)
           )
           .unique();
 
@@ -83,8 +83,8 @@ export const getSessionWithAttendees = query({
           : "cancelled";
 
         return {
-          userId: user.tokenIdentifier,
-          name: user.name,
+          userId: user.tokenIdentifier!,
+          name: user.name ?? "",
           status: status as "coming" | "cancelled" | "no_response",
           isGroupMember: true,
         };
@@ -217,7 +217,7 @@ export const getClientAttendanceOverview = query({
             // Get all attendance records for this user, then count by sessionId in JS
             const myAttendance = await ctx.db
               .query("attendance")
-              .withIndex("by_user", (q) => q.eq("userId", user.tokenIdentifier))
+              .withIndex("by_user", (q) => q.eq("userId", user.tokenIdentifier!))
               .take(500);
 
             const attended = myAttendance.filter(
