@@ -6,13 +6,20 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [ResendOTP],
   callbacks: {
     async createOrUpdateUser(ctx: MutationCtx, args) {
+      console.log("createOrUpdateUser called", JSON.stringify({
+        existingUserId: args.existingUserId,
+        profile: args.profile,
+        type: args.type,
+        provider: args.provider?.id,
+      }));
+
       // Returning user — already linked to an auth account
       if (args.existingUserId) {
         return args.existingUserId;
       }
 
       // First-time sign-in: try to find existing user by email
-      const email = args.profile.email?.toLowerCase();
+      const email = (args.profile.email as string | undefined)?.toLowerCase();
       if (email) {
         // Try exact match via index first
         let existingUser = await ctx.db
