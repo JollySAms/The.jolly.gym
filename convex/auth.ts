@@ -19,7 +19,7 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       }
 
       // First-time sign-in: try to find existing user by email
-      const email = (args.profile.email as string | undefined)?.toLowerCase();
+      const email = ((args.profile.email as string | undefined) || undefined)?.toLowerCase()?.trim();
       if (email) {
         // Try exact match via index first
         let existingUser = await ctx.db

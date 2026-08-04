@@ -38,7 +38,8 @@ export default function SignInPage() {
                 setError("");
                 setLoading(true);
                 const formData = new FormData(e.currentTarget);
-                const email = formData.get("email") as string;
+                const email = (formData.get("email") as string).toLowerCase().trim();
+                formData.set("email", email);
                 try {
                   await signIn("resend-otp", formData);
                   setStep({ email });
