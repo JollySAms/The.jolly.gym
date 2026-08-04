@@ -11,7 +11,7 @@ export const ensureUser = mutation({
     if (!identity) throw new Error("Not authenticated");
 
     const tokenIdentifier = identity.tokenIdentifier;
-    const email = identity.email ?? "";
+    const email = (identity.email ?? "").toLowerCase();
     const name = identity.name ?? "";
 
     // 1. Already has the correct tokenIdentifier — nothing to do
@@ -23,12 +23,20 @@ export const ensureUser = mutation({
     if (existing) return existing._id;
 
     // 2. Find by email and migrate tokenIdentifier + related records
-    const oldUser = email
+    // Try index first, then case-insensitive fallback
+    let oldUser = email
       ? await ctx.db
           .query("users")
           .withIndex("email", (q) => q.eq("email", email))
           .first()
       : null;
+
+    if (!oldUser && email) {
+      const allUsers = await ctx.db.query("users").collect();
+      oldUser = allUsers.find(
+        (u) => u.email?.toLowerCase() === email
+      ) ?? null;
+    }
 
     if (oldUser) {
       const oldToken = oldUser.tokenIdentifier;
@@ -118,10 +126,18 @@ export const getMe = query({
 
     // Fallback: find by email (before tokenIdentifier migration runs)
     if (identity.email) {
-      return await ctx.db
+      const email = identity.email.toLowerCase();
+      const byEmail = await ctx.db
         .query("users")
-        .withIndex("email", (q) => q.eq("email", identity.email!))
+        .withIndex("email", (q) => q.eq("email", email))
         .first();
+      if (byEmail) return byEmail;
+
+      // Case-insensitive fallback
+      const allUsers = await ctx.db.query("users").collect();
+      return allUsers.find(
+        (u) => u.email?.toLowerCase() === email
+      ) ?? null;
     }
 
     return null;

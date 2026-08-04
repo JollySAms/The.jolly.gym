@@ -12,15 +12,27 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
       }
 
       // First-time sign-in: try to find existing user by email
-      const email = args.profile.email;
+      const email = args.profile.email?.toLowerCase();
       if (email) {
-        const existingUser = await ctx.db
+        // Try exact match via index first
+        let existingUser = await ctx.db
           .query("users")
           .withIndex("email", (q) => q.eq("email", email))
           .first();
 
+        // Fallback: case-insensitive scan (handles "Casper@" vs "casper@")
+        if (!existingUser) {
+          const allUsers = await ctx.db.query("users").collect();
+          existingUser = allUsers.find(
+            (u) => u.email?.toLowerCase() === email
+          ) ?? null;
+        }
+
         if (existingUser) {
-          // Link existing user to new auth account — preserves role and all data
+          // Normalize stored email to lowercase for future lookups
+          if (existingUser.email !== email) {
+            await ctx.db.patch(existingUser._id, { email });
+          }
           return existingUser._id;
         }
       }

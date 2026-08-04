@@ -16,10 +16,18 @@ export async function requireTrainer(ctx: QueryCtx) {
 
   // Fallback: find by email (before tokenIdentifier migration runs)
   if (!user && identity.email) {
+    const email = identity.email.toLowerCase();
     user = await ctx.db
       .query("users")
-      .withIndex("email", (q) => q.eq("email", identity.email!))
+      .withIndex("email", (q) => q.eq("email", email))
       .first();
+    // Case-insensitive fallback
+    if (!user) {
+      const allUsers = await ctx.db.query("users").collect();
+      user = allUsers.find(
+        (u) => u.email?.toLowerCase() === email
+      ) ?? null;
+    }
   }
 
   if (!user || user.role !== "trainer") {
