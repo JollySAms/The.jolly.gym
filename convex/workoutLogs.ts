@@ -14,7 +14,6 @@ export const getMyLog = query({
       .withIndex("by_session_and_user", (q) =>
         q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
-      .filter((q) => q.neq(q.field("deleted"), true))
       .take(50);
   },
 });
@@ -200,6 +199,17 @@ export const deleteLog = mutation({
 
     if (existing) {
       await ctx.db.patch(existing._id, { deleted: true });
+    } else {
+      // Create a deleted placeholder so the exercise stays removed on reopen
+      await ctx.db.insert("workoutLogs", {
+        sessionId: args.sessionId,
+        userId,
+        exerciseId: args.exerciseId,
+        exerciseName: "",
+        sets: [],
+        isSubstitute: false,
+        deleted: true,
+      });
     }
   },
 });

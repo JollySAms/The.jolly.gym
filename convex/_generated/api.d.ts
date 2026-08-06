@@ -15,6 +15,7 @@ import type * as exercises from "../exercises.js";
 import type * as groups from "../groups.js";
 import type * as http from "../http.js";
 import type * as lib from "../lib.js";
+import type * as migrations from "../migrations.js";
 import type * as sessions from "../sessions.js";
 import type * as users from "../users.js";
 import type * as workoutLogs from "../workoutLogs.js";
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   groups: typeof groups;
   http: typeof http;
   lib: typeof lib;
+  migrations: typeof migrations;
   sessions: typeof sessions;
   users: typeof users;
   workoutLogs: typeof workoutLogs;

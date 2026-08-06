@@ -42,7 +42,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
 
   const [exercises, setExercises] = useState<LoggedExercise[]>([]);
   const [initialized, setInitialized] = useState(false);
-  const [removedSubstituteIds, setRemovedSubstituteIds] = useState<Id<"exercises">[]>([]);
+  const [removedExerciseIds, setRemovedExerciseIds] = useState<Id<"exercises">[]>([]);
   // Tracks which prescribed exercises had saved data on open — needed to delete stale entries on save
   const [savedPrescribedIds, setSavedPrescribedIds] = useState<Set<Id<"exercises">>>(new Set());
   const [showPicker, setShowPicker] = useState(false);
@@ -59,19 +59,24 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
   useEffect(() => {
     if (existingLogs === undefined || initialized) return;
 
-    const logMap = new Map(existingLogs.map((l: { exerciseId: string | null | undefined; sets: { reps: number; weight: number }[]; isSubstitute?: boolean; exerciseName?: string }) => [l.exerciseId, l]));
+    const logMap = new Map(existingLogs.map((l: { exerciseId: string | null | undefined; sets: { reps: number; weight: number }[]; isSubstitute?: boolean; exerciseName?: string; deleted?: boolean }) => [l.exerciseId, l]));
 
-    const prescribed: LoggedExercise[] = workoutSnapshot.map((ex) => {
-      const saved = logMap.get(ex.exerciseId) as { sets: { reps: number; weight: number }[] } | undefined;
-      return {
-        exerciseId: ex.exerciseId,
-        exerciseName: ex.name,
-        isSubstitute: false,
-        sets: saved
-          ? saved.sets.map((s) => ({ id: newSetId(), reps: String(s.reps), weight: String(s.weight) }))
-          : Array.from({ length: ex.sets }, () => ({ id: newSetId(), reps: "", weight: "" })),
-      };
-    });
+    const prescribed: LoggedExercise[] = workoutSnapshot
+      .filter((ex) => {
+        const entry = logMap.get(ex.exerciseId) as { deleted?: boolean } | undefined;
+        return !entry?.deleted; // skip exercises the client explicitly removed
+      })
+      .map((ex) => {
+        const saved = logMap.get(ex.exerciseId) as { sets: { reps: number; weight: number }[] } | undefined;
+        return {
+          exerciseId: ex.exerciseId,
+          exerciseName: ex.name,
+          isSubstitute: false,
+          sets: saved
+            ? saved.sets.map((s) => ({ id: newSetId(), reps: String(s.reps), weight: String(s.weight) }))
+            : Array.from({ length: ex.sets }, () => ({ id: newSetId(), reps: "", weight: "" })),
+        };
+      });
 
     const snapshotIds = new Set(workoutSnapshot.map((e) => e.exerciseId));
     const substitutes: LoggedExercise[] = existingLogs
@@ -83,10 +88,13 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
         sets: l.sets.map((s) => ({ id: newSetId(), reps: String(s.reps), weight: String(s.weight) })),
       }));
 
-    // Track which prescribed exercises already have saved data
+    // Track which prescribed exercises already have saved (non-deleted) data
     const savedIds = new Set<Id<"exercises">>(
       workoutSnapshot
-        .filter((ex) => logMap.has(ex.exerciseId))
+        .filter((ex) => {
+          const entry = logMap.get(ex.exerciseId) as { deleted?: boolean } | undefined;
+          return entry && !entry.deleted;
+        })
         .map((ex) => ex.exerciseId)
     );
     setSavedPrescribedIds(savedIds);
@@ -117,28 +125,25 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
     const ex = exercises[exIndex];
     const updated = ex.sets.filter((_, j) => j !== setIndex);
 
-    // Substitute with no sets left: remove the whole exercise
-    if (ex.isSubstitute && updated.length === 0) {
-      removeSubstitute(exIndex);
+    // No sets left: remove the whole exercise
+    if (updated.length === 0) {
+      removeExercise(exIndex);
       return;
     }
-
-    // Prescribed exercises keep at least 1 row so the field stays visible
-    if (!ex.isSubstitute && updated.length === 0) return;
 
     setExercises((prev) =>
       prev.map((e, i) => (i === exIndex ? { ...e, sets: updated } : e))
     );
   }
 
-  function removeSubstitute(exIndex: number) {
+  function removeExercise(exIndex: number) {
     const ex = exercises[exIndex];
-    setRemovedSubstituteIds((prev) => [...prev, ex.exerciseId]);
+    setRemovedExerciseIds((prev) => [...prev, ex.exerciseId]);
     setExercises((prev) => prev.filter((_, i) => i !== exIndex));
   }
 
   function addSubstitute(exerciseId: Id<"exercises">, exerciseName: string) {
-    setRemovedSubstituteIds((prev) => prev.filter((id) => id !== exerciseId));
+    setRemovedExerciseIds((prev) => prev.filter((id) => id !== exerciseId));
     setExercises((prev) => {
       if (prev.some((e) => e.exerciseId === exerciseId)) return prev;
       return [...prev, { exerciseId, exerciseName, isSubstitute: true, sets: [{ id: newSetId(), reps: "", weight: "" }] }];
@@ -173,7 +178,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
             isSubstitute: ex.isSubstitute,
           })
         ),
-        ...removedSubstituteIds.map((exerciseId) => deleteLog({ sessionId, exerciseId })),
+        ...removedExerciseIds.map((exerciseId) => deleteLog({ sessionId, exerciseId })),
         ...stalePrescribedIds.map((exerciseId) => deleteLog({ sessionId, exerciseId })),
       ]);
 
@@ -250,14 +255,12 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
                           </span>
                         )}
                       </div>
-                      {ex.isSubstitute && (
-                        <button
-                          onClick={() => removeSubstitute(exIndex)}
-                          className="p-1 rounded hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      )}
+                      <button
+                        onClick={() => removeExercise(exIndex)}
+                        className="p-1 rounded hover:bg-red-50 text-gray-300 hover:text-red-500 transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
 
                     {/* Column labels */}
