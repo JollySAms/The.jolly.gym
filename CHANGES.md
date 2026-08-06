@@ -12,7 +12,7 @@
 
 ## 🔴 Bugs / Urgent (fix first — affects real users now)
 
-- [x] **#6 — Sessie timeout** — Opgelost. Clerk gemigreerd van Development naar Production mode. App live op jollygym.nl. Auto-migratie van gebruikersdata werkt via Clerk API.
+- [x] **#6 — Sessie timeout** — Opgelost. Clerk→Convex Auth migratie + cookieConfig fix. Auth cookies waren session cookies (verdwenen bij app sluiten); nu persistent 90 dagen via `cookieConfig: { maxAge }` in middleware.ts.
 
 ---
 
@@ -63,6 +63,7 @@
 | 2026-08-06 | Data migration: all userId fields migrated from Clerk tokenIdentifier to Convex user _id | Casper + Claude |
 | 2026-08-06 | Post-migration cleanup: sign-out buttons (trainer + client nav), resend code button (sign-in), removed ensureUser calls, renamed clientTokenIdentifier→clientId, removed `as any` casts, cleaned auth.ts (throw on missing email, removed full-table scan fallback), updated schema comments, .env.local.example, OTP email now says "15 minuten geldig" | Casper + Claude |
 | 2026-08-06 | Bottom bar + sign-out UX: removed sign-out from mobile bottom nav (both roles), added subtle sign-out to client /home and trainer /agenda (mobile), added confirmation dialog everywhere, enlarged client bottom bar (icons 26px, text-sm, py-5), slightly enlarged trainer bottom bar (py-5) | Casper + Claude |
+| 2026-08-06 | Fix #6 (again): auth cookies were session cookies — added cookieConfig maxAge 90 days to middleware so refresh tokens persist when app is closed | Casper + Claude |
 
 ---
 
@@ -71,5 +72,5 @@
 - Always check with Jolmer before making UI-facing design changes
 - App is live at jollygym.nl — real clients are using it
 - Dutch language used throughout client-facing UI
-- #6 (session timeout) — resolved by switching from Clerk to Convex Auth (1-year session / 90-day inactive timeout)
+- #6 (session timeout) — resolved by switching from Clerk to Convex Auth (1-year session / 90-day inactive timeout) + setting cookieConfig.maxAge to 90 days in middleware (without this, auth cookies were session-only and got cleared on app close)
 - #3 (exercise vervangen) needs code review first to assess current substitute flow
