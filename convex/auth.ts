@@ -6,13 +6,6 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [ResendOTP],
   callbacks: {
     async createOrUpdateUser(ctx: MutationCtx, args) {
-      console.log("createOrUpdateUser called", JSON.stringify({
-        existingUserId: args.existingUserId,
-        profile: args.profile,
-        type: args.type,
-        provider: args.provider?.id,
-      }));
-
       // Returning user — already linked to an auth account
       if (args.existingUserId) {
         return args.existingUserId;
