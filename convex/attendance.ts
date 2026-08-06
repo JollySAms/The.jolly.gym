@@ -293,6 +293,53 @@ export const undoAbsent = mutation({
   },
 });
 
+// Trainer — manually set a client's attendance status
+export const trainerSetAttendance = mutation({
+  args: {
+    sessionId: v.id("sessions"),
+    userId: v.string(),
+    status: v.union(v.literal("coming"), v.literal("cancelled"), v.literal("no_response")),
+  },
+  handler: async (ctx, args) => {
+    await requireTrainer(ctx);
+
+    const session = await ctx.db.get(args.sessionId);
+    if (!session || session.cancelled) throw new Error("Sessie niet gevonden");
+
+    const user = await ctx.db.get(args.userId as Id<"users">);
+
+    const existing = await ctx.db
+      .query("attendance")
+      .withIndex("by_session_and_user", (q) =>
+        q.eq("sessionId", args.sessionId).eq("userId", args.userId)
+      )
+      .unique();
+
+    if (args.status === "no_response") {
+      // Soft-delete the record → returns to "no response"
+      if (existing && !existing.deleted) {
+        await ctx.db.patch(existing._id, { deleted: true });
+      }
+      return;
+    }
+
+    if (existing) {
+      await ctx.db.patch(existing._id, {
+        status: args.status,
+        deleted: false,
+      });
+    } else {
+      await ctx.db.insert("attendance", {
+        sessionId: args.sessionId,
+        userId: args.userId,
+        userName: user?.name ?? "Onbekend",
+        status: args.status,
+        signedUpAt: Date.now(),
+      });
+    }
+  },
+});
+
 // Cancel your RSVP for a session
 export const cancelRsvp = mutation({
   args: { sessionId: v.id("sessions") },

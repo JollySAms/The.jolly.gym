@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parse, addHours } from "date-fns";
@@ -24,15 +24,24 @@ type Props = {
 };
 
 const STATUS_CONFIG = {
-  coming:      { label: "Gaat",            className: "text-green-600" },
-  cancelled:   { label: "Gaat niet",       className: "text-red-500"   },
-  no_response: { label: "Nog geen reactie", className: "text-gray-500"  },
+  coming:      { label: "Komt",     bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+  cancelled:   { label: "Afgemeld", bg: "bg-red-50",   text: "text-red-600",   border: "border-red-200" },
+  no_response: { label: "–",        bg: "bg-gray-50",  text: "text-gray-400",  border: "border-gray-200" },
 } as const;
 
-export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
+type AttendeeStatus = "coming" | "cancelled" | "no_response";
+
+const STATUS_CYCLE: Record<AttendeeStatus, AttendeeStatus> = {
+  no_response: "coming",
+  coming: "cancelled",
+  cancelled: "no_response",
+};
+
+export function SessionDetailSheet({ session, isTrainer, onClose, onEdit }: Props) {
   const attendees = useQuery(api.attendance.getSessionWithAttendees, {
     sessionId: session._id,
   });
+  const setAttendance = useMutation(api.attendance.trainerSetAttendance);
 
   const liveCount = attendees
     ? (attendees.members.filter((m) => m?.status === "coming").length +
@@ -124,9 +133,18 @@ export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
                       className="flex items-center justify-between py-2 border-b border-gray-50"
                     >
                       <span className="text-sm text-gray-800">{m.name}</span>
-                      <span className={`text-xs font-medium ${cfg.className}`}>
-                        {cfg.label}
-                      </span>
+                      {isTrainer ? (
+                        <button
+                          onClick={() => setAttendance({ sessionId: session._id, userId: m.userId, status: STATUS_CYCLE[m.status] })}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${cfg.bg} ${cfg.text} ${cfg.border}`}
+                        >
+                          {cfg.label}
+                        </button>
+                      ) : (
+                        <span className={`text-xs font-medium ${cfg.text}`}>
+                          {cfg.label}
+                        </span>
+                      )}
                     </div>
                   );
                 })}
@@ -134,15 +152,27 @@ export function SessionDetailSheet({ session, onClose, onEdit }: Props) {
                 {attendees.crossGroupComers.length > 0 && (
                   <>
                     <p className="text-xs text-gray-500 pt-3 pb-1">Ook aanwezig</p>
-                    {attendees.crossGroupComers.map((c) => (
-                      <div
-                        key={c.userId}
-                        className="flex items-center justify-between py-2 border-b border-gray-50"
-                      >
-                        <span className="text-sm text-gray-800">{c.name}</span>
-                        <span className="text-xs font-medium text-green-600">Gaat</span>
-                      </div>
-                    ))}
+                    {attendees.crossGroupComers.map((c) => {
+                      const guestCfg = STATUS_CONFIG.coming;
+                      return (
+                        <div
+                          key={c.userId}
+                          className="flex items-center justify-between py-2 border-b border-gray-50"
+                        >
+                          <span className="text-sm text-gray-800">{c.name}</span>
+                          {isTrainer ? (
+                            <button
+                              onClick={() => setAttendance({ sessionId: session._id, userId: c.userId, status: STATUS_CYCLE.coming })}
+                              className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${guestCfg.bg} ${guestCfg.text} ${guestCfg.border}`}
+                            >
+                              {guestCfg.label}
+                            </button>
+                          ) : (
+                            <span className="text-xs font-medium text-green-600">Komt</span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </>
                 )}
 

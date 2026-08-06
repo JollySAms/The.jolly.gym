@@ -1,6 +1,6 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 
@@ -15,8 +15,21 @@ type Attendee = {
   isGroupMember: boolean;
 };
 
+const STATUS_CYCLE: Record<Attendee["status"], Attendee["status"]> = {
+  no_response: "coming",
+  coming: "cancelled",
+  cancelled: "no_response",
+};
+
+const STATUS_CONFIG = {
+  coming:      { label: "Komt",     bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+  cancelled:   { label: "Afgemeld", bg: "bg-red-50",   text: "text-red-600",   border: "border-red-200" },
+  no_response: { label: "–",        bg: "bg-gray-50",  text: "text-gray-400",  border: "border-gray-200" },
+} as const;
+
 export function SessionAttendees({ sessionId }: Props) {
   const data = useQuery(api.attendance.getSessionWithAttendees, { sessionId });
+  const setAttendance = useMutation(api.attendance.trainerSetAttendance);
 
   if (data === undefined) {
     return <p className="text-sm text-gray-500 py-2">Laden...</p>;
@@ -34,27 +47,32 @@ export function SessionAttendees({ sessionId }: Props) {
     return <p className="text-sm text-gray-500 py-2 italic">Nog niemand aangemeld</p>;
   }
 
+  function handleToggle(userId: string, currentStatus: Attendee["status"]) {
+    const nextStatus = STATUS_CYCLE[currentStatus];
+    setAttendance({ sessionId, userId, status: nextStatus });
+  }
+
   return (
     <ul className="mt-2 space-y-1">
-      {all.map((m) => (
-        <li key={m.userId} className="flex items-center justify-between text-sm">
-          <span className="text-gray-700">
-            {m.name ?? "Onbekend"}
-            {!m.isGroupMember && (
-              <span className="ml-1.5 text-xs text-gray-500">(gast)</span>
-            )}
-          </span>
-          {m.status === "coming" && (
-            <span className="text-green-600 font-medium">Komt</span>
-          )}
-          {m.status === "cancelled" && (
-            <span className="text-red-500 font-medium">Afgemeld</span>
-          )}
-          {m.status === "no_response" && (
-            <span className="text-gray-500">–</span>
-          )}
-        </li>
-      ))}
+      {all.map((m) => {
+        const cfg = STATUS_CONFIG[m.status];
+        return (
+          <li key={m.userId} className="flex items-center justify-between text-sm">
+            <span className="text-gray-700">
+              {m.name ?? "Onbekend"}
+              {!m.isGroupMember && (
+                <span className="ml-1.5 text-xs text-gray-500">(gast)</span>
+              )}
+            </span>
+            <button
+              onClick={() => handleToggle(m.userId, m.status)}
+              className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${cfg.bg} ${cfg.text} ${cfg.border}`}
+            >
+              {cfg.label}
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }
