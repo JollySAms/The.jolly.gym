@@ -138,6 +138,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
 
   function removeExercise(exIndex: number) {
     const ex = exercises[exIndex];
+    if (!window.confirm(`${ex.exerciseName} verwijderen?`)) return;
     setRemovedExerciseIds((prev) => [...prev, ex.exerciseId]);
     setExercises((prev) => prev.filter((_, i) => i !== exIndex));
   }
