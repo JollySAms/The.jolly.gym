@@ -4,6 +4,12 @@ import { MutationCtx } from "./_generated/server";
 
 export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
   providers: [ResendOTP],
+  session: {
+    // Keep sessions alive for 1 year (default is 30 days)
+    totalDurationMs: 1000 * 60 * 60 * 24 * 365,
+    // Inactive sessions expire after 90 days without opening the app
+    inactiveDurationMs: 1000 * 60 * 60 * 24 * 90,
+  },
   callbacks: {
     async createOrUpdateUser(ctx: MutationCtx, args) {
       // Returning user — already linked to an auth account
