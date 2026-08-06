@@ -85,7 +85,7 @@ export const create = mutation({
       groupId: args.groupId,
       capacity: 14,
       cancelled: false,
-      createdBy: trainer.tokenIdentifier!,
+      createdBy: trainer._id,
       workoutId: args.workoutId,
       workoutSnapshot: snapshot,
     });
@@ -169,7 +169,7 @@ export const createBatch = mutation({
         groupId: args.groupId,
         capacity: 14,
         cancelled: false,
-        createdBy: trainer.tokenIdentifier!,
+        createdBy: trainer._id,
         workoutId: args.workoutId,
         workoutSnapshot: snapshot,
       });
@@ -195,7 +195,7 @@ export const cancel = mutation({
 export const listUpcoming = query({
   args: {},
   handler: async (ctx, _args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
     const today = new Date().toISOString().slice(0, 10);
 
     const sessions = await ctx.db
@@ -206,7 +206,7 @@ export const listUpcoming = query({
       .take(500);
 
     return await Promise.all(
-      sessions.map((s) => enrichSessionForClient(ctx, s, identity.tokenIdentifier))
+      sessions.map((s) => enrichSessionForClient(ctx, s, userId))
     );
   },
 });
@@ -217,13 +217,13 @@ export const listUpcoming = query({
 export const getMyNextSession = query({
   args: {},
   handler: async (ctx, _args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
     const today = new Date().toISOString().slice(0, 10);
 
     // All attendance records for this user
     const myAttendance = await ctx.db
       .query("attendance")
-      .withIndex("by_user", (q) => q.eq("userId", identity.tokenIdentifier))
+      .withIndex("by_user", (q) => q.eq("userId", userId))
       .take(200);
 
     const comingAttendance = myAttendance.filter((a) => a.status === "coming");
@@ -238,16 +238,12 @@ export const getMyNextSession = query({
       const next = rsvpdSessions.sort(
         (a, b) => a!.date.localeCompare(b!.date) || a!.time.localeCompare(b!.time)
       )[0]!;
-      const enriched = await enrichSessionForClient(ctx, next, identity.tokenIdentifier);
+      const enriched = await enrichSessionForClient(ctx, next, userId);
       return enriched;
     }
 
     // Fallback: find this user's group and return its next session
-    const me = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
-
+    const me = await ctx.db.get(userId);
     if (!me) return null;
 
     // Scan groups to find the one this user belongs to
@@ -264,7 +260,7 @@ export const getMyNextSession = query({
       .first();
 
     if (!nextGroupSession) return null;
-    return enrichSessionForClient(ctx, nextGroupSession, identity.tokenIdentifier);
+    return enrichSessionForClient(ctx, nextGroupSession, userId);
   },
 });
 
@@ -289,7 +285,7 @@ async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
 async function enrichSessionForClient(
   ctx: QueryCtx,
   session: Doc<"sessions">,
-  tokenIdentifier: string
+  userId: string
 ) {
   const group = await ctx.db.get(session.groupId);
 
@@ -303,19 +299,15 @@ async function enrichSessionForClient(
   const myAttendance = await ctx.db
     .query("attendance")
     .withIndex("by_session_and_user", (q) =>
-      q.eq("sessionId", session._id).eq("userId", tokenIdentifier)
+      q.eq("sessionId", session._id).eq("userId", userId)
     )
     .unique();
 
   // Soft-deleted record means the client undid their "niet aanwezig" → treat as no response
   const myStatus = myAttendance?.deleted ? null : (myAttendance?.status ?? null);
 
-  // Look up user document to check group membership
-  const me = await ctx.db
-    .query("users")
-    .withIndex("by_token", (q) => q.eq("tokenIdentifier", tokenIdentifier))
-    .unique();
-  const isGroupMember = !!(me && (group?.memberIds ?? []).includes(me._id));
+  // Check group membership directly by userId
+  const isGroupMember = (group?.memberIds ?? []).includes(userId as any);
 
   // Fetch workout name from the template (not the snapshot, which has no name)
   let workoutName: string | null = null;

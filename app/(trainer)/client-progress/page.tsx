@@ -26,7 +26,7 @@ export default function TrainerProgressionPage() {
   );
 
   const selectedClientName =
-    clients?.find((c) => c.tokenIdentifier === selectedClientToken)?.name ?? null;
+    clients?.find((c) => c._id === selectedClientToken)?.name ?? null;
   const selectedExerciseName =
     exercises?.find((e) => e._id === selectedExerciseId)?.name ?? null;
 
@@ -53,7 +53,7 @@ export default function TrainerProgressionPage() {
           <SearchCombobox
             items={(clients ?? []).map((c) => ({
               label: c.name,
-              value: c.tokenIdentifier,
+              value: c._id,
             }))}
             value={selectedClientToken}
             onChange={(v) => {

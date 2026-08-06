@@ -22,13 +22,12 @@ export const getForSession = query({
 export const getMyStatus = query({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const identity = await ctx.auth.getUserIdentity();
-    if (!identity) return null;
+    const userId = await requireAuth(ctx);
 
     const record = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_user", (q) =>
-        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
       .unique();
 
@@ -45,7 +44,7 @@ export const getMyStatus = query({
 export const getSessionWithAttendees = query({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
 
     const session = await ctx.db.get(args.sessionId);
     if (!session) return null;
@@ -56,22 +55,19 @@ export const getSessionWithAttendees = query({
     const memberIds = group.memberIds ?? [];
 
     // Look up current user to determine group membership
-    const currentUser = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
+    const currentUser = await ctx.db.get(userId);
     const isCurrentUserGroupMember = !!(currentUser && memberIds.includes(currentUser._id));
 
     // Fetch each group member and their attendance record
     const members = await Promise.all(
-      memberIds.map(async (userId) => {
-        const user = await ctx.db.get(userId);
+      memberIds.map(async (memberId) => {
+        const user = await ctx.db.get(memberId);
         if (!user) return null;
 
         const attendance = await ctx.db
           .query("attendance")
           .withIndex("by_session_and_user", (q) =>
-            q.eq("sessionId", args.sessionId).eq("userId", user.tokenIdentifier!)
+            q.eq("sessionId", args.sessionId).eq("userId", memberId)
           )
           .unique();
 
@@ -83,7 +79,7 @@ export const getSessionWithAttendees = query({
           : "cancelled";
 
         return {
-          userId: user.tokenIdentifier!,
+          userId: memberId,
           name: user.name ?? "",
           status: status as "coming" | "cancelled" | "no_response",
           isGroupMember: true,
@@ -99,13 +95,13 @@ export const getSessionWithAttendees = query({
       )
       .take(14);
 
-    // Build set of group member token identifiers for fast lookup — reuse already-fetched members
-    const groupMemberTokens = new Set(
+    // Build set of group member IDs for fast lookup
+    const groupMemberIdSet = new Set(
       members.filter(Boolean).map((m) => m!.userId)
     );
 
     const crossGroupComers = allComing
-      .filter((a) => !groupMemberTokens.has(a.userId) && !a.deleted)
+      .filter((a) => !groupMemberIdSet.has(a.userId as any) && !a.deleted)
       .map((a) => ({
         userId: a.userId,
         name: a.userName,
@@ -125,13 +121,10 @@ export const getSessionWithAttendees = query({
 export const rsvp = mutation({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
 
     // Trainers manage sessions, they don't attend them
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
+    const user = await ctx.db.get(userId);
     if (user?.role === "trainer") throw new Error("Trainers cannot RSVP to sessions");
 
     const session = await ctx.db.get(args.sessionId);
@@ -149,7 +142,7 @@ export const rsvp = mutation({
     const existing = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_user", (q) =>
-        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
       .unique();
 
@@ -167,8 +160,8 @@ export const rsvp = mutation({
     } else {
       await ctx.db.insert("attendance", {
         sessionId: args.sessionId,
-        userId: identity.tokenIdentifier,
-        userName: identity.name ?? identity.email ?? "Unknown",
+        userId,
+        userName: user?.name ?? "Unknown",
         status: "coming",
         signedUpAt: Date.now(),
       });
@@ -210,14 +203,14 @@ export const getClientAttendanceOverview = query({
         const sessionIdSet = new Set(groupSessions.map((s) => s._id));
 
         const members = await Promise.all(
-          (group.memberIds ?? []).map(async (userId) => {
-            const user = await ctx.db.get(userId);
+          (group.memberIds ?? []).map(async (memberId) => {
+            const user = await ctx.db.get(memberId);
             if (!user) return null;
 
             // Get all attendance records for this user, then count by sessionId in JS
             const myAttendance = await ctx.db
               .query("attendance")
-              .withIndex("by_user", (q) => q.eq("userId", user.tokenIdentifier!))
+              .withIndex("by_user", (q) => q.eq("userId", memberId))
               .take(500);
 
             const attended = myAttendance.filter(
@@ -247,12 +240,9 @@ export const getClientAttendanceOverview = query({
 export const markAbsent = mutation({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
 
-    const user = await ctx.db
-      .query("users")
-      .withIndex("by_token", (q) => q.eq("tokenIdentifier", identity.tokenIdentifier))
-      .unique();
+    const user = await ctx.db.get(userId);
     if (user?.role === "trainer") throw new Error("Trainers cannot mark absence");
 
     // Only group members may use this — cross-group visitors use RSVP only
@@ -260,14 +250,14 @@ export const markAbsent = mutation({
     if (!session || session.cancelled) throw new Error("Session not found");
     const group = await ctx.db.get(session.groupId);
     if (!group) throw new Error("Group not found");
-    if (!(group.memberIds ?? []).includes(user!._id)) {
+    if (!(group.memberIds ?? []).includes(userId)) {
       throw new Error("Not a member of this group");
     }
 
     const existing = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_user", (q) =>
-        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
       .unique();
 
@@ -276,8 +266,8 @@ export const markAbsent = mutation({
     } else {
       await ctx.db.insert("attendance", {
         sessionId: args.sessionId,
-        userId: identity.tokenIdentifier,
-        userName: identity.name ?? identity.email ?? "Unknown",
+        userId,
+        userName: user?.name ?? "Unknown",
         status: "cancelled",
         signedUpAt: Date.now(),
       });
@@ -289,12 +279,12 @@ export const markAbsent = mutation({
 export const undoAbsent = mutation({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
 
     const existing = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_user", (q) =>
-        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
       .unique();
 
@@ -307,12 +297,12 @@ export const undoAbsent = mutation({
 export const cancelRsvp = mutation({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
 
     const existing = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_user", (q) =>
-        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
       .unique();
 

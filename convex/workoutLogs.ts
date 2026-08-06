@@ -8,11 +8,11 @@ const setValidator = v.object({ reps: v.number(), weight: v.number() });
 export const getMyLog = query({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
     return await ctx.db
       .query("workoutLogs")
       .withIndex("by_session_and_user", (q) =>
-        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
       .filter((q) => q.neq(q.field("deleted"), true))
       .take(50);
@@ -23,11 +23,11 @@ export const getMyLog = query({
 export const getMyProgressionForExercise = query({
   args: { exerciseId: v.id("exercises") },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
     const logs = await ctx.db
       .query("workoutLogs")
       .withIndex("by_user_and_exercise", (q) =>
-        q.eq("userId", identity.tokenIdentifier).eq("exerciseId", args.exerciseId)
+        q.eq("userId", userId).eq("exerciseId", args.exerciseId)
       )
       .filter((q) => q.neq(q.field("deleted"), true))
       .take(50);
@@ -83,13 +83,13 @@ export const getForExercise = query({
 export const getMyLastLogs = query({
   args: { exerciseIds: v.array(v.id("exercises")) },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
     const entries = await Promise.all(
       args.exerciseIds.map(async (exerciseId) => {
         const last = await ctx.db
           .query("workoutLogs")
           .withIndex("by_user_and_exercise", (q) =>
-            q.eq("userId", identity.tokenIdentifier).eq("exerciseId", exerciseId)
+            q.eq("userId", userId).eq("exerciseId", exerciseId)
           )
           .filter((q) => q.neq(q.field("deleted"), true))
           .order("desc")
@@ -113,12 +113,13 @@ export const saveLog = mutation({
     isSubstitute: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
-    const userId = identity.tokenIdentifier;
+    const userId = await requireAuth(ctx);
 
     // Validate the session exists and is not cancelled
     const session = await ctx.db.get(args.sessionId);
     if (!session || session.cancelled) throw new Error("Sessie niet gevonden");
+
+    const user = await ctx.db.get(userId);
 
     // Auto-RSVP: ensure a "coming" attendance record exists before saving the log
     const existingAttendance = await ctx.db
@@ -140,7 +141,7 @@ export const saveLog = mutation({
         await ctx.db.insert("attendance", {
           sessionId: args.sessionId,
           userId,
-          userName: identity.name ?? identity.email ?? "Unknown",
+          userName: user?.name ?? "Unknown",
           status: "coming",
           signedUpAt: Date.now(),
         });
@@ -188,11 +189,11 @@ export const deleteLog = mutation({
     exerciseId: v.id("exercises"),
   },
   handler: async (ctx, args) => {
-    const identity = await requireAuth(ctx);
+    const userId = await requireAuth(ctx);
     const existing = await ctx.db
       .query("workoutLogs")
       .withIndex("by_session_and_user", (q) =>
-        q.eq("sessionId", args.sessionId).eq("userId", identity.tokenIdentifier)
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
       )
       .filter((q) => q.eq(q.field("exerciseId"), args.exerciseId))
       .first();
