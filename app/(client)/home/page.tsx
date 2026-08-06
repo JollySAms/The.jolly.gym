@@ -5,7 +5,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, parseISO } from "date-fns";
 import { nl } from "date-fns/locale";
-import { Dumbbell, CalendarDays, Users } from "lucide-react";
+import { Dumbbell, CalendarDays, Users, LogOut } from "lucide-react";
+import { SignOutDialog } from "@/components/SignOutDialog";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { ClientSessionDetailSheet } from "@/app/(client)/_components/ClientSessionDetailSheet";
@@ -110,8 +111,16 @@ export default function ClientHomePage() {
 
   return (
     <div className="max-w-lg mx-auto px-4 py-8">
-      {/* Greeting */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Hoi {firstName}</h1>
+      {/* Header with sign-out */}
+      <div className="flex items-start justify-between mb-1">
+        <h1 className="text-2xl font-bold text-gray-900">Hoi {firstName}</h1>
+        <SignOutDialog>
+          <button className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors mt-1">
+            <LogOut size={14} />
+            Uitloggen
+          </button>
+        </SignOutDialog>
+      </div>
       <p className="text-sm text-gray-500 mb-8 capitalize">
         {todayLabel ?? ""}
       </p>

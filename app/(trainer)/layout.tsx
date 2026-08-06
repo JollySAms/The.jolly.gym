@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { useConvexAuth, useQuery } from "convex/react";
-import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@/convex/_generated/api";
 import { CalendarDays, Users, Dumbbell, ClipboardList, TrendingUp, LogOut } from "lucide-react";
+import { SignOutDialog } from "@/components/SignOutDialog";
 
 const navItems = [
   { href: "/agenda", label: "Agenda", icon: CalendarDays },
@@ -20,13 +20,7 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
   const pathname = usePathname();
   const router = useRouter();
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const { signOut } = useAuthActions();
   const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
-
-  async function handleSignOut() {
-    await signOut();
-    router.replace("/sign-in");
-  }
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/sign-in");
@@ -63,13 +57,12 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
           })}
         </nav>
         <div className="mt-auto pt-6">
-          <button
-            onClick={handleSignOut}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors w-full"
-          >
-            <LogOut size={18} />
-            Uitloggen
-          </button>
+          <SignOutDialog>
+            <button className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors w-full">
+              <LogOut size={18} />
+              Uitloggen
+            </button>
+          </SignOutDialog>
         </div>
       </aside>
 
@@ -84,22 +77,15 @@ export default function TrainerLayout({ children }: { children: React.ReactNode 
             <Link
               key={href}
               href={href}
-              className={`flex-1 flex flex-col items-center gap-1.5 py-4 text-xs font-medium transition-colors ${
+              className={`flex-1 flex flex-col items-center gap-1.5 py-5 text-xs font-medium transition-colors ${
                 active ? "text-gray-900" : "text-gray-400"
               }`}
             >
-              <Icon size={20} strokeWidth={active ? 2.5 : 1.5} />
+              <Icon size={22} strokeWidth={active ? 2.5 : 1.5} />
               {label}
             </Link>
           );
         })}
-        <button
-          onClick={handleSignOut}
-          className="flex-1 flex flex-col items-center gap-1.5 py-4 text-xs font-medium text-gray-400 transition-colors"
-        >
-          <LogOut size={20} strokeWidth={1.5} />
-          Uitloggen
-        </button>
       </nav>
     </div>
   );

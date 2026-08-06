@@ -6,7 +6,8 @@ import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, addMonths, subMonths } from "date-fns";
 import { nl } from "date-fns/locale";
-import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
+import { ChevronLeft, ChevronRight, Plus, LogOut } from "lucide-react";
+import { SignOutDialog } from "@/components/SignOutDialog";
 
 import { CalendarGrid } from "@/components/CalendarGrid";
 import { DaySessionList } from "@/components/DaySessionList";
@@ -55,8 +56,16 @@ export default function AgendaPage() {
 
   return (
     <main className="min-h-screen bg-white max-w-lg mx-auto px-4 py-6">
-      {/* Page title */}
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">The Jolly Gym agenda</h1>
+      {/* Page title with sign-out (mobile only) */}
+      <div className="flex items-start justify-between mb-4">
+        <h1 className="text-2xl font-bold text-gray-900">The Jolly Gym agenda</h1>
+        <SignOutDialog>
+          <button className="md:hidden flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors mt-1">
+            <LogOut size={14} />
+            Uitloggen
+          </button>
+        </SignOutDialog>
+      </div>
 
       {/* Month navigation */}
       <div className="flex items-center justify-between mb-4">
