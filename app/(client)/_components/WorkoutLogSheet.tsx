@@ -36,7 +36,7 @@ type Props = {
 };
 
 export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClose }: Props) {
-  const existingLogs = useQuery(api.workoutLogs.getMyLog, { sessionId });
+  const existingLogs = useQuery(api.workoutLogs.getMyRawLog, { sessionId });
   const saveLog = useMutation(api.workoutLogs.saveLog);
   const deleteLog = useMutation(api.workoutLogs.deleteLog);
 

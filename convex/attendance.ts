@@ -297,7 +297,7 @@ export const undoAbsent = mutation({
 export const trainerSetAttendance = mutation({
   args: {
     sessionId: v.id("sessions"),
-    userId: v.string(),
+    userId: v.id("users"),
     status: v.union(v.literal("coming"), v.literal("cancelled"), v.literal("no_response")),
   },
   handler: async (ctx, args) => {
@@ -306,7 +306,8 @@ export const trainerSetAttendance = mutation({
     const session = await ctx.db.get(args.sessionId);
     if (!session || session.cancelled) throw new Error("Sessie niet gevonden");
 
-    const user = await ctx.db.get(args.userId as Id<"users">);
+    const user = await ctx.db.get(args.userId);
+    if (!user) throw new Error("Gebruiker niet gevonden");
 
     const existing = await ctx.db
       .query("attendance")

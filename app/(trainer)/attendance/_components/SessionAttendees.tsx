@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { STATUS_CONFIG, STATUS_CYCLE } from "@/lib/attendanceStatus";
 
 type Props = {
   sessionId: Id<"sessions">;
@@ -14,18 +15,6 @@ type Attendee = {
   status: "coming" | "cancelled" | "no_response";
   isGroupMember: boolean;
 };
-
-const STATUS_CYCLE: Record<Attendee["status"], Attendee["status"]> = {
-  no_response: "coming",
-  coming: "cancelled",
-  cancelled: "no_response",
-};
-
-const STATUS_CONFIG = {
-  coming:      { label: "Komt",     bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-  cancelled:   { label: "Afgemeld", bg: "bg-red-50",   text: "text-red-600",   border: "border-red-200" },
-  no_response: { label: "–",        bg: "bg-gray-50",  text: "text-gray-400",  border: "border-gray-200" },
-} as const;
 
 export function SessionAttendees({ sessionId }: Props) {
   const data = useQuery(api.attendance.getSessionWithAttendees, { sessionId });
@@ -49,7 +38,7 @@ export function SessionAttendees({ sessionId }: Props) {
 
   function handleToggle(userId: string, currentStatus: Attendee["status"]) {
     const nextStatus = STATUS_CYCLE[currentStatus];
-    setAttendance({ sessionId, userId, status: nextStatus });
+    setAttendance({ sessionId, userId: userId as Id<"users">, status: nextStatus });
   }
 
   return (

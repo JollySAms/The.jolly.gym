@@ -3,6 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
+import { STATUS_CONFIG, STATUS_CYCLE } from "@/lib/attendanceStatus";
 import { format, parse, addHours } from "date-fns";
 import { nl } from "date-fns/locale";
 import { X, Clock } from "lucide-react";
@@ -23,19 +24,6 @@ type Props = {
   onEdit?: () => void;
 };
 
-const STATUS_CONFIG = {
-  coming:      { label: "Komt",     bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
-  cancelled:   { label: "Afgemeld", bg: "bg-red-50",   text: "text-red-600",   border: "border-red-200" },
-  no_response: { label: "–",        bg: "bg-gray-50",  text: "text-gray-400",  border: "border-gray-200" },
-} as const;
-
-type AttendeeStatus = "coming" | "cancelled" | "no_response";
-
-const STATUS_CYCLE: Record<AttendeeStatus, AttendeeStatus> = {
-  no_response: "coming",
-  coming: "cancelled",
-  cancelled: "no_response",
-};
 
 export function SessionDetailSheet({ session, isTrainer, onClose, onEdit }: Props) {
   const attendees = useQuery(api.attendance.getSessionWithAttendees, {
@@ -135,7 +123,7 @@ export function SessionDetailSheet({ session, isTrainer, onClose, onEdit }: Prop
                       <span className="text-sm text-gray-800">{m.name}</span>
                       {isTrainer ? (
                         <button
-                          onClick={() => setAttendance({ sessionId: session._id, userId: m.userId, status: STATUS_CYCLE[m.status] })}
+                          onClick={() => setAttendance({ sessionId: session._id, userId: m.userId as Id<"users">, status: STATUS_CYCLE[m.status] })}
                           className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${cfg.bg} ${cfg.text} ${cfg.border}`}
                         >
                           {cfg.label}
@@ -162,7 +150,7 @@ export function SessionDetailSheet({ session, isTrainer, onClose, onEdit }: Prop
                           <span className="text-sm text-gray-800">{c.name}</span>
                           {isTrainer ? (
                             <button
-                              onClick={() => setAttendance({ sessionId: session._id, userId: c.userId, status: STATUS_CYCLE.coming })}
+                              onClick={() => setAttendance({ sessionId: session._id, userId: c.userId as Id<"users">, status: STATUS_CYCLE.coming })}
                               className={`px-2.5 py-1 rounded-lg text-xs font-medium border transition-colors ${guestCfg.bg} ${guestCfg.text} ${guestCfg.border}`}
                             >
                               {guestCfg.label}

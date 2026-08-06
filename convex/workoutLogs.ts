@@ -4,8 +4,23 @@ import { requireAuth, requireTrainer } from "./lib";
 
 const setValidator = v.object({ reps: v.number(), weight: v.number() });
 
-// Client — get my own log entries for a specific session
+// Client — get my own log entries for a specific session (excludes deleted)
 export const getMyLog = query({
+  args: { sessionId: v.id("sessions") },
+  handler: async (ctx, args) => {
+    const userId = await requireAuth(ctx);
+    return await ctx.db
+      .query("workoutLogs")
+      .withIndex("by_session_and_user", (q) =>
+        q.eq("sessionId", args.sessionId).eq("userId", userId)
+      )
+      .filter((q) => q.neq(q.field("deleted"), true))
+      .take(50);
+  },
+});
+
+// Client — get all log entries including soft-deleted (used by WorkoutLogSheet to detect removed exercises)
+export const getMyRawLog = query({
   args: { sessionId: v.id("sessions") },
   handler: async (ctx, args) => {
     const userId = await requireAuth(ctx);
