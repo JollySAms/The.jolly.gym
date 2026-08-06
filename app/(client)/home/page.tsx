@@ -25,7 +25,6 @@ type NextSession = {
 
 export default function ClientHomePage() {
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const ensureUser = useMutation(api.users.ensureUser);
   const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
   const nextSession = useQuery(
     api.sessions.getMyNextSession,
@@ -49,10 +48,6 @@ export default function ClientHomePage() {
   useEffect(() => {
     if (nextSession) setLocalStatus(nextSession.myStatus);
   }, [nextSession?.myStatus]);
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && me === null) ensureUser();
-  }, [isLoading, isAuthenticated, me, ensureUser]);
 
   if (isLoading) return null;
   if (!isAuthenticated) return null;

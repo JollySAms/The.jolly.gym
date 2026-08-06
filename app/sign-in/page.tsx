@@ -7,6 +7,8 @@ export default function SignInPage() {
   const { signIn } = useAuthActions();
   const [step, setStep] = useState<"email" | { email: string }>("email");
   const [loading, setLoading] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
   const [error, setError] = useState("");
 
   return (
@@ -128,11 +130,35 @@ export default function SignInPage() {
               </button>
               <button
                 type="button"
+                disabled={resendLoading}
+                onClick={async () => {
+                  if (typeof step !== "object") return;
+                  setResendLoading(true);
+                  setResendSent(false);
+                  setError("");
+                  try {
+                    const formData = new FormData();
+                    formData.set("email", step.email);
+                    await signIn("resend-otp", formData);
+                    setResendSent(true);
+                  } catch {
+                    setError("Kon geen nieuwe code versturen. Probeer het opnieuw.");
+                  } finally {
+                    setResendLoading(false);
+                  }
+                }}
+                className="w-full mt-2 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors disabled:opacity-50"
+              >
+                {resendLoading ? "Code versturen..." : resendSent ? "Code verstuurd ✓" : "Stuur nieuwe code"}
+              </button>
+              <button
+                type="button"
                 onClick={() => {
                   setStep("email");
                   setError("");
+                  setResendSent(false);
                 }}
-                className="w-full mt-2 py-2 text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                className="w-full py-2 text-sm text-gray-400 hover:text-gray-600 transition-colors"
               >
                 Ander e-mailadres
               </button>

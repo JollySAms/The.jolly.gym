@@ -86,7 +86,7 @@ After the handover, you own all of these:
 | GitHub | Stores the code | github.com |
 | Vercel | Hosts the live app | vercel.com |
 | Convex | The database | convex.dev |
-| Clerk | User login/auth | clerk.com |
+| Resend | Sends login codes via email | resend.com |
 | Hostnet | jollygym.nl domain | hostnet.nl |
 
 ---

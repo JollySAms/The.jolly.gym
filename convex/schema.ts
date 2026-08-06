@@ -22,7 +22,7 @@ export default defineSchema({
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
     // Custom fields
-    tokenIdentifier: v.optional(v.string()), // legacy identity key, updated on login
+    tokenIdentifier: v.optional(v.string()), // legacy field from Clerk migration — kept to avoid schema errors, not used
     role: v.optional(v.union(v.literal("trainer"), v.literal("client"))),
   })
     .index("email", ["email"])
@@ -48,7 +48,7 @@ export default defineSchema({
     name: v.string(),                              // e.g. "Leg Day A"
     exercises: v.array(workoutExerciseValidator),  // ordered list of exercises + sets
     archived: v.boolean(),
-    createdBy: v.string(),                         // tokenIdentifier of trainer
+    createdBy: v.string(),                         // Convex user _id of trainer
   }).index("by_archived", ["archived"]),
 
   // Sessions created by Jolmer — one session per group per time slot
@@ -58,7 +58,7 @@ export default defineSchema({
     groupId: v.id("groups"),
     capacity: v.number(),    // always 14
     cancelled: v.boolean(),
-    createdBy: v.string(),   // tokenIdentifier of trainer
+    createdBy: v.string(),   // Convex user _id of trainer
     // Workout assignment — snapshot is frozen at assignment time so past sessions are unaffected
     workoutId: v.optional(v.id("workouts")),              // reference to the template (for display)
     workoutSnapshot: v.optional(v.array(workoutExerciseValidator)), // frozen copy of exercises + sets
@@ -69,7 +69,7 @@ export default defineSchema({
   // RSVP records — one per (session, user) pair
   attendance: defineTable({
     sessionId: v.id("sessions"),
-    userId: v.string(),       // tokenIdentifier
+    userId: v.string(),       // Convex user _id
     userName: v.string(),     // cached display name for attendee list
     status: v.union(v.literal("coming"), v.literal("cancelled")),
     signedUpAt: v.number(),   // timestamp for "Gemaakt op" column
@@ -83,7 +83,7 @@ export default defineSchema({
   // Clients log their actual sets/reps/weight. isSubstitute=true means they replaced a prescribed exercise.
   workoutLogs: defineTable({
     sessionId: v.id("sessions"),
-    userId: v.string(),          // tokenIdentifier of the client
+    userId: v.string(),          // Convex user _id of the client
     exerciseId: v.id("exercises"),
     exerciseName: v.string(),    // cached for display even if exercise is archived
     sets: v.array(v.object({ reps: v.number(), weight: v.number() })), // weight in kg

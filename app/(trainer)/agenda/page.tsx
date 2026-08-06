@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useConvexAuth, useQuery, useMutation } from "convex/react";
+import { useState } from "react";
+import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
 import { format, addMonths, subMonths } from "date-fns";
@@ -27,7 +27,6 @@ type EnrichedSession = {
 
 export default function AgendaPage() {
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const ensureUser = useMutation(api.users.ensureUser);
   const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
 
   const [currentMonth, setCurrentMonth] = useState<Date>(() => new Date());
@@ -36,25 +35,9 @@ export default function AgendaPage() {
   const [editingSession, setEditingSession] = useState<EnrichedSession | null>(null);
   const [showAddSession, setShowAddSession] = useState(false);
 
-  // Create user record on first login.
-  // We only call ensureUser when ALL of these are true:
-  //   1. Clerk has finished loading (isLoaded)
-  //   2. Clerk confirms the user is signed in (isSignedIn)
-  //   3. The getMe query has resolved (me !== undefined)
-  //   4. No user record exists yet (me === null)
-  // Without the isSignedIn + isLoaded guards, this fires while Convex still
-  // has no JWT, causing ctx.auth.getUserIdentity() to return null and the
-  // mutation to throw "Not authenticated".
-  useEffect(() => {
-    if (!isLoading && isAuthenticated && me === null) {
-      ensureUser();
-    }
-  }, [isLoading, isAuthenticated, me, ensureUser]);
-
   // Wait for me to resolve before determining role — prevents trainer seeing client UI during load
   const isTrainer = me !== undefined && me?.role === "trainer";
 
-  // "skip" prevents the query from running before Clerk has provided a token
   const monthSessions = useQuery(
     api.sessions.listByMonth,
     isAuthenticated

@@ -3,10 +3,10 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { useConvexAuth } from "convex/react";
-import { useQuery } from "convex/react";
+import { useConvexAuth, useQuery } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "@/convex/_generated/api";
-import { Home, CalendarDays, TrendingUp } from "lucide-react";
+import { Home, CalendarDays, TrendingUp, LogOut } from "lucide-react";
 
 const navItems = [
   { href: "/home", label: "Home", icon: Home },
@@ -18,7 +18,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
   const pathname = usePathname();
   const router = useRouter();
   const { isLoading, isAuthenticated } = useConvexAuth();
+  const { signOut } = useAuthActions();
   const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
+
+  async function handleSignOut() {
+    await signOut();
+    router.replace("/sign-in");
+  }
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/sign-in");
@@ -49,6 +55,13 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
             </Link>
           );
         })}
+        <button
+          onClick={handleSignOut}
+          className="flex-1 flex flex-col items-center gap-1.5 py-4 text-xs font-medium text-gray-400 transition-colors"
+        >
+          <LogOut size={22} strokeWidth={1.5} />
+          Uitloggen
+        </button>
       </nav>
     </div>
   );

@@ -59,6 +59,9 @@
 |------|--------------|-----|
 | 2026-06-18 | CHANGES.md created + full list categorized | Casper + Claude |
 | 2026-06-18 | #7, #14, #15 implemented | Casper + Claude |
+| 2026-08-04 | Migrated auth from Clerk to Convex Auth (email OTP via Resend) | Casper + Claude |
+| 2026-08-06 | Data migration: all userId fields migrated from Clerk tokenIdentifier to Convex user _id | Casper + Claude |
+| 2026-08-06 | Post-migration cleanup: sign-out buttons (trainer + client nav), resend code button (sign-in), removed ensureUser calls, renamed clientTokenIdentifier→clientId, removed `as any` casts, cleaned auth.ts (throw on missing email, removed full-table scan fallback), updated schema comments, .env.local.example, OTP email now says "15 minuten geldig" | Casper + Claude |
 
 ---
 
@@ -67,5 +70,5 @@
 - Always check with Jolmer before making UI-facing design changes
 - App is live at jollygym.nl — real clients are using it
 - Dutch language used throughout client-facing UI
-- #6 (session timeout) requires Clerk Production migration — not a simple dashboard setting (extending session lifetime in Dev mode is a paid Clerk feature)
+- #6 (session timeout) — resolved by switching from Clerk to Convex Auth (1-year session / 90-day inactive timeout)
 - #3 (exercise vervangen) needs code review first to assess current substitute flow

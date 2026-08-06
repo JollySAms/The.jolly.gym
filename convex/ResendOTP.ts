@@ -19,7 +19,7 @@ export const ResendOTP = Resend({
       from: "The Jolly Gym <noreply@jollygym.nl>",
       to: [email],
       subject: `Je inlogcode: ${token}`,
-      text: `Je inlogcode voor The Jolly Gym is: ${token}\n\nVoer deze code in op jollygym.nl om in te loggen.`,
+      text: `Je inlogcode voor The Jolly Gym is: ${token}\n\nDeze code is 15 minuten geldig. Voer deze code in op jollygym.nl om in te loggen.`,
     });
     if (error) {
       throw new Error("Kon de e-mail niet versturen");

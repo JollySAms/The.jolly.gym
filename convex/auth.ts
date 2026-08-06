@@ -19,34 +19,28 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
 
       // First-time sign-in: try to find existing user by email
       const email = ((args.profile.email as string | undefined) || undefined)?.toLowerCase()?.trim();
-      if (email) {
-        // Try exact match via index first
-        let existingUser = await ctx.db
-          .query("users")
-          .withIndex("email", (q) => q.eq("email", email))
-          .first();
+      if (!email) {
+        throw new Error("E-mailadres is vereist om in te loggen.");
+      }
 
-        // Fallback: case-insensitive scan (handles "Casper@" vs "casper@")
-        if (!existingUser) {
-          const allUsers = await ctx.db.query("users").collect();
-          existingUser = allUsers.find(
-            (u) => u.email?.toLowerCase() === email
-          ) ?? null;
-        }
+      // Look up existing user by email index
+      const existingUser = await ctx.db
+        .query("users")
+        .withIndex("email", (q) => q.eq("email", email))
+        .first();
 
-        if (existingUser) {
-          // Normalize stored email to lowercase for future lookups
-          if (existingUser.email !== email) {
-            await ctx.db.patch(existingUser._id, { email });
-          }
-          return existingUser._id;
+      if (existingUser) {
+        // Normalize stored email to lowercase for future lookups
+        if (existingUser.email !== email) {
+          await ctx.db.patch(existingUser._id, { email });
         }
+        return existingUser._id;
       }
 
       // Brand new user — default to client role
       return await ctx.db.insert("users", {
-        email: email ?? undefined,
-        name: email ?? "Nieuw lid",
+        email,
+        name: email,
         role: "client",
       });
     },

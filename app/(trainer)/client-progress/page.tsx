@@ -15,18 +15,18 @@ export default function TrainerProgressionPage() {
   const clients = useQuery(api.users.listClients, me?.role === "trainer" ? {} : "skip");
   const exercises = useQuery(api.exercises.list, me?.role === "trainer" ? {} : "skip");
 
-  const [selectedClientToken, setSelectedClientToken] = useState<string | null>(null);
+  const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedExerciseId, setSelectedExerciseId] = useState<Id<"exercises"> | null>(null);
 
   const history = useQuery(
     api.workoutLogs.getForExercise,
-    selectedClientToken && selectedExerciseId
-      ? { exerciseId: selectedExerciseId, clientTokenIdentifier: selectedClientToken }
+    selectedClientId && selectedExerciseId
+      ? { exerciseId: selectedExerciseId, clientId: selectedClientId }
       : "skip"
   );
 
   const selectedClientName =
-    clients?.find((c) => c._id === selectedClientToken)?.name ?? null;
+    clients?.find((c) => c._id === selectedClientId)?.name ?? null;
   const selectedExerciseName =
     exercises?.find((e) => e._id === selectedExerciseId)?.name ?? null;
 
@@ -55,9 +55,9 @@ export default function TrainerProgressionPage() {
               label: c.name,
               value: c._id,
             }))}
-            value={selectedClientToken}
+            value={selectedClientId}
             onChange={(v) => {
-              setSelectedClientToken(v);
+              setSelectedClientId(v);
               setSelectedExerciseId(null);
             }}
             placeholder="Zoek klant..."
@@ -73,16 +73,16 @@ export default function TrainerProgressionPage() {
             value={selectedExerciseId}
             onChange={(v) => setSelectedExerciseId(v as Id<"exercises"> | null)}
             placeholder="Zoek oefening..."
-            disabled={!selectedClientToken}
+            disabled={!selectedClientId}
           />
         )}
       </div>
 
       {/* History */}
-      {!selectedClientToken || !selectedExerciseId ? (
+      {!selectedClientId || !selectedExerciseId ? (
         <div className="text-center py-12">
           <p className="text-sm text-gray-500">
-            {!selectedClientToken
+            {!selectedClientId
               ? "Kies eerst een klant"
               : "Kies een oefening om de progressie te zien"}
           </p>

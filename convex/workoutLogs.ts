@@ -51,14 +51,14 @@ export const getMyProgressionForExercise = query({
 export const getForExercise = query({
   args: {
     exerciseId: v.id("exercises"),
-    clientTokenIdentifier: v.string(),
+    clientId: v.string(),
   },
   handler: async (ctx, args) => {
     await requireTrainer(ctx);
     const logs = await ctx.db
       .query("workoutLogs")
       .withIndex("by_user_and_exercise", (q) =>
-        q.eq("userId", args.clientTokenIdentifier).eq("exerciseId", args.exerciseId)
+        q.eq("userId", args.clientId).eq("exerciseId", args.exerciseId)
       )
       .filter((q) => q.neq(q.field("deleted"), true))
       .take(50);

@@ -285,7 +285,7 @@ async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
 async function enrichSessionForClient(
   ctx: QueryCtx,
   session: Doc<"sessions">,
-  userId: string
+  userId: Id<"users">
 ) {
   const group = await ctx.db.get(session.groupId);
 
@@ -307,7 +307,7 @@ async function enrichSessionForClient(
   const myStatus = myAttendance?.deleted ? null : (myAttendance?.status ?? null);
 
   // Check group membership directly by userId
-  const isGroupMember = (group?.memberIds ?? []).includes(userId as any);
+  const isGroupMember = (group?.memberIds ?? []).includes(userId);
 
   // Fetch workout name from the template (not the snapshot, which has no name)
   let workoutName: string | null = null;

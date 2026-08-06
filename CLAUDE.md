@@ -19,7 +19,7 @@ Changes (attendance, logged weights) must sync to Jolmer in real-time, and vice 
 | Framework | Next.js 15 (App Router) |
 | Language | TypeScript |
 | Styling | Tailwind CSS + shadcn/ui |
-| Auth | Clerk (trainer role for Jolmer, clients invited via link) |
+| Auth | Convex Auth (email OTP via Resend — no passwords, no session expiry issues) |
 | Database | Convex (real-time sync) |
 | PWA | `next-pwa` (installable, service worker) |
 | Push notifications | OneSignal (free up to 10,000 subscribers) |
@@ -144,8 +144,7 @@ Chart of progression over time per exercise, available on both `/progression` (c
 - `NEXT_PUBLIC_CONVEX_URL` = `https://robust-hornet-740.eu-west-1.convex.cloud`
 - `NEXT_PUBLIC_CONVEX_SITE_URL` = `https://robust-hornet-740.eu-west-1.convex.site`
 - `CONVEX_DEPLOY_KEY` = prod deploy key from Convex dashboard (robust-hornet-740 → Settings → Deploy Keys)
-- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` = Clerk publishable key
-- `CLERK_SECRET_KEY` = Clerk secret key
+- Auth env vars (`AUTH_RESEND_KEY`, `JWT_PRIVATE_KEY`, `JWKS`, `SITE_URL`) are set in the Convex dashboard, not Vercel
 
 **If something works locally but not in prod:** 99% chance Convex code was not deployed to prod. Check Vercel build log — it should say "Deployed Convex functions to robust-hornet-740" near the top.
 
@@ -171,7 +170,7 @@ Reschedule requests · Stripe/payments · Nutrition tracking · Multi-trainer su
 ## Auth & Permissions
 
 - Jolmer: single trainer account, full access
-- Clients: invited via Clerk link, see all sessions in agenda, only their own progression
+- Clients: sign in with email OTP, see all sessions in agenda, only their own progression
 - **Trainer-only** (clients must never access): creating/editing/deleting workout templates, creating/editing/cancelling sessions, managing groups. Clients can customize their own workout log per session (add/remove exercises, change sets/reps) — changes are personal and never affect the master workout or other clients.
 - All Convex mutations for trainer actions must verify the caller has the trainer role. Never render trainer UI in client routes.
 

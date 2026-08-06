@@ -101,7 +101,7 @@ export const getSessionWithAttendees = query({
     );
 
     const crossGroupComers = allComing
-      .filter((a) => !groupMemberIdSet.has(a.userId as any) && !a.deleted)
+      .filter((a) => !groupMemberIdSet.has(a.userId as Id<"users">) && !a.deleted)
       .map((a) => ({
         userId: a.userId,
         name: a.userName,
