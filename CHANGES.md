@@ -64,7 +64,7 @@
 | 2026-08-06 | Post-migration cleanup: sign-out buttons (trainer + client nav), resend code button (sign-in), removed ensureUser calls, renamed clientTokenIdentifier→clientId, removed `as any` casts, cleaned auth.ts (throw on missing email, removed full-table scan fallback), updated schema comments, .env.local.example, OTP email now says "15 minuten geldig" | Casper + Claude |
 | 2026-08-06 | Bottom bar + sign-out UX: removed sign-out from mobile bottom nav (both roles), added subtle sign-out to client /home and trainer /agenda (mobile), added confirmation dialog everywhere, enlarged client bottom bar (icons 26px, text-sm, py-5), slightly enlarged trainer bottom bar (py-5) | Casper + Claude |
 | 2026-08-06 | Fix #6 (again): auth cookies were session cookies — added cookieConfig maxAge 90 days to middleware so refresh tokens persist when app is closed | Casper + Claude |
-| 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). | Jolmer + Claude |
+| 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). Migrated user data for Michiel (vergouwen@dkva.nl) and Sebastián (sebastian-rojas@hotmail.com) in prod. Convex CLI ingelogd. | Jolmer + Claude |
 
 ---
 
@@ -81,8 +81,8 @@
 
 ## Starting Message (voor volgende sessie)
 
-> Vorige sessie (10 aug): #16 (pre-fill vorige sessie) is gebouwd en gedeployed. GitHub CLI is geïnstalleerd en werkt.
+> Vorige sessie (10 aug): #16 (pre-fill vorige sessie) gebouwd en gedeployed. User data migratie voor Michiel en Sebastián uitgevoerd in prod. GitHub CLI en Convex CLI zijn ingelogd en werken.
+>
+> Oude user accounts (michielvergouwen70@gmail.com, sebas.rojas.2011@gmail.com) kunnen verwijderd worden in Convex prod dashboard (robust-hornet-740). In DEV database (academic-cat-468) bestaat ook een dubbel account voor jolmer@jolmer.com.
 >
 > Open items om op te pakken: #1 (drag-to-reorder exercises), #3 (exercise vervangen beoordelen), #17 (eerdere sessies in agenda). Zie de volledige lijst hierboven.
->
-> Let op: in de DEV database bestaat een dubbel account voor jolmer@jolmer.com — het nieuwe account (zonder trainer role) kan verwijderd worden in het Convex dashboard (academic-cat-468).
