@@ -48,6 +48,7 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
   const [showPicker, setShowPicker] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [prefilled, setPrefilled] = useState(false);
 
   const exerciseIds = exercises.map((e) => e.exerciseId);
   const lastLogs = useQuery(
@@ -151,6 +152,29 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
     });
   }
 
+  function prefillFromPrevious() {
+    if (!lastLogs) return;
+    setExercises((prev) =>
+      prev.map((ex) => {
+        const prevSets = lastLogs[ex.exerciseId];
+        if (!prevSets) return ex;
+        return {
+          ...ex,
+          sets: ex.sets.map((set, i) => {
+            const prev = prevSets[i];
+            if (!prev) return set;
+            return {
+              ...set,
+              reps: set.reps === "" ? String(prev.reps) : set.reps,
+              weight: set.weight === "" ? String(prev.weight) : set.weight,
+            };
+          }),
+        };
+      })
+    );
+    setPrefilled(true);
+  }
+
   async function handleSave() {
     setSaving(true);
     try {
@@ -244,6 +268,16 @@ export function WorkoutLogSheet({ sessionId, workoutName, workoutSnapshot, onClo
               </div>
             ) : (
               <>
+                {lastLogs && Object.keys(lastLogs).length > 0 && (
+                  <button
+                    onClick={prefillFromPrevious}
+                    disabled={prefilled}
+                    className="w-full py-2.5 rounded-xl text-sm font-medium border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    {prefilled ? "Vorige sessie geladen" : "Laad vorige sessie"}
+                  </button>
+                )}
+
                 {exercises.map((ex, exIndex) => (
                   <div key={ex.exerciseId}>
                     {/* Exercise header */}
