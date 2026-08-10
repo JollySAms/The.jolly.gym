@@ -75,7 +75,7 @@
 - Dutch language used throughout client-facing UI
 - #6 (session timeout) — resolved by switching from Clerk to Convex Auth (1-year session / 90-day inactive timeout) + setting cookieConfig.maxAge to 90 days in middleware (without this, auth cookies were session-only and got cleared on app close)
 - #3 (exercise vervangen) needs code review first to assess current substitute flow
-- **Sessie afsluiten:** altijd testen → commit & push → CHANGES.md updaten (inclusief starting message hieronder). Bij grotere features optioneel `/code-review` en `/qa-agent` draaien.
+- **Sessie afsluiten:** altijd testen → commit & push → localhost stoppen → CHANGES.md updaten (inclusief starting message hieronder). Bij grotere features optioneel `/code-review` en `/qa-agent` draaien.
 
 ---
 
