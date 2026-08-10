@@ -21,7 +21,8 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) router.replace("/sign-in");
-  }, [isLoading, isAuthenticated, router]);
+    if (me !== undefined && me?.role === "trainer") router.replace("/agenda");
+  }, [isLoading, isAuthenticated, me, router]);
 
   // Don't render client UI until auth is confirmed
   if (isLoading || !isAuthenticated || me === undefined) return null;

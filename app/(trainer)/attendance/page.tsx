@@ -10,7 +10,7 @@ type Tab = "sessies" | "overzicht";
 
 export default function AttendancePage() {
   const { isLoading, isAuthenticated } = useConvexAuth();
-  const me = useQuery(api.users.getMe, isAuthenticated ? undefined : "skip");
+  const me = useQuery(api.users.getMe, isAuthenticated ? {} : "skip");
   const [activeTab, setActiveTab] = useState<Tab>("sessies");
 
   if (isLoading) return null;

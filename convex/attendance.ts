@@ -9,12 +9,13 @@ export const getForSession = query({
   handler: async (ctx, args) => {
     await requireAuth(ctx);
 
-    return await ctx.db
+    const records = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_status", (q) =>
         q.eq("sessionId", args.sessionId).eq("status", "coming")
       )
-      .take(14); // max capacity
+      .take(30); // fetch extra to account for deleted records
+    return records.filter((a) => !a.deleted).slice(0, 14);
   },
 });
 
@@ -214,11 +215,11 @@ export const getClientAttendanceOverview = query({
               .take(500);
 
             const attended = myAttendance.filter(
-              (a) => a.status === "coming" && sessionIdSet.has(a.sessionId)
+              (a) => a.status === "coming" && !a.deleted && sessionIdSet.has(a.sessionId)
             ).length;
 
             return {
-              name: user.name,
+              name: user.name ?? user.email ?? "Onbekend",
               totalSessions: groupSessions.length,
               attended,
             };

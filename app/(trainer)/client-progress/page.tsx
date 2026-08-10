@@ -52,7 +52,7 @@ export default function TrainerProgressionPage() {
         ) : (
           <SearchCombobox
             items={(clients ?? []).map((c) => ({
-              label: c.name,
+              label: c.name ?? c.email ?? "Onbekend",
               value: c._id,
             }))}
             value={selectedClientId}

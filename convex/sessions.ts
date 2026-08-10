@@ -226,7 +226,7 @@ export const getMyNextSession = query({
       .withIndex("by_user", (q) => q.eq("userId", userId))
       .take(200);
 
-    const comingAttendance = myAttendance.filter((a) => a.status === "coming");
+    const comingAttendance = myAttendance.filter((a) => a.status === "coming" && !a.deleted);
 
     // Fetch those sessions and keep only future, non-cancelled ones
     const rsvpdSessions = (
@@ -267,12 +267,14 @@ export const getMyNextSession = query({
 // Internal helper — joins session with its group and attendance count
 async function enrichSession(ctx: QueryCtx, session: Doc<"sessions">) {
   const group = await ctx.db.get(session.groupId);
-  const coming = await ctx.db
+  const comingRaw = await ctx.db
     .query("attendance")
     .withIndex("by_session_and_status", (q) =>
       q.eq("sessionId", session._id).eq("status", "coming")
     )
     .take(session.capacity + 10); // capacity (14) + headroom for cross-group guests
+
+  const coming = comingRaw.filter((a) => !a.deleted);
 
   return {
     ...session,
@@ -289,12 +291,14 @@ async function enrichSessionForClient(
 ) {
   const group = await ctx.db.get(session.groupId);
 
-  const coming = await ctx.db
+  const comingRaw = await ctx.db
     .query("attendance")
     .withIndex("by_session_and_status", (q) =>
       q.eq("sessionId", session._id).eq("status", "coming")
     )
     .take(session.capacity + 10); // capacity (14) + headroom for cross-group guests
+
+  const coming = comingRaw.filter((a) => !a.deleted);
 
   const myAttendance = await ctx.db
     .query("attendance")

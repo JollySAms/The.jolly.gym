@@ -72,10 +72,10 @@ export function MembersSheet({ group, onClose }: Props) {
                     >
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-semibold text-gray-600">
-                          {client.name.charAt(0).toUpperCase()}
+                          {(client.name ?? "?").charAt(0).toUpperCase()}
                         </div>
                         <div className="text-left">
-                          <p className="text-sm font-medium text-gray-900">{client.name}</p>
+                          <p className="text-sm font-medium text-gray-900">{client.name ?? "Onbekend"}</p>
                           <p className="text-xs text-gray-500">{client.email}</p>
                         </div>
                       </div>

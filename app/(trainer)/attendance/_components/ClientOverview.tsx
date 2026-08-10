@@ -51,7 +51,7 @@ export function ClientOverview() {
                 <li key={i} className="flex items-center gap-3">
                   {/* Name */}
                   <span className="text-sm text-gray-700 w-32 shrink-0 truncate">
-                    {member.name}
+                    {member.name ?? "Onbekend"}
                   </span>
 
                   {/* Progress bar */}
