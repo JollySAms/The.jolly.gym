@@ -32,7 +32,7 @@
 - [x] **#8 — Trainer past aanwezigheid aan** — Jolmer kan aanwezigheid van klanten handmatig aanpassen. Tappable status buttons op attendance page en agenda session detail.
 - [ ] **#1 — Volgorde wisselen** — Drag-to-reorder exercises tijdens workout aanmaken én tijdens loggen. Vereist een reorder UI (drag handles of up/down knoppen).
 - [ ] **#3 — Exercise vervangen** — Exercise moet makkelijk vervangen kunnen worden. Controleren of huidige substitute flow goed genoeg is of verbeterd moet worden.
-- [ ] **#16 — Pre-fill vorige keer** — Optie om workout log automatisch in te vullen met waarden van de vorige keer. "Laad vorige sessie" knop in WorkoutLogSheet.
+- [x] **#16 — Pre-fill vorige keer** — "Laad vorige sessie" knop in WorkoutLogSheet. Vult alleen lege velden in met waarden van de vorige keer per exercise. Knop disabled na gebruik.
 - [ ] **#17 — Eerdere sessies zien** — Clients kunnen eerdere (verleden) sessies terugzien op hun agenda. Nu toont listUpcoming alleen toekomstige sessies.
 
 ---
@@ -64,6 +64,7 @@
 | 2026-08-06 | Post-migration cleanup: sign-out buttons (trainer + client nav), resend code button (sign-in), removed ensureUser calls, renamed clientTokenIdentifier→clientId, removed `as any` casts, cleaned auth.ts (throw on missing email, removed full-table scan fallback), updated schema comments, .env.local.example, OTP email now says "15 minuten geldig" | Casper + Claude |
 | 2026-08-06 | Bottom bar + sign-out UX: removed sign-out from mobile bottom nav (both roles), added subtle sign-out to client /home and trainer /agenda (mobile), added confirmation dialog everywhere, enlarged client bottom bar (icons 26px, text-sm, py-5), slightly enlarged trainer bottom bar (py-5) | Casper + Claude |
 | 2026-08-06 | Fix #6 (again): auth cookies were session cookies — added cookieConfig maxAge 90 days to middleware so refresh tokens persist when app is closed | Casper + Claude |
+| 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). | Jolmer + Claude |
 
 ---
 
@@ -74,3 +75,14 @@
 - Dutch language used throughout client-facing UI
 - #6 (session timeout) — resolved by switching from Clerk to Convex Auth (1-year session / 90-day inactive timeout) + setting cookieConfig.maxAge to 90 days in middleware (without this, auth cookies were session-only and got cleared on app close)
 - #3 (exercise vervangen) needs code review first to assess current substitute flow
+- **Sessie afsluiten:** altijd testen → commit & push → CHANGES.md updaten (inclusief starting message hieronder). Bij grotere features optioneel `/code-review` en `/qa-agent` draaien.
+
+---
+
+## Starting Message (voor volgende sessie)
+
+> Vorige sessie (10 aug): #16 (pre-fill vorige sessie) is gebouwd en gedeployed. GitHub CLI is geïnstalleerd en werkt.
+>
+> Open items om op te pakken: #1 (drag-to-reorder exercises), #3 (exercise vervangen beoordelen), #17 (eerdere sessies in agenda). Zie de volledige lijst hierboven.
+>
+> Let op: in de DEV database bestaat een dubbel account voor jolmer@jolmer.com — het nieuwe account (zonder trainer role) kan verwijderd worden in het Convex dashboard (academic-cat-468).
