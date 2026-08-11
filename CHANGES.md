@@ -13,6 +13,9 @@
 ## 🔴 Bugs / Urgent (fix first — affects real users now)
 
 - [x] **#6 — Sessie timeout** — Opgelost. Clerk→Convex Auth migratie + cookieConfig fix. Auth cookies waren session cookies (verdwenen bij app sluiten); nu persistent 90 dagen via `cookieConfig: { maxAge }` in middleware.ts.
+- [ ] **#23 — Aanwezigheid niet goed aangegeven** — Soms wordt niet goed aangegeven of iemand komt of niet. Exacte reproductie nog uitzoeken.
+- [ ] **#24 — Trainer login dev omgeving** — jolmer@jolmer.com logt niet in als trainer in de dev environment (academic-cat-468). Werkt wel in prod.
+- [ ] **#25 — Verkeerd homescherm** — Klant Ples zag de verkeerde training op zijn homescherm: een training werd getoond terwijl hij een andere training daartussenin had. Logica voor "volgende sessie" toont mogelijk niet de juiste eerstvolgende sessie.
 
 ---
 
@@ -21,7 +24,8 @@
 - [x] **#7 — Geen workout note** — Als er nog geen workout aan een sessie is toegevoegd, toon een note: "Nog geen workout toegevoegd".
 - [x] **#14 — Bottom bar groter** — Onderste navigatiebar (Progressie + Agenda knoppen) iets groter en iets hoger. CSS tweak in client layout.
 - [x] **#15 — Opslaan bevestiging** — Toon "Goed gedaan! 👍" bevestiging na het opslaan van een workout log.
-- [x] **#9 — Push notificatie timing** — Alleen 1 dag van tevoren sturen, NIET ook 1 uur van tevoren. Beslissing vastgelegd in CLAUDE.md — geen cron gebouwd dus geen code change nodig.
+- [x] **#9a — Push notificatie timing** — Beslissing: alleen 1 dag van tevoren sturen, NIET ook 1 uur van tevoren. Vastgelegd in CLAUDE.md.
+- [ ] **#9b — Push notificaties bouwen** — De daadwerkelijke push notificaties moeten nog gebouwd worden (OneSignal + Convex crons). Timing: 24u van tevoren. Bericht: "Klopt het dat je komt?" Alleen naar klanten zonder attendance record.
 
 ---
 
@@ -34,6 +38,10 @@
 - [ ] **#3 — Exercise vervangen** — Exercise moet makkelijk vervangen kunnen worden. Controleren of huidige substitute flow goed genoeg is of verbeterd moet worden.
 - [x] **#16 — Pre-fill vorige keer** — "Laad vorige sessie" knop in WorkoutLogSheet. Vult alleen lege velden in met waarden van de vorige keer per exercise. Knop disabled na gebruik.
 - [ ] **#17 — Eerdere sessies zien** — Clients kunnen eerdere (verleden) sessies terugzien op hun agenda. Nu toont listUpcoming alleen toekomstige sessies.
+- [ ] **#19 — Lettertype groter** — Lettertype door de hele app heen groter maken voor betere leesbaarheid (doelgroep: boomers).
+- [ ] **#20 — Bevestigingen positiever en gevarieerder** — Na het loggen van een workout moeten de bevestigingsberichten positiever zijn en variëren (niet altijd hetzelfde). Denk aan korte motiverende zinnen die boomers leuk vinden.
+- [ ] **#21 — Progressie automatisch tonen** — Feedback van Poelie: je zou automatisch je progressie moeten kunnen zien. Check bij aanvang wat hier precies mee bedoeld wordt (welke data, waar tonen, welk formaat).
+- [ ] **#22 — Homescherm uitbreiden** — Feedback van Poelie: op het homescherm meer tonen dan alleen de agenda. Bijvoorbeeld hoeveel sessies iemand heeft gedaan, of andere motiverende info.
 
 ---
 
@@ -70,12 +78,14 @@
 
 ## Notes & Decisions
 
+- **Convex MCP** is geïnstalleerd als MCP server in Claude Code. Draait standaard tegen dev (academic-cat-468). Prod (robust-hornet-740) is **read-only** beschikbaar — Claude kan prod data bekijken en logs lezen, maar kan niks wijzigen in prod via de MCP. Schrijven naar prod gaat altijd via git push → Vercel. Config staat in `~/.claude/settings.json` onder `mcpServers.convex`.
 - Always check with Jolmer before making UI-facing design changes
 - App is live at jollygym.nl — real clients are using it
 - Dutch language used throughout client-facing UI
 - #6 (session timeout) — resolved by switching from Clerk to Convex Auth (1-year session / 90-day inactive timeout) + setting cookieConfig.maxAge to 90 days in middleware (without this, auth cookies were session-only and got cleared on app close)
 - #3 (exercise vervangen) needs code review first to assess current substitute flow
 - **Sessie afsluiten:** altijd testen → commit & push → localhost stoppen → CHANGES.md updaten (inclusief starting message hieronder). Bij grotere features optioneel `/code-review` en `/qa-agent` draaien.
+- **Optie: Claude Mastery Starter omgeving** — Aanname van Casper: als de the-jolly-gym folder naar binnen de Claude Mastery Starter omgeving wordt verplaatst, kun je Control+E gebruiken voor uitleg bij toestemmingsprompts en de kosten per commando zien. Niet geverifieerd — als Jolmer hier behoefte aan heeft, met Casper afstemmen.
 
 ---
 
