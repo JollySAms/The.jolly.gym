@@ -49,12 +49,14 @@ Changes (attendance, logged weights) must sync to Jolmer in real-time, and vice 
 
 Wanneer Jolmer zegt "sluit de sessie af" (of iets vergelijkbaars), doorloop dan automatisch deze stappen:
 
-1. **Code review** — draai `/code-review` als er significante changes zijn gemaakt
-2. **QA check** — draai `/qa-agent` als er een grote feature is gebouwd
-3. **Commit & push** — als er uncommitted changes zijn, commit en push naar production
-4. **Localhost stoppen** — stop de Next.js en Convex dev servers als die draaien
-5. **CHANGES.md updaten** — markeer afgeronde items, voeg session log entry toe, update starting message
+1. **Testen** — controleer of localhost draait en of er fouten zijn
+2. **Commit & push** — als er uncommitted changes zijn, commit en push naar production
+3. **Localhost stoppen** — stop de Next.js en Convex dev servers als die draaien
+4. **CHANGES.md updaten** — markeer afgeronde items, voeg session log entry toe, update starting message
+5. **HANDOVER.md check** — beoordeel of er deze sessie iets is veranderd dat de handover raakt (nieuwe feature afgerond, werkwijze gewijzigd, accounts aangepast). Zo ja, update HANDOVER.md. Zo nee, sla over.
 6. **Starting message** — geef Jolmer een starting message voor de volgende sessie
+
+Optioneel (bij grotere features): draai `/code-review` en `/qa-agent` voordat je commit.
 
 ---
 

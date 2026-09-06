@@ -75,6 +75,7 @@
 | 2026-08-06 | Fix #6 (again): auth cookies were session cookies — added cookieConfig maxAge 90 days to middleware so refresh tokens persist when app is closed | Casper + Claude |
 | 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). Migrated user data for Michiel (vergouwen@dkva.nl) and Sebastián (sebastian-rojas@hotmail.com) in prod. Fixed duplicate memberIds in Sterruk groep. Convex CLI ingelogd. | Jolmer + Claude |
 | 2026-09-06 | Exercise rename (pencil icon). Fixed #24 in dev. #1: drag-to-reorder (@dnd-kit). #4: workout toewijzen aan meerdere sessies. #26: RSVP capacity fix (soft-deleted records). | Jolmer + Claude |
+| 2026-09-06 | HANDOVER.md vertaald naar Nederlands + "Sessie afsluiten" workflow toegevoegd aan HANDOVER.md en CLAUDE.md | Jolmer + Claude |
 
 ---
 
@@ -93,8 +94,6 @@
 
 ## Starting Message (voor volgende sessie)
 
-> Vorige sessie (6 sep): Exercise rename feature gebouwd en gedeployed (pencil icon in exercise picker). Bug #24 gefixt in dev (trainer login werkt nu). Convex MCP had connectieproblemen met dev — CLI werkt wel betrouwbaar.
->
-> Opruimen: oude user accounts (michielvergouwen70@gmail.com, sebas.rojas.2011@gmail.com) zijn al verwijderd uit prod.
+> Vorige sessie (6 sep): Exercise rename, drag-to-reorder (#1), workout toewijzen aan meerdere sessies (#4), RSVP capacity fix (#26), HANDOVER.md vertaald naar Nederlands + "Sessie afsluiten" workflow toegevoegd.
 >
 > Open items om op te pakken: #3 (exercise vervangen beoordelen), #17 (eerdere sessies in agenda), #25 (verkeerd homescherm). Zie de volledige lijst hierboven.
