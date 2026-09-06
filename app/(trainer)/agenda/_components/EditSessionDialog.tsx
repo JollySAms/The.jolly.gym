@@ -22,11 +22,14 @@ export function EditSessionDialog({ session, onClose }: Props) {
   const workouts = useQuery(api.workouts.list);
   const updateSession = useMutation(api.sessions.update);
   const cancelSession = useMutation(api.sessions.cancel);
+  const assignWorkoutToUpcoming = useMutation(api.sessions.assignWorkoutToUpcoming);
 
   const [date, setDate] = useState(session.date);
   const [time, setTime] = useState(session.time);
   const [groupId, setGroupId] = useState<Id<"groups">>(session.groupId);
   const [workoutId, setWorkoutId] = useState<Id<"workouts"> | "">(session.workoutId ?? "");
+  const [applyToMore, setApplyToMore] = useState(false);
+  const [applyWeeks, setApplyWeeks] = useState(4);
   const [saving, setSaving] = useState(false);
   const [cancelling, setCancelling] = useState(false);
   const [confirmingCancel, setConfirmingCancel] = useState(false);
@@ -44,6 +47,14 @@ export function EditSessionDialog({ session, onClose }: Props) {
         groupId,
         workoutId: workoutId ? (workoutId as Id<"workouts">) : undefined,
       });
+      if (applyToMore && workoutId) {
+        await assignWorkoutToUpcoming({
+          groupId,
+          workoutId: workoutId as Id<"workouts">,
+          afterDate: date,
+          limit: applyWeeks,
+        });
+      }
       onClose();
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Er ging iets mis");
@@ -149,6 +160,24 @@ export function EditSessionDialog({ session, onClose }: Props) {
               </>
             )}
           </div>
+
+          {workoutId && (
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked={applyToMore} onChange={(e) => setApplyToMore(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" />
+                <span className="text-sm text-gray-700">Pas ook toe op volgende sessies van deze groep</span>
+              </label>
+              {applyToMore && (
+                <div className="flex items-center gap-2 pl-6">
+                  <span className="text-sm text-gray-600">Aantal sessies:</span>
+                  <input type="number" min={1} max={52} value={applyWeeks}
+                    onChange={(e) => setApplyWeeks(Math.max(1, Math.min(52, Number(e.target.value))))}
+                    className="w-16 text-center border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+              )}
+            </div>
+          )}
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 

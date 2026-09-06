@@ -329,3 +329,29 @@ async function enrichSessionForClient(
     isGroupMember,
   };
 }
+
+// Trainer only — assign a workout to multiple future sessions of the same group
+export const assignWorkoutToUpcoming = mutation({
+  args: {
+    groupId: v.id("groups"),
+    workoutId: v.id("workouts"),
+    afterDate: v.string(),
+    limit: v.number(),
+  },
+  handler: async (ctx, args) => {
+    await requireTrainer(ctx);
+    if (args.limit < 1 || args.limit > 52) throw new Error("Limiet moet tussen 1 en 52 liggen");
+    const snapshot = await buildSnapshot(ctx as QueryCtx, args.workoutId);
+    const sessions = await ctx.db
+      .query("sessions")
+      .withIndex("by_cancelled_and_date", (q) =>
+        q.eq("cancelled", false).gte("date", args.afterDate)
+      )
+      .filter((q) => q.eq(q.field("groupId"), args.groupId))
+      .take(args.limit);
+    for (const session of sessions) {
+      await ctx.db.patch(session._id, { workoutId: args.workoutId, workoutSnapshot: snapshot });
+    }
+    return sessions.length;
+  },
+});
