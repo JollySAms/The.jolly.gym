@@ -14,7 +14,7 @@
 
 - [x] **#6 — Sessie timeout** — Opgelost. Clerk→Convex Auth migratie + cookieConfig fix. Auth cookies waren session cookies (verdwenen bij app sluiten); nu persistent 90 dagen via `cookieConfig: { maxAge }` in middleware.ts.
 - [ ] **#23 — Aanwezigheid niet goed aangegeven** — Soms wordt niet goed aangegeven of iemand komt of niet. Exacte reproductie nog uitzoeken.
-- [ ] **#24 — Trainer login dev omgeving** — jolmer@jolmer.com logt niet in als trainer in de dev environment (academic-cat-468). Werkt wel in prod.
+- [x] **#24 — Trainer login dev omgeving** — Opgelost. Auth account en sessies in dev wezen naar een niet-bestaande user ID. Re-linked naar het bestaande trainer record. Oorzaak: Clerk→Convex Auth migratie had het auth account gekoppeld aan een verkeerd user ID.
 - [ ] **#25 — Verkeerd homescherm** — Klant Ples zag de verkeerde training op zijn homescherm: een training werd getoond terwijl hij een andere training daartussenin had. Logica voor "volgende sessie" toont mogelijk niet de juiste eerstvolgende sessie.
 
 ---
@@ -34,7 +34,7 @@
 - [x] **#2 — Exercise verwijderen** — Exercise moet verwijderd kunnen worden uit een workout (in builder én in log). Builder had dit al; log nu ook — inclusief soft-delete placeholder zodat verwijderde exercises niet terugkomen.
 - [x] **#5 — Niet aanwezig knop** — Altijd 2 knoppen: "Inschrijven" (toont "Ingeschreven ✓" als aangemeld) en "Niet aanwezig". Werkt op home én agenda.
 - [x] **#8 — Trainer past aanwezigheid aan** — Jolmer kan aanwezigheid van klanten handmatig aanpassen. Tappable status buttons op attendance page en agenda session detail.
-- [ ] **#1 — Volgorde wisselen** — Drag-to-reorder exercises tijdens workout aanmaken én tijdens loggen. Vereist een reorder UI (drag handles of up/down knoppen).
+- [x] **#1 — Volgorde wisselen** — Drag-to-reorder in workout builder (trainer). Drag handles met @dnd-kit. Client-side loggen nog niet (apart oppakken als gewenst).
 - [ ] **#3 — Exercise vervangen** — Exercise moet makkelijk vervangen kunnen worden. Controleren of huidige substitute flow goed genoeg is of verbeterd moet worden.
 - [x] **#16 — Pre-fill vorige keer** — "Laad vorige sessie" knop in WorkoutLogSheet. Vult alleen lege velden in met waarden van de vorige keer per exercise. Knop disabled na gebruik.
 - [ ] **#17 — Eerdere sessies zien** — Clients kunnen eerdere (verleden) sessies terugzien op hun agenda. Nu toont listUpcoming alleen toekomstige sessies.
@@ -73,6 +73,7 @@
 | 2026-08-06 | Bottom bar + sign-out UX: removed sign-out from mobile bottom nav (both roles), added subtle sign-out to client /home and trainer /agenda (mobile), added confirmation dialog everywhere, enlarged client bottom bar (icons 26px, text-sm, py-5), slightly enlarged trainer bottom bar (py-5) | Casper + Claude |
 | 2026-08-06 | Fix #6 (again): auth cookies were session cookies — added cookieConfig maxAge 90 days to middleware so refresh tokens persist when app is closed | Casper + Claude |
 | 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). Migrated user data for Michiel (vergouwen@dkva.nl) and Sebastián (sebastian-rojas@hotmail.com) in prod. Fixed duplicate memberIds in Sterruk groep. Convex CLI ingelogd. | Jolmer + Claude |
+| 2026-09-06 | Exercise rename: pencil icon in exercise picker. Fixed #24 in dev. #1: drag-to-reorder exercises in workout builder (@dnd-kit). | Jolmer + Claude |
 
 ---
 
@@ -91,8 +92,8 @@
 
 ## Starting Message (voor volgende sessie)
 
-> Vorige sessie (10 aug): #16 (pre-fill vorige sessie) gebouwd en gedeployed. User data migratie voor Michiel en Sebastián uitgevoerd in prod. Dubbele memberIds in Sterruk groep gefixt. GitHub CLI en Convex CLI zijn ingelogd en werken.
+> Vorige sessie (6 sep): Exercise rename feature gebouwd en gedeployed (pencil icon in exercise picker). Bug #24 gefixt in dev (trainer login werkt nu). Convex MCP had connectieproblemen met dev — CLI werkt wel betrouwbaar.
 >
-> Opruimen: oude user accounts (michielvergouwen70@gmail.com, sebas.rojas.2011@gmail.com) kunnen verwijderd worden in Convex prod dashboard (robust-hornet-740). In DEV database (academic-cat-468) bestaat ook een dubbel account voor jolmer@jolmer.com.
+> Opruimen: oude user accounts (michielvergouwen70@gmail.com, sebas.rojas.2011@gmail.com) kunnen verwijderd worden in Convex prod dashboard (robust-hornet-740).
 >
-> Open items om op te pakken: #1 (drag-to-reorder exercises), #3 (exercise vervangen beoordelen), #17 (eerdere sessies in agenda). Zie de volledige lijst hierboven.
+> Open items om op te pakken: #3 (exercise vervangen beoordelen), #17 (eerdere sessies in agenda), #25 (verkeerd homescherm). Zie de volledige lijst hierboven.
