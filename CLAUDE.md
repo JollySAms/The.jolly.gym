@@ -45,6 +45,17 @@ Changes (attendance, logged weights) must sync to Jolmer in real-time, and vice 
 **At the start of every session:** Read `CHANGES.md` to see what's done, in progress, and pending.
 **At the end of every session:** Update `CHANGES.md` — mark completed items `[x]`, add a session log entry.
 
+## Sessie afsluiten
+
+Wanneer Jolmer zegt "sluit de sessie af" (of iets vergelijkbaars), doorloop dan automatisch deze stappen:
+
+1. **Code review** — draai `/code-review` als er significante changes zijn gemaakt
+2. **QA check** — draai `/qa-agent` als er een grote feature is gebouwd
+3. **Commit & push** — als er uncommitted changes zijn, commit en push naar production
+4. **Localhost stoppen** — stop de Next.js en Convex dev servers als die draaien
+5. **CHANGES.md updaten** — markeer afgeronde items, voeg session log entry toe, update starting message
+6. **Starting message** — geef Jolmer een starting message voor de volgende sessie
+
 ---
 
 ## Key Principles

@@ -1,180 +1,187 @@
-# The Jolly Gym — Developer Guide for Jolmer
+# The Jolly Gym — Handleiding voor Jolmer
 
-This is everything you need to know to maintain, fix, and improve The Jolly Gym app on your own. Read it once, then keep it nearby.
+Dit is alles wat je moet weten om de The Jolly Gym app zelf te onderhouden, fixen en verbeteren. Lees het één keer door en houd het bij de hand.
 
-Casper built this app with Claude Code. You will maintain and improve it the same way. You don't need to understand the code — but you do need to understand how to work with Claude effectively. That is what this guide is about.
-
----
-
-## The One Rule
-
-**Never deploy by clicking a button anywhere. Always deploy through Claude.**
-
-When you're happy with a change, just tell Claude: **"Push this to production."** Claude will handle the git commit and push. Vercel picks it up automatically, builds the app, and deploys it to jollygym.nl. Keep vercel.com open in a tab so you can watch it happen and catch problems early.
-
-Never click a deploy button in Vercel or Convex. Never run deploy commands yourself. Let Claude handle it.
+Casper heeft deze app gebouwd met Claude Code. Jij onderhoudt en verbetert hem op dezelfde manier. Je hoeft de code niet te begrijpen — maar je moet wel weten hoe je effectief met Claude werkt. Daar gaat deze handleiding over.
 
 ---
 
-## Starting a Work Session
+## De Enige Regel
 
-Every single session, without exception:
+**Deploy nooit door ergens op een knop te klikken. Deploy altijd via Claude.**
+
+Als je tevreden bent met een wijziging, zeg je tegen Claude: **"Push dit naar productie."** Claude regelt de git commit en push. Vercel pikt het automatisch op, bouwt de app en deployt naar jollygym.nl. Houd vercel.com open in een tab zodat je kunt meekijken en problemen vroeg opmerkt.
+
+Klik nooit op een deploy-knop in Vercel of Convex. Voer nooit zelf deploy-commando's uit. Laat Claude het afhandelen.
+
+---
+
+## Een Werksessie Starten
+
+Elke sessie, zonder uitzondering:
 
 1. Open Terminal
-2. Run: `cd ~/Documents/the-jolly-gym && claude`
-3. Say this to Claude: **"Read CHANGES.md and CLAUDE.md and tell me what's pending"** or "**Insert starting message you acquired last claude chat**"
+2. Voer uit: `cd ~/Documents/the-jolly-gym && claude`
+3. Zeg tegen Claude: **"Lees CHANGES.md en CLAUDE.md en vertel me wat er open staat"** of **"Plak hier de starting message van de vorige sessie"**
 
-Claude will read both files and know exactly where things stand. This one habit prevents 90% of confusion.
-
-Ending a session:
-- Physical test
-- /code-review — catches security issues, bad patterns, AI antipatterns before they pile up
-- /qa-agent — finds edge cases and bugs you might have missed (good to run after a big feature)
-- Commit and push
-- Stop localhost from running
-- Update memory and changes.md
-- Ask for a starting message for next time
+Claude leest beide bestanden en weet precies waar alles staat. Deze ene gewoonte voorkomt 90% van de verwarring.
 
 ---
 
-## How to Work With Claude
+## Een Werksessie Afsluiten
 
-### The mindset
+Schrijf aan het einde van je sessie: **"Sluit de sessie af"**. Claude doorloopt dan automatisch deze stappen:
 
-You are the Engineering Lead. Claude is your developer. You make decisions, Claude writes the code. You don't need to understand what the code does — but you do need to stay on top of *what* Claude is doing and *why*.
+1. **Testen** — Controleert of localhost draait en of er fouten zijn
+2. **Commit & push** — Maakt een git commit van alle wijzigingen en pusht naar GitHub (Vercel deployt automatisch)
+3. **Localhost stoppen** — Stopt de lokale dev servers netjes
+4. **CHANGES.md updaten** — Markeert afgeronde items als `[x]`, voegt een sessie-logregel toe
+5. **Starting message** — Schrijft een bericht dat je kunt gebruiken om de volgende sessie te starten
 
-The biggest mistake Casper made was not making sure they were on the same page before Claude started building. Don't make that mistake. Before Claude writes a single line of code, make sure you both agree on exactly what is being built.
+Je hoeft alleen "sluit de sessie af" te zeggen — Claude doet de rest. Als er niks te committen of te pushen valt, slaat Claude die stap over.
 
-### Before Claude starts any feature or fix
+Bij grotere features kun je optioneel ook `/code-review` en `/qa-agent` laten draaien voordat je afsluit.
 
-Always ask these before saying "go ahead":
+---
 
-- "What are you going to do, step by step?"
-- "What files will you change?"
-- "Will this affect anything else in the app?"
-- "Is there anything that could go wrong?"
+## Hoe Je Met Claude Werkt
 
-If the plan makes sense, say go. If anything is unclear, ask again. This takes 2 minutes and saves hours of going in circles.
+### De mindset
 
-### The starting message
+Jij bent de Engineering Lead. Claude is je developer. Jij neemt beslissingen, Claude schrijft de code. Je hoeft niet te snappen wat de code doet — maar je moet wel bijhouden *wat* Claude doet en *waarom*.
 
-At the end of every session, ask Claude:
+De grootste fout die Casper maakte was niet zorgen dat ze op één lijn zaten voordat Claude begon met bouwen. Maak die fout niet. Voordat Claude één regel code schrijft, zorg dat jullie het eens zijn over wat er gebouwd wordt.
 
-> "Write me a starting message for the next session that gives a new Claude full context on what we're building, what we just did, and what's next."
+### Voordat Claude begint aan een feature of fix
 
-Copy that message. Use it to start your next session. This is how you keep Claude sharp across sessions — it doesn't remember previous conversations, so you give it the memory.
+Stel altijd deze vragen voordat je "ga maar" zegt:
 
-### Keep sessions focused
+- "Wat ga je doen, stap voor stap?"
+- "Welke bestanden ga je aanpassen?"
+- "Heeft dit gevolgen voor andere delen van de app?"
+- "Kan er iets misgaan?"
 
-One thing per session. If you came in to fix a bug, fix the bug — don't also start a new feature. If you came in to build a feature, finish it — don't let Claude start refactoring other things along the way. Claude will sometimes suggest "while we're here, I could also..." — it's okay to say no.
+Als het plan logisch klinkt, zeg go. Als iets onduidelijk is, vraag opnieuw. Dit kost 2 minuten en bespaart uren ronddraaien.
 
-### When you're going in circles
+### De starting message
 
-This happens. Claude thinks it fixed something, but it didn't. Then it tries again, and still doesn't fix it. Signs you're in a loop:
-- Claude says "that should be fixed now" but the problem persists
-- The same error keeps coming back
-- You've been on the same issue for more than 30 minutes
+Vraag aan het einde van elke sessie aan Claude:
 
-When this happens, **stop and restart the approach**. Say:
+> "Schrijf een starting message voor de volgende sessie die een nieuwe Claude volledig context geeft over wat we bouwen, wat we net gedaan hebben, en wat hierna komt."
 
-> "Let's stop. Forget everything you tried. Explain to me in plain English what you think is causing this problem and why. Then propose a completely different approach."
+Kopieer dat bericht. Gebruik het om je volgende sessie te starten. Zo houd je Claude scherp tussen sessies — Claude onthoudt geen eerdere gesprekken, dus jij geeft het het geheugen.
 
-This forces Claude to think from scratch instead of iterating on a broken fix. If it still can't solve it after that, try a fresh Claude session with the starting message and describe the problem from the beginning.
+### Houd sessies gefocust
 
-### Model choice matters
+Eén ding per sessie. Als je kwam om een bug te fixen, fix de bug — begin niet ook aan een nieuwe feature. Als je kwam om een feature te bouwen, maak hem af — laat Claude niet tussendoor andere dingen gaan refactoren. Claude stelt soms voor "nu we hier toch bezig zijn, kan ik ook..." — het is prima om nee te zeggen.
 
-For anything complex — auth, database changes, major new features — use **Claude Opus** if you have the option. For small UI tweaks and bug fixes, Sonnet is fine. The Clerk to Convex Auth migration took a long time partly because of model choice. When something is complicated and important, use the best model available.
+### Als je in cirkels draait
+
+Dit gebeurt. Claude denkt dat het iets gefixt heeft, maar dat is niet zo. Dan probeert het opnieuw, en het werkt nog steeds niet. Signalen dat je in een loop zit:
+- Claude zegt "dat zou nu gefixt moeten zijn" maar het probleem blijft
+- Dezelfde error komt steeds terug
+- Je bent al meer dan 30 minuten met hetzelfde bezig
+
+Als dit gebeurt, **stop en begin opnieuw**. Zeg:
+
+> "Laten we stoppen. Vergeet alles wat je geprobeerd hebt. Leg me in gewone taal uit wat volgens jou het probleem veroorzaakt en waarom. Stel dan een compleet andere aanpak voor."
+
+Dit dwingt Claude om opnieuw na te denken in plaats van door te itereren op een kapotte fix. Als het daarna nog steeds niet lukt, probeer een nieuwe Claude-sessie met de starting message en beschrijf het probleem vanaf het begin.
+
+### Modelkeuze maakt uit
+
+Voor complexe dingen — auth, database-wijzigingen, grote nieuwe features — gebruik **Claude Opus** als je de optie hebt. Voor kleine UI-tweaks en bugfixes is Sonnet prima. De Clerk naar Convex Auth migratie duurde deels lang door modelkeuze. Als iets ingewikkeld en belangrijk is, gebruik het beste model dat beschikbaar is.
 
 ### Context window
 
-Claude has a limited memory within a single session. When you see the context filling up (there's an indicator), start a fresh session with the starting message. Don't try to squeeze more into a session that's almost full — Claude starts making mistakes when context is high.
+Claude heeft een beperkt geheugen binnen één sessie. Als je ziet dat de context vol raakt (er is een indicator), start een nieuwe sessie met de starting message. Probeer niet meer in een bijna volle sessie te proppen — Claude begint fouten te maken als de context hoog is.
 
 ---
 
-## How to Build a New Feature
+## Een Nieuwe Feature Bouwen
 
-1. **Start the session** — read CHANGES.md, tell Claude what you want to build
-2. **Get a plan first** — "Before you write any code, describe exactly what you're going to build and how"
-3. **Approve the plan** — make sure it matches what you had in mind
-4. **Build one thing at a time** — Claude builds it, you test it locally
-5. **Test it** — actually use the feature on localhost:3000 before pushing (see Testing section below)
-6. **Push** — tell Claude "push this to production", watch Vercel, check jollygym.nl
+1. **Start de sessie** — lees CHANGES.md, vertel Claude wat je wilt bouwen
+2. **Vraag eerst een plan** — "Beschrijf precies wat je gaat bouwen en hoe, voordat je code schrijft"
+3. **Keur het plan goed** — zorg dat het overeenkomt met wat jij in gedachten had
+4. **Bouw één ding tegelijk** — Claude bouwt het, jij test het lokaal
+5. **Test het** — gebruik de feature daadwerkelijk op localhost:3000 voordat je pusht (zie Lokaal Testen hieronder)
+6. **Push** — zeg tegen Claude "push dit naar productie", kijk op Vercel, check jollygym.nl
 
-Never push something you haven't tested locally first.
-
----
-
-## How to Fix a Bug
-
-1. **Describe the bug precisely** — "When I do X, Y happens. I expect Z to happen instead."
-2. **Tell Claude where** — which page, which button, which user role (trainer or client)
-3. **Ask for the diagnosis first** — "What do you think is causing this? Don't fix it yet, just explain."
-4. **Approve the fix** — "Does fixing this affect anything else?"
-5. **Test it** — confirm the bug is gone on localhost before pushing (see Testing section below)
-6. **Push** — tell Claude "push this to production"
-
-If something breaks in production and needs an immediate fix:
-- Go to vercel.com → your project → Deployments → click the last working deployment → "Promote to Production"
-- This instantly reverts the live app. Then fix it properly on localhost and push again.
+Push nooit iets dat je niet lokaal getest hebt.
 
 ---
 
-## The Codebase — What to Be Careful About
+## Een Bug Fixen
 
-### Things that are solid — don't touch unless you have a reason
-- The auth flow (`convex/auth.ts`, `convex/ResendOTP.ts`, `middleware.ts`) — it works and it's not simple. Don't change it without a very specific reason.
-- The workout snapshot system — workouts are frozen at the moment they're assigned to a session. This is intentional. Don't change how this works.
-- Soft-deletes — nothing is ever permanently deleted. `cancelled`, `archived`, and `deleted` flags are used everywhere. Keep this pattern.
+1. **Beschrijf de bug precies** — "Als ik X doe, gebeurt Y. Ik verwacht dat Z gebeurt."
+2. **Vertel Claude waar** — welke pagina, welke knop, welke gebruikersrol (trainer of klant)
+3. **Vraag eerst om de diagnose** — "Wat denk je dat dit veroorzaakt? Fix het nog niet, leg het alleen uit."
+4. **Keur de fix goed** — "Heeft het fixen hiervan gevolgen voor iets anders?"
+5. **Test het** — bevestig dat de bug weg is op localhost voordat je pusht (zie Lokaal Testen hieronder)
+6. **Push** — zeg tegen Claude "push dit naar productie"
 
-### Things that need care
-- **Database schema** (`convex/schema.ts`) — always ask Claude before changing this. A wrong schema change can break queries on existing data. Tell Claude: "I want to add X — is this a schema change? What's the risk?"
-- **The `userId` fields** — in the `attendance`, `workoutLogs`, `sessions`, and `workouts` tables, `userId` is stored as a plain string, not a typed ID. This was an intentional decision after a migration. Don't change these to `v.id("users")` without asking Claude to handle the migration properly.
-- **The `EnrichedSession` type** — this TypeScript type is defined in 5 different files. If you add a new field to a session query, you may need to update all 5. Claude knows about this — just tell it you're adding a field and let it handle it.
+Als er iets kapot gaat in productie en je hebt een onmiddellijke fix nodig:
+- Ga naar vercel.com → je project → Deployments → klik op de laatste werkende deployment → "Promote to Production"
+- Dit draait de live app direct terug. Fix het daarna rustig op localhost en push opnieuw.
 
-### Two Convex databases — never confuse them
-| Name | What it is | Used by |
+---
+
+## De Codebase — Waar Je Voorzichtig Mee Moet Zijn
+
+### Dingen die solide zijn — niet aanraken zonder reden
+- De auth flow (`convex/auth.ts`, `convex/ResendOTP.ts`, `middleware.ts`) — het werkt en het is niet simpel. Niet aanpassen zonder specifieke reden.
+- Het workout snapshot systeem — workouts worden bevroren op het moment dat ze aan een sessie worden toegewezen. Dit is bewust. Verander niet hoe dit werkt.
+- Soft-deletes — er wordt nooit iets permanent verwijderd. `cancelled`, `archived` en `deleted` flags worden overal gebruikt. Houd dit patroon aan.
+
+### Dingen die aandacht nodig hebben
+- **Database schema** (`convex/schema.ts`) — vraag altijd aan Claude voordat je dit wijzigt. Een verkeerde schema-wijziging kan queries op bestaande data breken. Zeg tegen Claude: "Ik wil X toevoegen — is dit een schema-wijziging? Wat is het risico?"
+- **De `userId` velden** — in de `attendance`, `workoutLogs`, `sessions` en `workouts` tabellen is `userId` opgeslagen als een plain string, niet als een typed ID. Dit was een bewuste keuze na een migratie. Verander deze niet naar `v.id("users")` zonder Claude de migratie goed te laten afhandelen.
+- **Het `EnrichedSession` type** — dit TypeScript type is gedefinieerd in 5 verschillende bestanden. Als je een nieuw veld toevoegt aan een sessie-query, moet je mogelijk alle 5 updaten. Claude weet hiervan — zeg gewoon dat je een veld toevoegt en laat Claude het regelen.
+
+### Twee Convex databases — verwar ze nooit
+| Naam | Wat het is | Gebruikt door |
 |---|---|---|
-| `robust-hornet-740` | **PRODUCTION** — real client data | jollygym.nl (via Vercel) |
-| `academic-cat-468` | **DEV** — test sandbox | localhost:3000 only |
+| `robust-hornet-740` | **PRODUCTIE** — echte klantdata | jollygym.nl (via Vercel) |
+| `academic-cat-468` | **DEV** — test sandbox | alleen localhost:3000 |
 
-The live app always uses `robust-hornet-740`. Your local dev uses `academic-cat-468`. Telling Claude to push is the only safe path to production — Vercel is configured correctly and handles this automatically.
+De live app gebruikt altijd `robust-hornet-740`. Je lokale dev gebruikt `academic-cat-468`. Tegen Claude zeggen dat hij moet pushen is het enige veilige pad naar productie — Vercel is correct geconfigureerd en handelt dit automatisch af.
 
 ---
 
-## Useful Claude Skills (Slash Commands)
+## Handige Claude Skills (Slash Commands)
 
-Type these in Claude Code to trigger specific workflows:
+Type deze in Claude Code om specifieke workflows te starten:
 
-| Command | When to use it |
+| Commando | Wanneer gebruiken |
 |---|---|
-| `/fix-errors` | Something is broken and you want Claude to diagnose and fix it |
-| `/code-review` | Before pushing a big change — have Claude check it |
-| `/debug` | When you're stuck on a bug and need a fresh approach |
-| `/qa-agent` | Have Claude test the app and find bugs before your clients do |
-| `/next` | Move to the next item on the todo list |
-| `/progress` | See where you are in the feature backlog |
+| `/fix-errors` | Er is iets kapot en je wilt dat Claude het diagnosticeert en fixt |
+| `/code-review` | Voor het pushen van een grote wijziging — laat Claude het checken |
+| `/debug` | Als je vastloopt op een bug en een frisse aanpak nodig hebt |
+| `/qa-agent` | Laat Claude de app testen en bugs vinden voordat je klanten dat doen |
+| `/next` | Ga naar het volgende item op de todo-lijst |
+| `/progress` | Bekijk waar je staat in de feature backlog |
 
 ---
 
-## The Accounts You Own
+## De Accounts Die Je Beheert
 
-| Service | What it does | Login |
+| Service | Wat het doet | Login |
 |---|---|---|
-| GitHub | Stores the code | github.com — JollySAms account |
-| Vercel | Hosts and deploys the app | vercel.com |
-| Convex | The database | convex.dev |
-| Resend | Sends login code emails | resend.com |
-| Hostnet | The jollygym.nl domain | hostnet.nl |
+| GitHub | Slaat de code op | github.com — JollySAms account |
+| Vercel | Host en deployt de app | vercel.com |
+| Convex | De database | convex.dev |
+| Resend | Verstuurt login-code e-mails | resend.com |
+| Hostnet | Het jollygym.nl domein | hostnet.nl |
 
-If a client says they're not receiving their login code, check **Resend → Emails** first. It will show whether the email was delivered or bounced.
+Als een klant zegt dat ze geen logincode ontvangen, check **Resend → Emails** eerst. Daar zie je of de e-mail is afgeleverd of gebounced.
 
-If jollygym.nl is suddenly unreachable, check Vercel first (failed build?), then Hostnet (domain expired?).
+Als jollygym.nl ineens onbereikbaar is, check eerst Vercel (mislukte build?) en dan Hostnet (domein verlopen?).
 
 ---
 
-## The Feature & Bug List
+## De Feature- & Buglijst
 
-Everything that needs doing is in `CHANGES.md` in this folder. Open it at the start of every session. Update it at the end. It is the single source of truth for what's done and what's next.
+Alles wat gedaan moet worden staat in `CHANGES.md` in deze map. Open het aan het begin van elke sessie. Update het aan het einde. Het is de single source of truth voor wat af is en wat nog moet.
 
 Huidige openstaande items (bijgewerkt 6 september 2026):
 
@@ -193,7 +200,7 @@ Huidige openstaande items (bijgewerkt 6 september 2026):
 - **#21** — Progressie automatisch tonen (feedback Poelie — verduidelijken)
 - **#22** — Homescherm uitbreiden (meer dan alleen agenda)
 
-### Bigger features
+### Grotere features
 - **#10** — Sessie-specifieke workout aanpassen
 - **#11** — Workout dupliceren
 - **#12** — Progressie graph
@@ -209,63 +216,63 @@ Huidige openstaande items (bijgewerkt 6 september 2026):
 
 ---
 
-## When You're Unsure
+## Als Je Twijfelt
 
-Ask yourself: **"Do I understand what Claude is about to do?"**
+Stel jezelf de vraag: **"Begrijp ik wat Claude gaat doen?"**
 
-If no — ask Claude to explain it differently. Keep asking until you do understand. It's okay to say "explain this like I've never seen code before." Don't approve something you don't understand.
+Zo niet — vraag Claude om het anders uit te leggen. Blijf vragen tot je het begrijpt. Het is prima om te zeggen "leg dit uit alsof ik nog nooit code heb gezien." Keur niks goed dat je niet begrijpt.
 
-If something feels wrong — it probably is. Trust that feeling. Say "this doesn't feel right, let's step back" before Claude goes further.
+Als iets niet goed voelt — dan klopt het waarschijnlijk ook niet. Vertrouw dat gevoel. Zeg "dit voelt niet goed, laten we een stap terug doen" voordat Claude verder gaat.
 
-If Claude seems very confident but something still doesn't work — that's the most dangerous situation. Claude can be confidently wrong. When a fix doesn't work after two attempts, stop and ask for a completely different approach.
+Als Claude heel zelfverzekerd is maar iets werkt nog steeds niet — dat is de gevaarlijkste situatie. Claude kan zelfverzekerd fout zitten. Als een fix na twee pogingen niet werkt, stop en vraag om een compleet andere aanpak.
 
 ---
 
-## Testing Locally
+## Lokaal Testen
 
-Before anything goes live, test it on your own machine first. This is your safety net — changes here never affect real clients.
+Voordat iets live gaat, test je het op je eigen machine. Dit is je vangnet — wijzigingen hier raken nooit echte klanten.
 
-**Start the local app:**
+**De lokale app starten:**
 
-Just tell Claude: **"Start the local app"** — Claude will start it in the background.
+Zeg tegen Claude: **"Start de lokale app"** — Claude start hem op de achtergrond.
 
-Then open your browser and go to **localhost:3000**. You'll see the app running locally with test data, completely separate from what clients see.
+Open dan je browser en ga naar **localhost:3000**. Je ziet de app lokaal draaien met testdata, volledig gescheiden van wat klanten zien.
 
-You can sign in with:
+Je kunt inloggen met:
 - `jolmer@jolmer.com` — trainer account
-- `jolmer.schukken@triplepartners.com` — client account (om de klant-view te testen)
+- `jolmer.schukken@triplepartners.com` — klant account (om de klantweergave te testen)
 
-**Stop the local app when you're done:**
+**De lokale app stoppen als je klaar bent:**
 
-Tell Claude: **"Stop the local app"** — Claude will shut it down cleanly.
+Zeg tegen Claude: **"Stop de lokale app"** — Claude sluit hem netjes af.
 
-If you forget to stop it, it keeps running in the background but won't cause any problems. It stops automatically when you restart your Mac.
+Als je vergeet hem te stoppen, draait hij op de achtergrond maar veroorzaakt geen problemen. Hij stopt automatisch als je je Mac herstart.
 
 ---
 
-## Quick Reference
+## Snelreferentie
 
-**Start a session:**
+**Sessie starten:**
 ```
 cd ~/Documents/the-jolly-gym && claude
 ```
-Then say: *"Read CHANGES.md and CLAUDE.md and tell me what's pending"*
+Zeg dan: *"Lees CHANGES.md en CLAUDE.md en vertel me wat er open staat"*
 
-**Start local testing:**
-Tell Claude: *"Start the local app"* — then open localhost:3000
+**Lokaal testen starten:**
+Zeg tegen Claude: *"Start de lokale app"* — open dan localhost:3000
 
-**Stop local testing:**
-Tell Claude: *"Stop the local app"*
+**Lokaal testen stoppen:**
+Zeg tegen Claude: *"Stop de lokale app"*
 
-**Deploy to production:**
-Tell Claude: *"Push this to production"*
+**Deployen naar productie:**
+Zeg tegen Claude: *"Push dit naar productie"*
 
-**Roll back if something breaks:**
-vercel.com → Deployments → click previous working deploy → "Promote to Production"
+**Terugdraaien als iets kapot gaat:**
+vercel.com → Deployments → klik op vorige werkende deploy → "Promote to Production"
 
 ---
 
-*Built by Casper for Jolmer — The Jolly Gym 2026*
+*Gebouwd door Casper voor Jolmer — The Jolly Gym 2026*
 
 ## Open vragen
 
