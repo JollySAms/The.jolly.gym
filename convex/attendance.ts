@@ -150,7 +150,7 @@ export const rsvp = mutation({
 
     if (existing?.status === "coming" && !existing.deleted) return;
 
-    if (coming.length >= session.capacity) throw new Error("Session is full");
+    if (coming.length >= session.capacity) throw new Error("Sessie is vol. App even met de trainer.");
     if (existing) {
       // Previously cancelled or soft-deleted (niet aanwezig) — reactivate
       await ctx.db.patch(existing._id, {

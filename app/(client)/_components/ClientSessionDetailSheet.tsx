@@ -82,9 +82,10 @@ export function ClientSessionDetailSheet({ session, onClose }: Props) {
         await rsvp({ sessionId: session._id });
         toast.success("Je bent ingeschreven!");
       }
-    } catch {
+    } catch (err: unknown) {
       setLocalStatus(previousStatus);
-      toast.error("Dat lukte niet. Probeer het opnieuw.");
+      const msg = err instanceof Error ? err.message : "";
+      toast.error(msg.includes("Sessie is vol") ? msg : "Dat lukte niet. Probeer het opnieuw.");
     } finally {
       setRsvpLoading(false);
     }
