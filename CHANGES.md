@@ -52,7 +52,7 @@
 - [ ] **#10 — Sessie-specifieke workout aanpassen** — Jolmer kan de workout van één sessie aanpassen zonder andere sessies of de bibliotheek te raken. Override de frozen snapshot per sessie.
 - [ ] **#11 — Workout dupliceren** — Workout dupliceren in de bibliotheek, daarna naam aanpassen. Eenvoudige copy+rename flow in /workouts.
 - [ ] **#12 — Progressie graph** — Grafiek met gewicht en geschatte 1RM (Epley: weight × (1 + reps÷30)) per sessie over tijd. Al gepland als post-MVP feature.
-- [ ] **#13 — Achievements** — Max gewicht en max volume voor een set. Al gepland als post-MVP feature.
+- [~] **#13 — Achievements** — PR-detectie gebouwd: 4 types (max gewicht, max set-volume, max totaal-volume, max reps bodyweight). Celebration screens na workout save. Nog niet: streaks, trainer-zichtbaarheid, permanente opslag van PR's.
 
 ---
 
@@ -76,6 +76,7 @@
 | 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). Migrated user data for Michiel (vergouwen@dkva.nl) and Sebastián (sebastian-rojas@hotmail.com) in prod. Fixed duplicate memberIds in Sterruk groep. Convex CLI ingelogd. | Jolmer + Claude |
 | 2026-09-06 | Exercise rename (pencil icon). Fixed #24 in dev. #1: drag-to-reorder (@dnd-kit). #4: workout toewijzen aan meerdere sessies. #26: RSVP capacity fix (soft-deleted records). | Jolmer + Claude |
 | 2026-09-06 | HANDOVER.md vertaald naar Nederlands + "Sessie afsluiten" workflow toegevoegd aan HANDOVER.md en CLAUDE.md | Jolmer + Claude |
+| 2026-09-06 | PR-detectie + celebration screens: nieuwe oefening ("OH YEAH!" + Chinese man), PR's (medaille-badge + "NOT WEAK!"), normaal ("Lekker bezig!"). 4 PR-types: max gewicht, max set-volume, max totaal-volume, max reps (bodyweight). | Jolmer + Claude |
 
 ---
 
@@ -94,6 +95,6 @@
 
 ## Starting Message (voor volgende sessie)
 
-> Vorige sessie (6 sep): Exercise rename, drag-to-reorder (#1), workout toewijzen aan meerdere sessies (#4), RSVP capacity fix (#26), HANDOVER.md vertaald naar Nederlands + "Sessie afsluiten" workflow toegevoegd.
+> Vorige sessie (6 sep): PR-detectie en celebration screens gebouwd (#13 deels). Nieuwe oefening → "OH YEAH!" + Chinese man. PR's → medaille-badge + "NOT WEAK!". Geen van beide → "Lekker bezig!". 4 PR-types: max gewicht, max set-volume, max totaal-volume, max reps (bodyweight). Gedeployd naar productie.
 >
-> Open items om op te pakken: #3 (exercise vervangen beoordelen), #17 (eerdere sessies in agenda), #25 (verkeerd homescherm). Zie de volledige lijst hierboven.
+> Open items om op te pakken: #3 (exercise vervangen beoordelen), #17 (eerdere sessies in agenda), #25 (verkeerd homescherm), #13 rest (streaks, trainer-zicht, permanente PR-opslag). Zie de volledige lijst hierboven.
