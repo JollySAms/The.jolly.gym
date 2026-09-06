@@ -16,7 +16,7 @@
 - [ ] **#23 — Aanwezigheid niet goed aangegeven** — Soms wordt niet goed aangegeven of iemand komt of niet. Exacte reproductie nog uitzoeken.
 - [x] **#24 — Trainer login dev omgeving** — Opgelost. Auth account en sessies in dev wezen naar een niet-bestaande user ID. Re-linked naar het bestaande trainer record. Oorzaak: Clerk→Convex Auth migratie had het auth account gekoppeld aan een verkeerd user ID.
 - [ ] **#25 — Verkeerd homescherm** — Klant Ples zag de verkeerde training op zijn homescherm: een training werd getoond terwijl hij een andere training daartussenin had. Logica voor "volgende sessie" toont mogelijk niet de juiste eerstvolgende sessie.
-- [x] **#26 — RSVP faalt bij vol tellen soft-deleted records** — Klant kon zich niet inschrijven als 13de terwijl max op 14 staat. Oorzaak: capacity check telde soft-deleted attendance records mee. Nu gefilterd.
+- [x] **#26 — RSVP faalt bij vol tellen soft-deleted records** — Klant kon zich niet inschrijven als 13de terwijl max op 14 staat. Oorzaak: capacity check telde soft-deleted attendance records mee. Nu gefilterd. Foutmelding verbeterd: "Sessie is vol. App even met de trainer."
 
 ---
 
