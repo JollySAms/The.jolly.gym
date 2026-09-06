@@ -131,13 +131,14 @@ export const rsvp = mutation({
     const session = await ctx.db.get(args.sessionId);
     if (!session || session.cancelled) throw new Error("Session not found");
 
-    // Check capacity — count current attendees
-    const coming = await ctx.db
+    // Check capacity — count current attendees (exclude soft-deleted records)
+    const comingRaw = await ctx.db
       .query("attendance")
       .withIndex("by_session_and_status", (q) =>
         q.eq("sessionId", args.sessionId).eq("status", "coming")
       )
-      .take(session.capacity + 1);
+      .take(session.capacity + 10);
+    const coming = comingRaw.filter((a) => !a.deleted);
 
     // Check for existing record (re-signing up after cancelling)
     const existing = await ctx.db
@@ -147,10 +148,9 @@ export const rsvp = mutation({
       )
       .unique();
 
-    if (existing?.status === "coming") return; // already signed up, do nothing
+    if (existing?.status === "coming" && !existing.deleted) return;
 
     if (coming.length >= session.capacity) throw new Error("Session is full");
-
     if (existing) {
       // Previously cancelled or soft-deleted (niet aanwezig) — reactivate
       await ctx.db.patch(existing._id, {
