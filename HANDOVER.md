@@ -36,7 +36,6 @@ Schrijf aan het einde van je sessie: **"Sluit de sessie af"**. Claude doorloopt 
 2. **Commit & push** — Maakt een git commit van alle wijzigingen en pusht naar GitHub (Vercel deployt automatisch)
 3. **Localhost stoppen** — Stopt de lokale dev servers netjes
 4. **CHANGES.md updaten** — Markeert afgeronde items als `[x]`, voegt een sessie-logregel toe
-5. **Starting message** — Schrijft een bericht dat je kunt gebruiken om de volgende sessie te starten
 
 Je hoeft alleen "sluit de sessie af" te zeggen — Claude doet de rest. Als er niks te committen of te pushen valt, slaat Claude die stap over.
 

@@ -54,7 +54,6 @@ Wanneer Jolmer zegt "sluit de sessie af" (of iets vergelijkbaars), doorloop dan 
 3. **Localhost stoppen** — stop de Next.js en Convex dev servers als die draaien
 4. **CHANGES.md updaten** — markeer afgeronde items, voeg session log entry toe, update starting message
 5. **HANDOVER.md check** — beoordeel of er deze sessie iets is veranderd dat de handover raakt (nieuwe feature afgerond, werkwijze gewijzigd, accounts aangepast). Zo ja, update HANDOVER.md. Zo nee, sla over.
-6. **Starting message** — geef Jolmer een starting message voor de volgende sessie
 
 Optioneel (bij grotere features): draai `/code-review` en `/qa-agent` voordat je commit.
 
