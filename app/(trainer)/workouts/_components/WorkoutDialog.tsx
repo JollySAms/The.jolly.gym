@@ -4,7 +4,7 @@ import { useState, useMemo } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { X, Plus, Trash2, Search, ChevronDown, ChevronUp } from "lucide-react";
+import { X, Plus, Trash2, Search, ChevronDown, ChevronUp, Pencil, Check } from "lucide-react";
 
 type ExerciseEntry = {
   exerciseId: Id<"exercises">;
@@ -28,6 +28,7 @@ export function WorkoutDialog({ workout, onClose }: Props) {
   const createWorkout = useMutation(api.workouts.create);
   const updateWorkout = useMutation(api.workouts.update);
   const createExercise = useMutation(api.exercises.create);
+  const updateExercise = useMutation(api.exercises.update);
 
   const [name, setName] = useState(workout?.name ?? "");
   const [selected, setSelected] = useState<ExerciseEntry[]>(workout?.exercises ?? []);
@@ -37,6 +38,8 @@ export function WorkoutDialog({ workout, onClose }: Props) {
   const [addingExercise, setAddingExercise] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [renamingId, setRenamingId] = useState<Id<"exercises"> | null>(null);
+  const [renameValue, setRenameValue] = useState("");
 
   // Alphabetically sorted + search filtered exercises
   const filteredExercises = useMemo(() => {
@@ -208,17 +211,56 @@ export function WorkoutDialog({ workout, onClose }: Props) {
                     <ul className="max-h-40 overflow-y-auto space-y-1">
                       {filteredExercises.map((ex) => {
                         const alreadyAdded = selectedIds.has(ex._id);
+                        const isRenaming = renamingId === ex._id;
                         return (
-                          <li key={ex._id}>
-                            <button
-                              type="button"
-                              disabled={alreadyAdded}
-                              onClick={() => addExercise(ex)}
-                              className="w-full text-left px-3 py-2 text-sm rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50 hover:text-blue-700 text-gray-700"
-                            >
-                              {ex.name}
-                              {alreadyAdded && <span className="ml-2 text-xs text-gray-500">toegevoegd</span>}
-                            </button>
+                          <li key={ex._id} className="flex items-center gap-1">
+                            {isRenaming ? (
+                              <form
+                                className="flex items-center gap-1 flex-1 min-w-0"
+                                onSubmit={async (e) => {
+                                  e.preventDefault();
+                                  const trimmed = renameValue.trim();
+                                  if (trimmed && trimmed !== ex.name) {
+                                    await updateExercise({ id: ex._id, name: trimmed });
+                                    setSelected((prev) =>
+                                      prev.map((s) => s.exerciseId === ex._id ? { ...s, name: trimmed } : s)
+                                    );
+                                  }
+                                  setRenamingId(null);
+                                }}
+                              >
+                                <input
+                                  autoFocus
+                                  type="text"
+                                  value={renameValue}
+                                  onChange={(e) => setRenameValue(e.target.value)}
+                                  onKeyDown={(e) => { if (e.key === "Escape") setRenamingId(null); }}
+                                  className="flex-1 min-w-0 border border-gray-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                />
+                                <button type="submit" className="p-1.5 rounded-lg hover:bg-green-50 text-gray-400 hover:text-green-600 flex-shrink-0">
+                                  <Check size={14} />
+                                </button>
+                              </form>
+                            ) : (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={alreadyAdded}
+                                  onClick={() => addExercise(ex)}
+                                  className="flex-1 text-left px-3 py-2 text-sm rounded-lg disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50 hover:text-blue-700 text-gray-700 truncate"
+                                >
+                                  {ex.name}
+                                  {alreadyAdded && <span className="ml-2 text-xs text-gray-500">toegevoegd</span>}
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => { setRenamingId(ex._id); setRenameValue(ex.name); }}
+                                  className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-300 hover:text-gray-500 flex-shrink-0"
+                                >
+                                  <Pencil size={13} />
+                                </button>
+                              </>
+                            )}
                           </li>
                         );
                       })}
