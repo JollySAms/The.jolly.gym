@@ -16,6 +16,7 @@
 - [ ] **#23 — Aanwezigheid niet goed aangegeven** — Soms wordt niet goed aangegeven of iemand komt of niet. Exacte reproductie nog uitzoeken.
 - [x] **#24 — Trainer login dev omgeving** — Opgelost. Auth account en sessies in dev wezen naar een niet-bestaande user ID. Re-linked naar het bestaande trainer record. Oorzaak: Clerk→Convex Auth migratie had het auth account gekoppeld aan een verkeerd user ID.
 - [ ] **#25 — Verkeerd homescherm** — Klant Ples zag de verkeerde training op zijn homescherm: een training werd getoond terwijl hij een andere training daartussenin had. Logica voor "volgende sessie" toont mogelijk niet de juiste eerstvolgende sessie.
+- [x] **#26 — RSVP faalt bij vol tellen soft-deleted records** — Klant kon zich niet inschrijven als 13de terwijl max op 14 staat. Oorzaak: capacity check telde soft-deleted attendance records mee. Nu gefilterd.
 
 ---
 
@@ -73,7 +74,7 @@
 | 2026-08-06 | Bottom bar + sign-out UX: removed sign-out from mobile bottom nav (both roles), added subtle sign-out to client /home and trainer /agenda (mobile), added confirmation dialog everywhere, enlarged client bottom bar (icons 26px, text-sm, py-5), slightly enlarged trainer bottom bar (py-5) | Casper + Claude |
 | 2026-08-06 | Fix #6 (again): auth cookies were session cookies — added cookieConfig maxAge 90 days to middleware so refresh tokens persist when app is closed | Casper + Claude |
 | 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). Migrated user data for Michiel (vergouwen@dkva.nl) and Sebastián (sebastian-rojas@hotmail.com) in prod. Fixed duplicate memberIds in Sterruk groep. Convex CLI ingelogd. | Jolmer + Claude |
-| 2026-09-06 | Exercise rename (pencil icon). Fixed #24 in dev. #1: drag-to-reorder (@dnd-kit). #4: workout toewijzen aan meerdere sessies. | Jolmer + Claude |
+| 2026-09-06 | Exercise rename (pencil icon). Fixed #24 in dev. #1: drag-to-reorder (@dnd-kit). #4: workout toewijzen aan meerdere sessies. #26: RSVP capacity fix (soft-deleted records). | Jolmer + Claude |
 
 ---
 
