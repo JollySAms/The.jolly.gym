@@ -47,7 +47,7 @@
 
 ## 🟣 Bigger Features (need more planning, build one at a time)
 
-- [ ] **#4 — Workout aan meerdere sessies toevoegen** — Workout toevoegen aan meerdere bestaande sessies tegelijk. Multi-select sessies in de agenda, dan workout kiezen.
+- [x] **#4 — Workout aan meerdere sessies toevoegen** — Checkbox in sessie-bewerken: "Pas ook toe op volgende sessies van deze groep" + aantal sessies kiezen. Alleen toekomstige sessies.
 - [ ] **#10 — Sessie-specifieke workout aanpassen** — Jolmer kan de workout van één sessie aanpassen zonder andere sessies of de bibliotheek te raken. Override de frozen snapshot per sessie.
 - [ ] **#11 — Workout dupliceren** — Workout dupliceren in de bibliotheek, daarna naam aanpassen. Eenvoudige copy+rename flow in /workouts.
 - [ ] **#12 — Progressie graph** — Grafiek met gewicht en geschatte 1RM (Epley: weight × (1 + reps÷30)) per sessie over tijd. Al gepland als post-MVP feature.
@@ -73,7 +73,7 @@
 | 2026-08-06 | Bottom bar + sign-out UX: removed sign-out from mobile bottom nav (both roles), added subtle sign-out to client /home and trainer /agenda (mobile), added confirmation dialog everywhere, enlarged client bottom bar (icons 26px, text-sm, py-5), slightly enlarged trainer bottom bar (py-5) | Casper + Claude |
 | 2026-08-06 | Fix #6 (again): auth cookies were session cookies — added cookieConfig maxAge 90 days to middleware so refresh tokens persist when app is closed | Casper + Claude |
 | 2026-08-10 | #16 implemented: "Laad vorige sessie" button in WorkoutLogSheet. Installed GitHub CLI (`gh`). Migrated user data for Michiel (vergouwen@dkva.nl) and Sebastián (sebastian-rojas@hotmail.com) in prod. Fixed duplicate memberIds in Sterruk groep. Convex CLI ingelogd. | Jolmer + Claude |
-| 2026-09-06 | Exercise rename: pencil icon in exercise picker. Fixed #24 in dev. #1: drag-to-reorder exercises in workout builder (@dnd-kit). | Jolmer + Claude |
+| 2026-09-06 | Exercise rename (pencil icon). Fixed #24 in dev. #1: drag-to-reorder (@dnd-kit). #4: workout toewijzen aan meerdere sessies. | Jolmer + Claude |
 
 ---
 
